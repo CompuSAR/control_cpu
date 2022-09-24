@@ -22,7 +22,7 @@
 
 module top(
     input board_clock,
-    input reset,
+    input nReset,
     output logic running
     );
 
@@ -42,7 +42,7 @@ function convert_byte_write( logic we, logic[2:0] address, logic[1:0] size );
 endfunction
 
 logic ctrl_cpu_clock, clocks_locked;
-clk_converter clocks(.clk_in1(board_clock), .reset(reset), .clk_out1(ctrl_cpu_clock), .locked(clocks_locked) );
+clk_converter clocks(.clk_in1(board_clock), .reset(0), .clk_ctrl_cpu(ctrl_cpu_clock), .locked(clocks_locked) );
 
 logic           ctrl_iBus_cmd_valid;
 logic           ctrl_iBus_cmd_ready;
@@ -67,6 +67,13 @@ logic           ctrl_software_interrupt;
 
 
 VexRiscv control_cpu(
+    .clk(ctrl_cpu_clock),
+    .reset(!nReset || !clocks_locked),
+
+    .timerInterrupt(0),
+    .externalInterrupt(0),
+    .softwareInterrupt(0),
+
     .iBus_cmd_valid(ctrl_iBus_cmd_valid),
     .iBus_cmd_ready(ctrl_iBus_cmd_ready),
     .iBus_cmd_payload_pc(ctrl_iBus_cmd_payload_pc),
@@ -82,22 +89,19 @@ VexRiscv control_cpu(
     .dBus_cmd_payload_size(ctrl_dBus_cmd_payload_size),
     .dBus_rsp_ready(ctrl_dBus_rsp_ready),
     .dBus_rsp_error(ctrl_dBus_rsp_error),
-    .dBus_rsp_data(ctrl_dBus_rsp_data),
-
-    .clk(ctrl_cpu_clock),
-    .reset(reset & clocks_locked),
-
-    .timerInterrupt(0),
-    .externalInterrupt(0),
-    .softwareInterrupt(0)
+    .dBus_rsp_data(ctrl_dBus_rsp_data)
 );
 
-assign ctrl_iBus_cmd_ready = 1;
-assign ctrl_iBus_rsp_valid = 1;
 assign ctrl_iBus_rsp_payload_error = 0;
 assign ctrl_dBus_cmd_ready = 1;
-assign ctrl_dBus_rsp_ready = 1;
 assign ctrl_dBus_rsp_error = 0;
+
+always_ff@(posedge board_clock)
+begin
+    ctrl_iBus_cmd_ready <= ctrl_iBus_cmd_valid;
+    ctrl_iBus_rsp_valid <= ctrl_iBus_cmd_valid;
+    ctrl_dBus_rsp_ready <= ctrl_dBus_cmd_valid;
+end
 
 blk_mem memory(
     .addra( ctrl_dBus_cmd_payload_address[15:3] ),
