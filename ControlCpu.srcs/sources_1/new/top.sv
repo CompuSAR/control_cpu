@@ -26,7 +26,7 @@ module top(
     output logic running
     );
 
-function convert_byte_write( logic we, logic[2:0] address, logic[1:0] size );
+function automatic [3:0] convert_byte_write( logic we, logic[1:0] address, logic[1:0] size );
     if( we ) begin
         logic[3:0] mask;
         case(size)
@@ -38,25 +38,18 @@ function convert_byte_write( logic we, logic[2:0] address, logic[1:0] size );
 
         convert_byte_write = mask<<address;
     end else
-        convert_byte_write = 0;
+        convert_byte_write = 4'b0;
 endfunction
 
 logic ctrl_cpu_clock, clocks_locked;
-clk_converter clocks(.clk_in1(board_clock), .reset(0), .clk_ctrl_cpu(ctrl_cpu_clock), .locked(clocks_locked) );
+clk_converter clocks(.clk_in1(board_clock), .reset(1'b0), .clk_ctrl_cpu(ctrl_cpu_clock), .locked(clocks_locked) );
 
-logic           ctrl_iBus_cmd_valid;
 logic           ctrl_iBus_cmd_ready;
-logic [31:0]    ctrl_iBus_cmd_payload_pc;
 logic           ctrl_iBus_rsp_valid;
 logic           ctrl_iBus_rsp_payload_error;
 logic [31:0]    ctrl_iBus_rsp_payload_inst;
 
-logic           ctrl_dBus_cmd_valid;
 logic           ctrl_dBus_cmd_ready;
-logic           ctrl_dBus_cmd_payload_wr;
-logic [31:0]    ctrl_dBus_cmd_payload_address;
-logic [31:0]    ctrl_dBus_cmd_payload_data;
-logic [1:0]     ctrl_dBus_cmd_payload_size;
 logic           ctrl_dBus_rsp_ready;
 logic           ctrl_dBus_rsp_error;
 logic [31:0]    ctrl_dBus_rsp_data;
@@ -70,23 +63,16 @@ VexRiscv control_cpu(
     .clk(ctrl_cpu_clock),
     .reset(!nReset || !clocks_locked),
 
-    .timerInterrupt(0),
-    .externalInterrupt(0),
-    .softwareInterrupt(0),
+    .timerInterrupt(1'b0),
+    .externalInterrupt(1'b0),
+    .softwareInterrupt(1'b0),
 
-    .iBus_cmd_valid(ctrl_iBus_cmd_valid),
     .iBus_cmd_ready(ctrl_iBus_cmd_ready),
-    .iBus_cmd_payload_pc(ctrl_iBus_cmd_payload_pc),
     .iBus_rsp_valid(ctrl_iBus_rsp_valid),
     .iBus_rsp_payload_error(ctrl_iBus_rsp_payload_error),
     .iBus_rsp_payload_inst(ctrl_iBus_rsp_payload_inst),
 
-    .dBus_cmd_valid(ctrl_dBus_cmd_valid),
     .dBus_cmd_ready(ctrl_dBus_cmd_ready),
-    .dBus_cmd_payload_wr(ctrl_dBus_cmd_payload_wr),
-    .dBus_cmd_payload_address(ctrl_dBus_cmd_payload_address),
-    .dBus_cmd_payload_data(ctrl_dBus_cmd_payload_data),
-    .dBus_cmd_payload_size(ctrl_dBus_cmd_payload_size),
     .dBus_rsp_ready(ctrl_dBus_rsp_ready),
     .dBus_rsp_error(ctrl_dBus_rsp_error),
     .dBus_rsp_data(ctrl_dBus_rsp_data)
@@ -98,27 +84,31 @@ assign ctrl_dBus_rsp_error = 0;
 
 always_ff@(posedge board_clock)
 begin
-    ctrl_iBus_cmd_ready <= ctrl_iBus_cmd_valid;
-    ctrl_iBus_rsp_valid <= ctrl_iBus_cmd_valid;
-    ctrl_dBus_rsp_ready <= ctrl_dBus_cmd_valid;
+    ctrl_iBus_cmd_ready <= control_cpu.iBus_cmd_valid;
+    ctrl_iBus_rsp_valid <= control_cpu.iBus_cmd_valid;
+    ctrl_dBus_rsp_ready <= control_cpu.dBus_cmd_valid;
 end
 
 blk_mem memory(
-    .addra( ctrl_dBus_cmd_payload_address[15:3] ),
+    .addra( control_cpu.dBus_cmd_payload_address[14:2] ),
     .clka( ctrl_cpu_clock),
-    .dina( ctrl_dBus_cmd_payload_data ),
+    .dina( control_cpu.dBus_cmd_payload_data ),
     .douta( ctrl_dBus_rsp_data ),
-    .ena( ctrl_dBus_cmd_valid ),
-    .wea( convert_byte_write(ctrl_dBus_cmd_payload_wr, ctrl_dBus_cmd_payload_address, ctrl_dBus_cmd_payload_size) ),
+    .ena( control_cpu.dBus_cmd_valid ),
+    .wea( convert_byte_write(
+        control_cpu.dBus_cmd_payload_wr,
+        control_cpu.dBus_cmd_payload_address,
+        control_cpu.dBus_cmd_payload_size)
+    ),
 
-    .addrb( ctrl_iBus_cmd_payload_pc[15:3] ),
+    .addrb( control_cpu.iBus_cmd_payload_pc[14:2] ),
     .clkb( ctrl_cpu_clock ),
     .dinb( 32'hX ),
     .doutb( ctrl_iBus_rsp_payload_inst ),
-    .enb( ctrl_iBus_cmd_valid ),
-    .web( 0 )
+    .enb( control_cpu.iBus_cmd_valid ),
+    .web( 4'b0 )
 );
 
-assign running = ctrl_dBus_cmd_valid;
+assign running = control_cpu.dBus_cmd_valid;
 
 endmodule

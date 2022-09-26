@@ -1,4 +1,4 @@
-all: ControlCpu.gen/saros/bl1/bl1.mem
+all: ControlCpu.gen/saros/bl1/bl1.coe
 
 ControlCpu.runs/ControlCpu.mcs:
 

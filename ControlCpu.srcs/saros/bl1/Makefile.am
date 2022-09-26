@@ -9,6 +9,15 @@ noinst_PROGRAMS=bl1.elf
 
 REMOVED_SECTIONS=debug_* riscv.attribute comment
 
+%.coe: %.raw
+	sed -e '$$s:,:;:' "$<" > "$@".tmp
+	mv "$@".tmp "$@"
+
+%.raw: %.bin
+	echo -e 'memory_initialization_radix = 16;\nmemory_initialization_vector =' > "$@".tmp
+	hexdump -e '1/4 "  %08x" ",\n"' "$<" >> "$@".tmp
+	mv "$@".tmp "$@"
+
 bl1.mem: bl1.bin
 	hexdump -e '1/4 "%08x" "\n"' "$<" > "$@".tmp
 	mv "$@".tmp "$@"
@@ -24,4 +33,4 @@ bl1.elf$(EXEEXT): $(bl1_elf_OBJECTS) $(EXTRA_bl1_elf_DEPENDENCIES)
 	$(HOST_TRIPLET)-ld $(LDFLAGS) $(AM_LDFLAGS) $(bl1_elf_LDFLAGS) -melf32lriscv_ilp32 $(bl1_elf_OBJECTS) -o "$@"
 
 clean-local:
-	$(RM) *.mem *.bin
+	$(RM) *.mem *.coe *.bin *.raw

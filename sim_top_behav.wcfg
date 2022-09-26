@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
-      <ZoomEndTime time="313.501 ns"></ZoomEndTime>
-      <Cursor1Time time="320.000 ns"></Cursor1Time>
+      <ZoomStartTime time="4,424.999 ns"></ZoomStartTime>
+      <ZoomEndTime time="4,488.100 ns"></ZoomEndTime>
+      <Cursor1Time time="4,456.666 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="291"></NameColumnWidth>
-      <ValueColumnWidth column_width="107"></ValueColumnWidth>
+      <ValueColumnWidth column_width="103"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="20" />
+   <WVObjectSize size="32" />
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -99,5 +99,53 @@
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/reset">
       <obj_property name="ElementShortName">reset</obj_property>
       <obj_property name="ObjectShortName">reset</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/memory/clka">
+      <obj_property name="ElementShortName">clka</obj_property>
+      <obj_property name="ObjectShortName">clka</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/memory/ena">
+      <obj_property name="ElementShortName">ena</obj_property>
+      <obj_property name="ObjectShortName">ena</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/memory/wea">
+      <obj_property name="ElementShortName">wea[3:0]</obj_property>
+      <obj_property name="ObjectShortName">wea[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/memory/addra">
+      <obj_property name="ElementShortName">addra[12:0]</obj_property>
+      <obj_property name="ObjectShortName">addra[12:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/memory/dina">
+      <obj_property name="ElementShortName">dina[31:0]</obj_property>
+      <obj_property name="ObjectShortName">dina[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/memory/douta">
+      <obj_property name="ElementShortName">douta[31:0]</obj_property>
+      <obj_property name="ObjectShortName">douta[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/memory/clkb">
+      <obj_property name="ElementShortName">clkb</obj_property>
+      <obj_property name="ObjectShortName">clkb</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/memory/enb">
+      <obj_property name="ElementShortName">enb</obj_property>
+      <obj_property name="ObjectShortName">enb</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/memory/web">
+      <obj_property name="ElementShortName">web[3:0]</obj_property>
+      <obj_property name="ObjectShortName">web[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/memory/addrb">
+      <obj_property name="ElementShortName">addrb[12:0]</obj_property>
+      <obj_property name="ObjectShortName">addrb[12:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/memory/dinb">
+      <obj_property name="ElementShortName">dinb[31:0]</obj_property>
+      <obj_property name="ObjectShortName">dinb[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/memory/doutb">
+      <obj_property name="ElementShortName">doutb[31:0]</obj_property>
+      <obj_property name="ObjectShortName">doutb[31:0]</obj_property>
    </wvobject>
 </wave_config>
