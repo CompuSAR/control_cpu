@@ -1,7 +1,15 @@
 ControlCpu.runs/ControlCpu.mcs:
 
-ControlCpu.gen/saros/bl1/bl1.bin: ControlCpu.gen/saros/bl1/dir.tag
-	$(MAKE) -C "$(@D)" -f "$(shell pwd)/ControlCpu.srcs/saros/bl1/Makefile" "$(@F)" VPATH="$(shell pwd)/ControlCpu.srcs/saros/bl1"
+ControlCpu.gen/saros/%: ControlCpu.gen/saros/config.log
+	$(MAKE) -C "$(@D)" "$(@F)"
+
+ControlCpu.gen/saros/config.log: ControlCpu.srcs/saros/configure
+	$(RM) -r $(@D)
+	mkdir -p $(@D)
+	cd $(@D) && ../../ControlCpu.srcs/saros/configure --host=riscv64-linux-gnu
+
+ControlCpu.srcs/saros/configure:
+	cd $(@D) && autoreconf -i
 
 %/dir.tag:
 	mkdir -p "$(@D)"

@@ -1,0 +1,12 @@
+/autom4te.cache/
+/aclocal.m4
+/configure
+/compile
+/config.guess
+/config.sub
+/install-sh
+/missing
+/depcomp
+
+*.in
+*~
