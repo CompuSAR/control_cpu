@@ -1,3 +1,5 @@
+all: ControlCpu.gen/saros/bl1/bl1.mem
+
 ControlCpu.runs/ControlCpu.mcs:
 
 ControlCpu.gen/saros/%: ControlCpu.gen/saros/config.log

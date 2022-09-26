@@ -1,23 +1,27 @@
-#HOST_TRIPLET=riscv64-linux-gnu-
-#AS=$(HOST_TRIPLET)as
-#CC=$(HOST_TRIPLET)gcc
-#CXX=$(HOST_TRIPLET)g++
-#LD=$(HOST_TRIPLET)ld
+ARCH=-march=rv32i
+ABI=-mabi=ilp32
 
-#ARCH=-march=rv32i
-#ABI=-mabi=ilp32
-
-#override ASFLAGS+= $(ARCH) $(ABI)
-#override CFLAGS+= $(ARCH) $(ABI)
-#override CXXFLAGS+= $(ARCH) $(ABI)
+AM_CCASFLAGS=$(ARCH) $(ABI) -nostdlib
+AM_CXXFLAGS=$(ARCH) $(ABI) -nostdlib
+AM_CFLAGS=$(ARCH) $(ABI) -nostdlib
 
 noinst_PROGRAMS=bl1.elf
 
+REMOVED_SECTIONS=debug_* riscv.attribute comment
+
+bl1.mem: bl1.bin
+	hexdump -e '1/4 "%08x" "\n"' "$<" > "$@".tmp
+	mv "$@".tmp "$@"
+
 bl1.bin: bl1.elf
-	$(HOST_TRIPLET)objcopy -Obin "$<" "$@"
+	$(HOST_TRIPLET)-objcopy -O binary "$<" "$@" $(foreach rem,$(REMOVED_SECTIONS), --remove-section="$(rem)")
 
 bl1_elf_SOURCES=crt.s bl1_start.cpp
+EXTRA_bl1_elf_DEPENDENCIES=$(srcdir)/bl1.lds
+bl1_elf_LDFLAGS=-T $(srcdir)/bl1.lds
 
-#bl1.elf: crt.o bl1_start.o
-#	$(LD) $(LDFLAGS) -melf32lriscv_ilp32 $^ -o "$@" -T
+bl1.elf$(EXEEXT): $(bl1_elf_OBJECTS) $(EXTRA_bl1_elf_DEPENDENCIES)
+	$(HOST_TRIPLET)-ld $(LDFLAGS) $(AM_LDFLAGS) $(bl1_elf_LDFLAGS) -melf32lriscv_ilp32 $(bl1_elf_OBJECTS) -o "$@"
 
+clean-local:
+	$(RM) *.mem *.bin
