@@ -11,22 +11,26 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="4,424.999 ns"></ZoomStartTime>
-      <ZoomEndTime time="4,488.100 ns"></ZoomEndTime>
-      <Cursor1Time time="4,456.666 ns"></Cursor1Time>
+      <ZoomStartTime time="4,668.207 ns"></ZoomStartTime>
+      <ZoomEndTime time="4,700.358 ns"></ZoomEndTime>
+      <Cursor1Time time="4,690.000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="291"></NameColumnWidth>
-      <ValueColumnWidth column_width="103"></ValueColumnWidth>
+      <ValueColumnWidth column_width="91"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="32" />
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
+      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/iBus_cmd_valid">
       <obj_property name="ElementShortName">iBus_cmd_valid</obj_property>
       <obj_property name="ObjectShortName">iBus_cmd_valid</obj_property>
+      <obj_property name="CustomSignalColor">#FF0080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/iBus_cmd_ready">
       <obj_property name="ElementShortName">iBus_cmd_ready</obj_property>
@@ -63,14 +67,20 @@
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_valid">
       <obj_property name="ElementShortName">dBus_cmd_valid</obj_property>
       <obj_property name="ObjectShortName">dBus_cmd_valid</obj_property>
+      <obj_property name="CustomSignalColor">#FF0080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_ready">
       <obj_property name="ElementShortName">dBus_cmd_ready</obj_property>
       <obj_property name="ObjectShortName">dBus_cmd_ready</obj_property>
+      <obj_property name="CustomSignalColor">#00FF00</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_payload_wr">
       <obj_property name="ElementShortName">dBus_cmd_payload_wr</obj_property>
       <obj_property name="ObjectShortName">dBus_cmd_payload_wr</obj_property>
+      <obj_property name="CustomSignalColor">#800080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_payload_address">
       <obj_property name="ElementShortName">dBus_cmd_payload_address[31:0]</obj_property>
@@ -83,6 +93,8 @@
    <wvobject type="array" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_payload_size">
       <obj_property name="ElementShortName">dBus_cmd_payload_size[1:0]</obj_property>
       <obj_property name="ObjectShortName">dBus_cmd_payload_size[1:0]</obj_property>
+      <obj_property name="CustomSignalColor">#800080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/dBus_rsp_ready">
       <obj_property name="ElementShortName">dBus_rsp_ready</obj_property>
@@ -103,14 +115,21 @@
    <wvobject type="logic" fp_name="/sim_top/top_module/memory/clka">
       <obj_property name="ElementShortName">clka</obj_property>
       <obj_property name="ObjectShortName">clka</obj_property>
+      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/memory/ena">
       <obj_property name="ElementShortName">ena</obj_property>
       <obj_property name="ObjectShortName">ena</obj_property>
+      <obj_property name="CustomSignalColor">#FF0080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/memory/wea">
       <obj_property name="ElementShortName">wea[3:0]</obj_property>
       <obj_property name="ObjectShortName">wea[3:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+      <obj_property name="CustomSignalColor">#800080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/memory/addra">
       <obj_property name="ElementShortName">addra[12:0]</obj_property>
@@ -127,14 +146,21 @@
    <wvobject type="logic" fp_name="/sim_top/top_module/memory/clkb">
       <obj_property name="ElementShortName">clkb</obj_property>
       <obj_property name="ObjectShortName">clkb</obj_property>
+      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/memory/enb">
       <obj_property name="ElementShortName">enb</obj_property>
       <obj_property name="ObjectShortName">enb</obj_property>
+      <obj_property name="CustomSignalColor">#FF0080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/memory/web">
       <obj_property name="ElementShortName">web[3:0]</obj_property>
       <obj_property name="ObjectShortName">web[3:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+      <obj_property name="CustomSignalColor">#800080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/memory/addrb">
       <obj_property name="ElementShortName">addrb[12:0]</obj_property>

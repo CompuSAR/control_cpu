@@ -4,6 +4,7 @@ ControlCpu.runs/ControlCpu.mcs:
 
 ControlCpu.gen/saros/%: ControlCpu.gen/saros/config.log
 	$(MAKE) -C "$(@D)" "$(@F)"
+.PHONY: ControlCpu.gen/saros/%
 
 ControlCpu.gen/saros/config.log: ControlCpu.srcs/saros/configure
 	$(RM) -r $(@D)

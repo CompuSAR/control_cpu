@@ -82,7 +82,7 @@ assign ctrl_iBus_rsp_payload_error = 0;
 assign ctrl_dBus_cmd_ready = 1;
 assign ctrl_dBus_rsp_error = 0;
 
-always_ff@(posedge board_clock)
+always_ff@(posedge ctrl_cpu_clock)
 begin
     ctrl_iBus_cmd_ready <= control_cpu.iBus_cmd_valid;
     ctrl_iBus_rsp_valid <= control_cpu.iBus_cmd_valid;
