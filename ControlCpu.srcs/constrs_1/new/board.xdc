@@ -8,6 +8,12 @@ set_property IOSTANDARD LVCMOS15 [get_ports nReset]
 set_property PACKAGE_PIN E11 [get_ports running]
 set_property IOSTANDARD LVCMOS33 [get_ports running]
 
+set_property PACKAGE_PIN P10 [get_ports uart_rx]
+set_property IOSTANDARD LVCMOS33 [get_ports uart_rx]
+
+set_property PACKAGE_PIN N10 [get_ports uart_tx]
+set_property IOSTANDARD LVCMOS33 [get_ports uart_tx]
+
 ############## NET - IOSTANDARD ##################
 set_property CFGBVS VCCO [current_design]
 set_property CONFIG_VOLTAGE 3.3 [current_design]

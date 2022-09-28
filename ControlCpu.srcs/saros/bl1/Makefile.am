@@ -25,7 +25,7 @@ bl1.mem: bl1.bin
 bl1.bin: bl1.elf
 	$(HOST_TRIPLET)-objcopy -O binary "$<" "$@" $(foreach rem,$(REMOVED_SECTIONS), --remove-section="$(rem)")
 
-bl1_elf_SOURCES=crt.s bl1_start.cpp
+bl1_elf_SOURCES=crt.s bl1_start.cpp uart.cpp
 EXTRA_bl1_elf_DEPENDENCIES=$(srcdir)/bl1.lds
 bl1_elf_LDFLAGS=-T $(srcdir)/bl1.lds
 

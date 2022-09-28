@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="4,668.207 ns"></ZoomStartTime>
-      <ZoomEndTime time="4,700.358 ns"></ZoomEndTime>
-      <Cursor1Time time="4,690.000 ns"></Cursor1Time>
+      <ZoomStartTime time="4,660.332 ns"></ZoomStartTime>
+      <ZoomEndTime time="4,725.033 ns"></ZoomEndTime>
+      <Cursor1Time time="4,699.332 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="291"></NameColumnWidth>
-      <ValueColumnWidth column_width="91"></ValueColumnWidth>
+      <ValueColumnWidth column_width="87"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="32" />
+   <WVObjectSize size="37" />
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -173,5 +173,25 @@
    <wvobject type="array" fp_name="/sim_top/top_module/memory/doutb">
       <obj_property name="ElementShortName">doutb[31:0]</obj_property>
       <obj_property name="ObjectShortName">doutb[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/io/uart_output/clock">
+      <obj_property name="ElementShortName">clock</obj_property>
+      <obj_property name="ObjectShortName">clock</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/io/uart_output/data_in">
+      <obj_property name="ElementShortName">data_in[7:0]</obj_property>
+      <obj_property name="ObjectShortName">data_in[7:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/io/uart_output/data_in_ready">
+      <obj_property name="ElementShortName">data_in_ready</obj_property>
+      <obj_property name="ObjectShortName">data_in_ready</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/io/uart_output/out_bit">
+      <obj_property name="ElementShortName">out_bit</obj_property>
+      <obj_property name="ObjectShortName">out_bit</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/io/uart_output/receive_ready">
+      <obj_property name="ElementShortName">receive_ready</obj_property>
+      <obj_property name="ObjectShortName">receive_ready</obj_property>
    </wvobject>
 </wave_config>

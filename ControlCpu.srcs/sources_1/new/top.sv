@@ -23,7 +23,11 @@
 module top(
     input board_clock,
     input nReset,
-    output logic running
+
+    output logic running,
+
+    output uart_tx,
+    input uart_rx
     );
 
 function automatic [3:0] convert_byte_write( logic we, logic[1:0] address, logic[1:0] size );
@@ -79,22 +83,45 @@ VexRiscv control_cpu(
 );
 
 assign ctrl_iBus_rsp_payload_error = 0;
-assign ctrl_dBus_cmd_ready = 1;
 assign ctrl_dBus_rsp_error = 0;
+
+logic mem_dBus_rsp_ready;
+logic [31:0] mem_dBus_rsp_data;
+
+io_block io(
+    .clock(ctrl_cpu_clock),
+
+    .address(control_cpu.dBus_cmd_payload_address),
+    .address_valid(control_cpu.dBus_cmd_valid),
+    .write(control_cpu.dBus_cmd_payload_wr),
+    .data_in(control_cpu.dBus_cmd_payload_data),
+    .data_out(ctrl_dBus_rsp_data),
+    .enable(control_cpu.dBus_cmd_valid),
+
+    .req_ack(ctrl_dBus_cmd_ready),
+    .rsp_ready(ctrl_dBus_rsp_ready),
+
+    .passthrough_req_ack(1),
+    .passthrough_rsp_ready(mem_dBus_rsp_ready),
+    .passthrough_data(mem_dBus_rsp_data),
+
+    .uart_tx(uart_tx),
+    .uart_rx(uart_rx)
+);
 
 always_ff@(posedge ctrl_cpu_clock)
 begin
     ctrl_iBus_cmd_ready <= control_cpu.iBus_cmd_valid;
     ctrl_iBus_rsp_valid <= control_cpu.iBus_cmd_valid;
-    ctrl_dBus_rsp_ready <= control_cpu.dBus_cmd_valid;
+    mem_dBus_rsp_ready <= io.passthrough_enable;
 end
 
 blk_mem memory(
     .addra( control_cpu.dBus_cmd_payload_address[14:2] ),
     .clka( ctrl_cpu_clock),
     .dina( control_cpu.dBus_cmd_payload_data ),
-    .douta( ctrl_dBus_rsp_data ),
-    .ena( control_cpu.dBus_cmd_valid ),
+    .douta( mem_dBus_rsp_data ),
+    .ena( io.passthrough_enable ),
     .wea( convert_byte_write(
         control_cpu.dBus_cmd_payload_wr,
         control_cpu.dBus_cmd_payload_address,
