@@ -7,7 +7,7 @@ AM_CFLAGS=$(ARCH) $(ABI) -nostdlib
 
 noinst_PROGRAMS=bl1.elf
 
-REMOVED_SECTIONS=debug_* riscv.attribute comment
+REMOVED_SECTIONS=
 
 %.coe: %.raw
 	sed -e '$$s:,:;:' "$<" > "$@".tmp
