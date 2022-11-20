@@ -1,7 +1,7 @@
 # Linker script for Boot Loader stage 1
-MEMORY { sram : ORIGIN = 0x0000, LENGTH = 0x8000 }
+MEMORY { sram : ORIGIN = 0x80000000, LENGTH = 0x8000 }
 MEMORY { discard : ORIGIN = 0x1000000, LENGTH = 0x1000000 }
-MEMORY { error : ORIGIN = 0x80000000, LENGTH = 0 }
+MEMORY { error : ORIGIN = 0xf0000000, LENGTH = 0 }
 SECTIONS
 {
     .text : {
