@@ -15,11 +15,11 @@ REMOVED_SECTIONS=
 
 %.raw: %.bin
 	echo -e 'memory_initialization_radix = 16;\nmemory_initialization_vector =' > "$@".tmp
-	hexdump -e '1/4 "  %08x" ",\n"' "$<" >> "$@".tmp
+	hexdump -v -e '1/4 "  %08x" ",\n"' "$<" >> "$@".tmp
 	mv "$@".tmp "$@"
 
 bl1.mem: bl1.bin
-	hexdump -e '1/4 "%08x" "\n"' "$<" > "$@".tmp
+	hexdump -v -e '1/4 "%08x" "\n"' "$<" > "$@".tmp
 	mv "$@".tmp "$@"
 
 bl1.bin: bl1.elf

@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="4,660.332 ns"></ZoomStartTime>
-      <ZoomEndTime time="4,725.033 ns"></ZoomEndTime>
-      <Cursor1Time time="4,699.332 ns"></Cursor1Time>
+      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
+      <ZoomEndTime time="65.101 ns"></ZoomEndTime>
+      <Cursor1Time time="10.000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="291"></NameColumnWidth>
-      <ValueColumnWidth column_width="87"></ValueColumnWidth>
+      <ValueColumnWidth column_width="83"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="37" />
+   <WVObjectSize size="47" />
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -112,86 +112,112 @@
       <obj_property name="ElementShortName">reset</obj_property>
       <obj_property name="ObjectShortName">reset</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/memory/clka">
-      <obj_property name="ElementShortName">clka</obj_property>
-      <obj_property name="ObjectShortName">clka</obj_property>
-      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
+   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/inport_awvalid_i">
+      <obj_property name="ElementShortName">inport_awvalid_i</obj_property>
+      <obj_property name="ObjectShortName">inport_awvalid_i</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/memory/ena">
-      <obj_property name="ElementShortName">ena</obj_property>
-      <obj_property name="ObjectShortName">ena</obj_property>
-      <obj_property name="CustomSignalColor">#FF0080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/inport_awaddr_i">
+      <obj_property name="ElementShortName">inport_awaddr_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">inport_awaddr_i[31:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/memory/wea">
-      <obj_property name="ElementShortName">wea[3:0]</obj_property>
-      <obj_property name="ObjectShortName">wea[3:0]</obj_property>
-      <obj_property name="Radix">BINARYRADIX</obj_property>
-      <obj_property name="CustomSignalColor">#800080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/inport_awid_i">
+      <obj_property name="ElementShortName">inport_awid_i[3:0]</obj_property>
+      <obj_property name="ObjectShortName">inport_awid_i[3:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/memory/addra">
-      <obj_property name="ElementShortName">addra[12:0]</obj_property>
-      <obj_property name="ObjectShortName">addra[12:0]</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/inport_awlen_i">
+      <obj_property name="ElementShortName">inport_awlen_i[7:0]</obj_property>
+      <obj_property name="ObjectShortName">inport_awlen_i[7:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/memory/dina">
-      <obj_property name="ElementShortName">dina[31:0]</obj_property>
-      <obj_property name="ObjectShortName">dina[31:0]</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/inport_awburst_i">
+      <obj_property name="ElementShortName">inport_awburst_i[1:0]</obj_property>
+      <obj_property name="ObjectShortName">inport_awburst_i[1:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/memory/douta">
-      <obj_property name="ElementShortName">douta[31:0]</obj_property>
-      <obj_property name="ObjectShortName">douta[31:0]</obj_property>
+   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/inport_wvalid_i">
+      <obj_property name="ElementShortName">inport_wvalid_i</obj_property>
+      <obj_property name="ObjectShortName">inport_wvalid_i</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/memory/clkb">
-      <obj_property name="ElementShortName">clkb</obj_property>
-      <obj_property name="ObjectShortName">clkb</obj_property>
-      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/inport_wdata_i">
+      <obj_property name="ElementShortName">inport_wdata_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">inport_wdata_i[31:0]</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/memory/enb">
-      <obj_property name="ElementShortName">enb</obj_property>
-      <obj_property name="ObjectShortName">enb</obj_property>
-      <obj_property name="CustomSignalColor">#FF0080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/inport_wstrb_i">
+      <obj_property name="ElementShortName">inport_wstrb_i[3:0]</obj_property>
+      <obj_property name="ObjectShortName">inport_wstrb_i[3:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/memory/web">
-      <obj_property name="ElementShortName">web[3:0]</obj_property>
-      <obj_property name="ObjectShortName">web[3:0]</obj_property>
-      <obj_property name="Radix">BINARYRADIX</obj_property>
-      <obj_property name="CustomSignalColor">#800080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
+   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/inport_wlast_i">
+      <obj_property name="ElementShortName">inport_wlast_i</obj_property>
+      <obj_property name="ObjectShortName">inport_wlast_i</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/memory/addrb">
-      <obj_property name="ElementShortName">addrb[12:0]</obj_property>
-      <obj_property name="ObjectShortName">addrb[12:0]</obj_property>
+   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/inport_bready_i">
+      <obj_property name="ElementShortName">inport_bready_i</obj_property>
+      <obj_property name="ObjectShortName">inport_bready_i</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/memory/dinb">
-      <obj_property name="ElementShortName">dinb[31:0]</obj_property>
-      <obj_property name="ObjectShortName">dinb[31:0]</obj_property>
+   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/inport_arvalid_i">
+      <obj_property name="ElementShortName">inport_arvalid_i</obj_property>
+      <obj_property name="ObjectShortName">inport_arvalid_i</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/memory/doutb">
-      <obj_property name="ElementShortName">doutb[31:0]</obj_property>
-      <obj_property name="ObjectShortName">doutb[31:0]</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/inport_araddr_i">
+      <obj_property name="ElementShortName">inport_araddr_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">inport_araddr_i[31:0]</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/io/uart_output/clock">
-      <obj_property name="ElementShortName">clock</obj_property>
-      <obj_property name="ObjectShortName">clock</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/inport_arid_i">
+      <obj_property name="ElementShortName">inport_arid_i[3:0]</obj_property>
+      <obj_property name="ObjectShortName">inport_arid_i[3:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/io/uart_output/data_in">
-      <obj_property name="ElementShortName">data_in[7:0]</obj_property>
-      <obj_property name="ObjectShortName">data_in[7:0]</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/inport_arlen_i">
+      <obj_property name="ElementShortName">inport_arlen_i[7:0]</obj_property>
+      <obj_property name="ObjectShortName">inport_arlen_i[7:0]</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/io/uart_output/data_in_ready">
-      <obj_property name="ElementShortName">data_in_ready</obj_property>
-      <obj_property name="ObjectShortName">data_in_ready</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/inport_arburst_i">
+      <obj_property name="ElementShortName">inport_arburst_i[1:0]</obj_property>
+      <obj_property name="ObjectShortName">inport_arburst_i[1:0]</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/io/uart_output/out_bit">
-      <obj_property name="ElementShortName">out_bit</obj_property>
-      <obj_property name="ObjectShortName">out_bit</obj_property>
+   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/inport_rready_i">
+      <obj_property name="ElementShortName">inport_rready_i</obj_property>
+      <obj_property name="ObjectShortName">inport_rready_i</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/io/uart_output/receive_ready">
-      <obj_property name="ElementShortName">receive_ready</obj_property>
-      <obj_property name="ObjectShortName">receive_ready</obj_property>
+   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/inport_awready_o">
+      <obj_property name="ElementShortName">inport_awready_o</obj_property>
+      <obj_property name="ObjectShortName">inport_awready_o</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/inport_wready_o">
+      <obj_property name="ElementShortName">inport_wready_o</obj_property>
+      <obj_property name="ObjectShortName">inport_wready_o</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/inport_bvalid_o">
+      <obj_property name="ElementShortName">inport_bvalid_o</obj_property>
+      <obj_property name="ObjectShortName">inport_bvalid_o</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/inport_bresp_o">
+      <obj_property name="ElementShortName">inport_bresp_o[1:0]</obj_property>
+      <obj_property name="ObjectShortName">inport_bresp_o[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/inport_bid_o">
+      <obj_property name="ElementShortName">inport_bid_o[3:0]</obj_property>
+      <obj_property name="ObjectShortName">inport_bid_o[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/inport_arready_o">
+      <obj_property name="ElementShortName">inport_arready_o</obj_property>
+      <obj_property name="ObjectShortName">inport_arready_o</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/inport_rvalid_o">
+      <obj_property name="ElementShortName">inport_rvalid_o</obj_property>
+      <obj_property name="ObjectShortName">inport_rvalid_o</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/inport_rdata_o">
+      <obj_property name="ElementShortName">inport_rdata_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">inport_rdata_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/inport_rresp_o">
+      <obj_property name="ElementShortName">inport_rresp_o[1:0]</obj_property>
+      <obj_property name="ObjectShortName">inport_rresp_o[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/inport_rid_o">
+      <obj_property name="ElementShortName">inport_rid_o[3:0]</obj_property>
+      <obj_property name="ObjectShortName">inport_rid_o[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/inport_rlast_o">
+      <obj_property name="ElementShortName">inport_rlast_o</obj_property>
+      <obj_property name="ObjectShortName">inport_rlast_o</obj_property>
    </wvobject>
 </wave_config>

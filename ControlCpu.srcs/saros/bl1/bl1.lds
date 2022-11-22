@@ -2,6 +2,7 @@
 MEMORY { sram : ORIGIN = 0x80000000, LENGTH = 0x8000 }
 MEMORY { discard : ORIGIN = 0x1000000, LENGTH = 0x1000000 }
 MEMORY { error : ORIGIN = 0xf0000000, LENGTH = 0 }
+MEMORY { ddr : ORIGIN = 0x0, LENGTH = 256*1024*1024 }
 SECTIONS
 {
     .text : {
@@ -15,6 +16,18 @@ SECTIONS
          *(.rodata*)
         . = ALIGN(4);
     } >sram
+
+    .got : {
+        . = ALIGN(4);
+        *(.got)
+        . = ALIGN(4);
+    } > sram
+
+    .got.plt : {
+        . = ALIGN(4);
+        *(.got.plt)
+        . = ALIGN(4);
+    } > sram
 
     /DISCARD/ : { *(.eh_frame) }
 
@@ -31,5 +44,6 @@ SECTIONS
     .riscv.attributes : { *(.riscv.attributes) } >discard
     .comment : { *(.comment) } >discard
 
+    PROVIDE(DDR_MEMORY = 0);
     .unknown : { *(.*) } >error
 }
