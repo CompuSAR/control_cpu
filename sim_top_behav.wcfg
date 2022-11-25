@@ -11,13 +11,13 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
-      <ZoomEndTime time="65.101 ns"></ZoomEndTime>
-      <Cursor1Time time="10.000 ns"></Cursor1Time>
+      <ZoomStartTime time="278.828433 us"></ZoomStartTime>
+      <ZoomEndTime time="409.828434 us"></ZoomEndTime>
+      <Cursor1Time time="387.995100 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="291"></NameColumnWidth>
-      <ValueColumnWidth column_width="83"></ValueColumnWidth>
+      <ValueColumnWidth column_width="79"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="47" />
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
@@ -89,6 +89,7 @@
    <wvobject type="array" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_payload_data">
       <obj_property name="ElementShortName">dBus_cmd_payload_data[31:0]</obj_property>
       <obj_property name="ObjectShortName">dBus_cmd_payload_data[31:0]</obj_property>
+      <obj_property name="Radix">ASCIIRADIX</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_payload_size">
       <obj_property name="ElementShortName">dBus_cmd_payload_size[1:0]</obj_property>
