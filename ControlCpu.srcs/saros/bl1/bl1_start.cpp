@@ -5,8 +5,20 @@ extern "C" void bl1_start();
 
 extern volatile unsigned int DDR_MEMORY[256*1024*1024/4];
 
+unsigned int test_buffer[] = {
+    0x70befbfb,
+    0xe4be39ff,
+    0xcd58d3be
+};
+
 void bl1_start() {
-    uint32_t mem = DDR_MEMORY[0];
+    DDR_MEMORY[1]=0x75c8f355;
+    DDR_MEMORY[2]=0x252505f5;
+    uint32_t mem = DDR_MEMORY[1];
+    print_hex(mem);
+    uart_send('\n');
+
+    mem = DDR_MEMORY[2];
     print_hex(mem);
     uart_send('\n');
 
@@ -15,33 +27,33 @@ void bl1_start() {
     uart_send('\n');
 
     uart_send("Hello, world\n");
-    mem = DDR_MEMORY[0];
+    mem = DDR_MEMORY[1];
     print_hex(mem);
     uart_send('\n');
 
-    mem = DDR_MEMORY[1];
+    mem = DDR_MEMORY[2];
     print_hex(mem);
     uart_send('\n');
 
     DDR_MEMORY[0] = 12;
-    mem = DDR_MEMORY[0];
+    mem = DDR_MEMORY[1];
     print_hex(mem);
 
     uart_send("\nWorld's still here\n");
-
-    mem = DDR_MEMORY[0];
-    print_hex(mem);
-    uart_send('\n');
 
     mem = DDR_MEMORY[1];
     print_hex(mem);
     uart_send('\n');
 
-    if( DDR_MEMORY[0]==12 )
+    mem = DDR_MEMORY[2];
+    print_hex(mem);
+    uart_send('\n');
+
+    if( DDR_MEMORY[1]==12 )
         uart_send("Verified\n");
     else {
         uart_send("Verification failed\n");
-        print_hex(DDR_MEMORY[0]);
+        print_hex(DDR_MEMORY[1]);
         uart_send('\n');
     }
 

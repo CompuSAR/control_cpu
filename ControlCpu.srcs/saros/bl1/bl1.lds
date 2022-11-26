@@ -17,6 +17,12 @@ SECTIONS
         . = ALIGN(4);
     } >sram
 
+    .data : {
+        . = ALIGN(4);
+         *(.data*)
+        . = ALIGN(4);
+    } >sram
+
     .got : {
         . = ALIGN(4);
         *(.got)
