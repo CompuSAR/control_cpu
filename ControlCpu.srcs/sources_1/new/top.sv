@@ -72,6 +72,16 @@ wire clk_ddr_w;
 wire clk_ddr_dqs_w;
 wire clk_ref_w;
 
+// mig requires 102.564MHz
+// mig version
+clk_converter clocks(
+    .clk_in1(board_clock), .reset(1'b0),
+    .clk_ctrl_cpu(ctrl_cpu_clock),
+    .locked(clocks_locked)
+);
+
+/*
+// github version
 clk_converter clocks(
     .clk_in1(board_clock), .reset(1'b0),
     .clk_ctrl_cpu(ctrl_cpu_clock),
@@ -80,6 +90,7 @@ clk_converter clocks(
     .clk_ddr_dqs_w(clk_ddr_dqs_w),
     .locked(clocks_locked)
 );
+*/
 
 logic           ctrl_iBus_cmd_ready;
 logic           ctrl_iBus_rsp_valid;
@@ -240,10 +251,11 @@ wire           axi4_wready_w;
 wire  [  1:0]  axi4_awburst_w = 1'b1;   // INCRemental burst
 wire           axi4_rvalid_w;
 
+/*
 ddr3_axi
 #(
-     .DDR_WRITE_LATENCY(4)
-    ,.DDR_READ_LATENCY(4)
+     .DDR_WRITE_LATENCY(6)
+    ,.DDR_READ_LATENCY(6)
     ,.DDR_MHZ(100)
 )
 u_ddr
@@ -348,6 +360,142 @@ u_phy
     ,.ddr3_dq_io(ddr3_dq)
     ,.ddr3_dqs_p_io(ddr3_dqs_p)
     ,.ddr3_dqs_n_io(ddr3_dqs_n)
+);
+*/
+
+
+mig_ddr u_ddr (
+    // Inputs
+// Memory interface ports
+       .ddr3_addr                      (ddr3_addr),
+       .ddr3_ba                        (ddr3_ba),
+       .ddr3_cas_n                     (ddr3_cas_n),
+       .ddr3_ck_n                      (ddr3_ck_n),
+       .ddr3_ck_p                      (ddr3_ck_p),
+       .ddr3_cke                       (ddr3_cke),
+       .ddr3_ras_n                     (ddr3_ras_n),
+       .ddr3_we_n                      (ddr3_we_n),
+       .ddr3_dq                        (ddr3_dq),
+       .ddr3_dqs_n                     (ddr3_dqs_n),
+       .ddr3_dqs_p                     (ddr3_dqs_p),
+       .ddr3_reset_n                   (ddr3_reset_n),
+       .init_calib_complete            (init_calib_complete),
+      
+       
+       .ddr3_dm                        (ddr3_dm),
+       .ddr3_odt                       (ddr3_odt),
+// Application interface ports
+       .s_axi_arready(axi4_arready_w),
+       .s_axi_arsize(3'h4),
+       .s_axi_arlen(axi4_arlen_w),
+       .s_axi_araddr(axi4_araddr_w),
+       .s_axi_arburst(axi4_arburst_w),
+       .s_axi_arvalid(axi4_arvalid_w),
+       .s_axi_arid(axi4_arid_w),
+       .s_axi_rready(axi4_rready_w),
+       .s_axi_rlast(axi4_rlast_w),
+       .s_axi_rid(axi4_rid_w),
+       .s_axi_rresp(axi4_rresp_w),
+       .s_axi_rdata(axi4_rdata_w),
+       .s_axi_rvalid(axi4_rvalid_w),
+
+       .s_axi_awready(axi4_awready_w),
+       .s_axi_awvalid(axi4_awvalid_w),
+       .s_axi_awid(axi4_awid_w),
+       .s_axi_awsize(3'h4),
+       .s_axi_awlen(axi4_awlen_w),
+       .s_axi_awaddr(axi4_awaddr_w),
+       .s_axi_awburst(axi4_awburst_w),
+       .s_axi_wvalid(axi4_wvalid_w),
+       .s_axi_wstrb(axi4_wstrb_w),
+       .s_axi_wdata(axi4_wdata_w),
+       .s_axi_wlast(axi4_wlast_w),
+       .s_axi_wready(axi4_wready_w),
+       .s_axi_bresp(axi4_bresp_w),
+       .s_axi_bvalid(axi4_bvalid_w),
+       .s_axi_bid(axi4_bid_w),
+       .s_axi_bready(axi4_bready_w),
+/*
+       .app_addr                       (app_addr),
+       .app_cmd                        (app_cmd),
+       .app_en                         (app_en),
+       .app_wdf_data                   (app_wdf_data),
+       .app_wdf_end                    (app_wdf_end),
+       .app_wdf_wren                   (app_wdf_wren),
+       .app_rd_data                    (app_rd_data),
+       .app_rd_data_end                (app_rd_data_end),
+       .app_rd_data_valid              (app_rd_data_valid),
+       .app_rdy                        (app_rdy),
+       .app_wdf_rdy                    (app_wdf_rdy),
+       .app_sr_active                  (app_sr_active),
+       .app_ref_ack                    (app_ref_ack),
+       .app_zq_ack                     (app_zq_ack),
+       .app_wdf_mask                   (app_wdf_mask),
+*/
+       .app_sr_req                     (1'b0),
+       .app_ref_req                    (1'b0),
+       .app_zq_req                     (1'b0),
+       .ui_clk                         (clk),
+       .ui_clk_sync_rst                (rst),
+      
+      
+       
+// System Clock Ports
+       .sys_clk_i                       (ctrl_cpu_clock),
+// Reference Clock Ports
+       .clk_ref_i                      (ctrl_cpu_clock),
+       .device_temp            (),
+      
+       .sys_rst                        (!clocks_locked)
+    /*
+     .clk(clk_w)
+    ,.rst_i(rst_w)
+    ,.inport_awvalid_i(axi4_awvalid_w)
+    ,.inport_awaddr_i(axi4_awaddr_w)
+    ,.inport_awid_i(axi4_awid_w)
+    ,.inport_awlen_i(axi4_awlen_w)
+    ,.inport_awburst_i(axi4_awburst_w)
+    ,.inport_wvalid_i(axi4_wvalid_w)
+    ,.inport_wdata_i(axi4_wdata_w)
+    ,.inport_wstrb_i(axi4_wstrb_w)
+    ,.inport_wlast_i(axi4_wlast_w)
+    ,.inport_bready_i(axi4_bready_w)
+    ,.inport_arvalid_i(axi4_arvalid_w)
+    ,.inport_araddr_i(axi4_araddr_w)
+    ,.inport_arid_i(axi4_arid_w)
+    ,.inport_arlen_i(axi4_arlen_w)
+    ,.inport_arburst_i(axi4_arburst_w)
+    ,.inport_rready_i(axi4_rready_w)
+    ,.dfi_rddata_i(dfi_rddata_w)
+    ,.dfi_rddata_valid_i(dfi_rddata_valid_w)
+    ,.dfi_rddata_dnv_i(dfi_rddata_dnv_w)
+
+    // Outputs
+    ,.inport_awready_o(axi4_awready_w)
+    ,.inport_wready_o(axi4_wready_w)
+    ,.inport_bvalid_o(axi4_bvalid_w)
+    ,.inport_bresp_o(axi4_bresp_w)
+    ,.inport_bid_o(axi4_bid_w)
+    ,.inport_arready_o(axi4_arready_w)
+    ,.inport_rvalid_o(axi4_rvalid_w)
+    ,.inport_rdata_o(axi4_rdata_w)
+    ,.inport_rresp_o(axi4_rresp_w)
+    ,.inport_rid_o(axi4_rid_w)
+    ,.inport_rlast_o(axi4_rlast_w)
+    ,.dfi_address_o(dfi_address_w)
+    ,.dfi_bank_o(dfi_bank_w)
+    ,.dfi_cas_n_o(dfi_cas_n_w)
+    ,.dfi_cke_o(dfi_cke_w)
+    ,.dfi_cs_n_o(dfi_cs_n_w)
+    ,.dfi_odt_o(dfi_odt_w)
+    ,.dfi_ras_n_o(dfi_ras_n_w)
+    ,.dfi_reset_n_o(dfi_reset_n_w)
+    ,.dfi_we_n_o(dfi_we_n_w)
+    ,.dfi_wrdata_o(dfi_wrdata_w)
+    ,.dfi_wrdata_en_o(dfi_wrdata_en_w)
+    ,.dfi_wrdata_mask_o(dfi_wrdata_mask_w)
+    ,.dfi_rddata_en_o(dfi_rddata_en_w)
+    */
 );
 
 endmodule
