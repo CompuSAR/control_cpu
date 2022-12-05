@@ -1,5 +1,6 @@
 #include "uart.h"
 #include "format.h"
+#include "ddr.h"
 
 extern "C" void bl1_start();
 
@@ -12,9 +13,12 @@ unsigned int test_buffer[] = {
 };
 
 void bl1_start() {
-    DDR_MEMORY[1]=0x75c8f355;
-    DDR_MEMORY[2]=0x252505f5;
-    uint32_t mem = DDR_MEMORY[1];
+    ddr_init();
+
+    DDR_MEMORY[16]=0x75c8f355;
+    uart_send('\n');
+    DDR_MEMORY[32]=0x252505f5;
+    uint32_t mem = DDR_MEMORY[16];
     print_hex(mem);
     uart_send('\n');
 

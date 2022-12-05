@@ -131,6 +131,9 @@ assign ctrl_dBus_rsp_error = 0;
 
 logic sram_dBus_rsp_ready;
 logic [31:0] sram_dBus_rsp_data;
+logic [31:0] ddr_ctrl_in;
+
+assign ddr_ctrl_in[31:3] = 0;
 
 io_block iob(
     .clock(ctrl_cpu_clock),
@@ -154,7 +157,9 @@ io_block iob(
     .passthrough_ddr_data(axi4_rdata_w),
 
     .uart_tx(uart_tx),
-    .uart_rx(uart_rx)
+    .uart_rx(uart_rx),
+
+    .ddr_ctrl_in(ddr_ctrl_in)
 );
 
 always_ff@(posedge ctrl_cpu_clock)
@@ -379,7 +384,6 @@ mig_ddr u_ddr (
        .ddr3_dqs_n                     (ddr3_dqs_n),
        .ddr3_dqs_p                     (ddr3_dqs_p),
        .ddr3_reset_n                   (ddr3_reset_n),
-       .init_calib_complete            (init_calib_complete),
       
        
        .ddr3_dm                        (ddr3_dm),
@@ -415,6 +419,17 @@ mig_ddr u_ddr (
        .s_axi_bvalid(axi4_bvalid_w),
        .s_axi_bid(axi4_bid_w),
        .s_axi_bready(axi4_bready_w),
+
+       .s_axi_awcache(4'h0),
+       .s_axi_awlock(2'b00),
+       .s_axi_awprot(3'b000),
+       .s_axi_awqos(4'b0000),
+
+       .s_axi_arcache(4'h0),
+       .s_axi_arlock(2'b00),
+       .s_axi_arprot(3'b000),
+       .s_axi_arqos(4'b0000),
+
 /*
        .app_addr                       (app_addr),
        .app_cmd                        (app_cmd),
@@ -435,67 +450,22 @@ mig_ddr u_ddr (
        .app_sr_req                     (1'b0),
        .app_ref_req                    (1'b0),
        .app_zq_req                     (1'b0),
-       .ui_clk                         (clk),
-       .ui_clk_sync_rst                (rst),
+       .ui_clk                         (),
+       .mmcm_locked                    (ddr_ctrl_in[0]),
+       .init_calib_complete            (ddr_ctrl_in[1]),
+       .ui_clk_sync_rst                (ddr_ctrl_in[2]),
       
       
        
 // System Clock Ports
-       .sys_clk_i                       (ctrl_cpu_clock),
+       .sys_clk_i                      (ctrl_cpu_clock),
 // Reference Clock Ports
        .clk_ref_i                      (ctrl_cpu_clock),
-       .device_temp            (),
+       .device_temp_i                  (0),
+       .device_temp                    (),
       
-       .sys_rst                        (!clocks_locked)
-    /*
-     .clk(clk_w)
-    ,.rst_i(rst_w)
-    ,.inport_awvalid_i(axi4_awvalid_w)
-    ,.inport_awaddr_i(axi4_awaddr_w)
-    ,.inport_awid_i(axi4_awid_w)
-    ,.inport_awlen_i(axi4_awlen_w)
-    ,.inport_awburst_i(axi4_awburst_w)
-    ,.inport_wvalid_i(axi4_wvalid_w)
-    ,.inport_wdata_i(axi4_wdata_w)
-    ,.inport_wstrb_i(axi4_wstrb_w)
-    ,.inport_wlast_i(axi4_wlast_w)
-    ,.inport_bready_i(axi4_bready_w)
-    ,.inport_arvalid_i(axi4_arvalid_w)
-    ,.inport_araddr_i(axi4_araddr_w)
-    ,.inport_arid_i(axi4_arid_w)
-    ,.inport_arlen_i(axi4_arlen_w)
-    ,.inport_arburst_i(axi4_arburst_w)
-    ,.inport_rready_i(axi4_rready_w)
-    ,.dfi_rddata_i(dfi_rddata_w)
-    ,.dfi_rddata_valid_i(dfi_rddata_valid_w)
-    ,.dfi_rddata_dnv_i(dfi_rddata_dnv_w)
-
-    // Outputs
-    ,.inport_awready_o(axi4_awready_w)
-    ,.inport_wready_o(axi4_wready_w)
-    ,.inport_bvalid_o(axi4_bvalid_w)
-    ,.inport_bresp_o(axi4_bresp_w)
-    ,.inport_bid_o(axi4_bid_w)
-    ,.inport_arready_o(axi4_arready_w)
-    ,.inport_rvalid_o(axi4_rvalid_w)
-    ,.inport_rdata_o(axi4_rdata_w)
-    ,.inport_rresp_o(axi4_rresp_w)
-    ,.inport_rid_o(axi4_rid_w)
-    ,.inport_rlast_o(axi4_rlast_w)
-    ,.dfi_address_o(dfi_address_w)
-    ,.dfi_bank_o(dfi_bank_w)
-    ,.dfi_cas_n_o(dfi_cas_n_w)
-    ,.dfi_cke_o(dfi_cke_w)
-    ,.dfi_cs_n_o(dfi_cs_n_w)
-    ,.dfi_odt_o(dfi_odt_w)
-    ,.dfi_ras_n_o(dfi_ras_n_w)
-    ,.dfi_reset_n_o(dfi_reset_n_w)
-    ,.dfi_we_n_o(dfi_we_n_w)
-    ,.dfi_wrdata_o(dfi_wrdata_w)
-    ,.dfi_wrdata_en_o(dfi_wrdata_en_w)
-    ,.dfi_wrdata_mask_o(dfi_wrdata_mask_w)
-    ,.dfi_rddata_en_o(dfi_rddata_en_w)
-    */
+       .sys_rst                        (iob.ddr_ctrl_out[0]),
+       .aresetn                        (iob.ddr_ctrl_out[1])
 );
 
 endmodule

@@ -6,6 +6,11 @@ ControlCpu.gen/saros/%: ControlCpu.gen/saros/config.log
 	$(MAKE) -C "$(@D)" "$(@F)"
 .PHONY: ControlCpu.gen/saros/%
 
+ControlCpu.gen/saros/bl1/bl1.coe:
+	$(MAKE) -C "$(@D)" "$(@F)"
+
+.PHONY: ControlCpu.gen/saros/bl1/bl1.coe
+
 ControlCpu.gen/saros/config.log: ControlCpu.srcs/saros/configure
 	$(RM) -r $(@D)
 	mkdir -p $(@D)
