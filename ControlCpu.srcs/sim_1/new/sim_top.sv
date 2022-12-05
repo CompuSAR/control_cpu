@@ -43,6 +43,7 @@ ddr3_model ddr(
     .cke        (top_module.ddr3_cke),
     .cs_n       (0),
     .ras_n      (top_module.ddr3_ras_n),
+    .cas_n      (top_module.ddr3_cas_n),
     .we_n       (top_module.ddr3_we_n),
     .dm_tdqs    (top_module.ddr3_dm),
     .ba         (top_module.ddr3_ba),
