@@ -67,16 +67,18 @@ endfunction
 //-----------------------------------------------------------------
 logic ctrl_cpu_clock, clocks_locked;
 wire clk_w = ctrl_cpu_clock;
+wire ddr_clock;
 wire rst_w = !clocks_locked;
 wire clk_ddr_w;
 wire clk_ddr_dqs_w;
 wire clk_ref_w;
 
-// mig requires 102.564MHz
+// mig requires 166.6666MHz
 // mig version
 clk_converter clocks(
     .clk_in1(board_clock), .reset(1'b0),
     .clk_ctrl_cpu(ctrl_cpu_clock),
+    .clk_ddr_w(ddr_clock),
     .locked(clocks_locked)
 );
 
@@ -132,6 +134,8 @@ assign ctrl_dBus_rsp_error = 0;
 logic sram_dBus_rsp_ready;
 logic [31:0] sram_dBus_rsp_data;
 logic [31:0] ddr_ctrl_in;
+logic [63:0] ddr_read_data;
+logic ddr_ready, ddr_rsp_ready, ddr_write_data_ready;
 
 assign ddr_ctrl_in[31:3] = 0;
 
@@ -152,9 +156,9 @@ io_block iob(
     .passthrough_sram_rsp_ready(sram_dBus_rsp_ready),
     .passthrough_sram_data(sram_dBus_rsp_data),
 
-    .passthrough_ddr_req_ack(control_cpu.dBus_cmd_payload_wr ? (axi4_wready_w && axi4_awready_w) : axi4_arready_w),
-    .passthrough_ddr_rsp_ready(axi4_rvalid_w || axi4_bvalid_w),
-    .passthrough_ddr_data(axi4_rdata_w),
+    .passthrough_ddr_req_ack(ddr_ready && ddr_write_data_ready),
+    .passthrough_ddr_rsp_ready(ddr_rsp_ready),
+    .passthrough_ddr_data(ddr_read_data),
 
     .uart_tx(uart_tx),
     .uart_rx(uart_rx),
@@ -389,8 +393,9 @@ mig_ddr u_ddr (
        .ddr3_dm                        (ddr3_dm),
        .ddr3_odt                       (ddr3_odt),
 // Application interface ports
+/*
        .s_axi_arready(axi4_arready_w),
-       .s_axi_arsize(3'h4),
+       .s_axi_arsize(3'h1),
        .s_axi_arlen(axi4_arlen_w),
        .s_axi_araddr(axi4_araddr_w),
        .s_axi_arburst(axi4_arburst_w),
@@ -406,7 +411,7 @@ mig_ddr u_ddr (
        .s_axi_awready(axi4_awready_w),
        .s_axi_awvalid(axi4_awvalid_w),
        .s_axi_awid(axi4_awid_w),
-       .s_axi_awsize(3'h4),
+       .s_axi_awsize(3'h1),
        .s_axi_awlen(axi4_awlen_w),
        .s_axi_awaddr(axi4_awaddr_w),
        .s_axi_awburst(axi4_awburst_w),
@@ -429,43 +434,45 @@ mig_ddr u_ddr (
        .s_axi_arlock(2'b00),
        .s_axi_arprot(3'b000),
        .s_axi_arqos(4'b0000),
-
-/*
-       .app_addr                       (app_addr),
-       .app_cmd                        (app_cmd),
-       .app_en                         (app_en),
-       .app_wdf_data                   (app_wdf_data),
-       .app_wdf_end                    (app_wdf_end),
-       .app_wdf_wren                   (app_wdf_wren),
-       .app_rd_data                    (app_rd_data),
-       .app_rd_data_end                (app_rd_data_end),
-       .app_rd_data_valid              (app_rd_data_valid),
-       .app_rdy                        (app_rdy),
-       .app_wdf_rdy                    (app_wdf_rdy),
-       .app_sr_active                  (app_sr_active),
-       .app_ref_ack                    (app_ref_ack),
-       .app_zq_ack                     (app_zq_ack),
-       .app_wdf_mask                   (app_wdf_mask),
 */
+
+       .app_addr                       (control_cpu.dBus_cmd_payload_address[31:4]),
+       .app_cmd                        (control_cpu.dBus_cmd_payload_wr ? 3'b000 : 3'b001),
+       .app_en                         (iob.passthrough_ddr_enable),
+       .app_wdf_data                   ({ control_cpu.dBus_cmd_payload_data, control_cpu.dBus_cmd_payload_data }),
+       .app_wdf_end                    (1'b1),
+       .app_wdf_wren                   (iob.passthrough_ddr_enable && control_cpu.dBus_cmd_payload_wr),
+       .app_wdf_mask                   (control_cpu.dBus_cmd_payload_address[3] ? {axi4_wstrb_w, 4'b0000} : {4'b0000, axi4_wstrb_w}),
+
+       .app_rd_data                    (ddr_read_data),
+       .app_rd_data_end                (),
+       .app_rd_data_valid              (ddr_rsp_ready),
+       .app_rdy                        (ddr_ready),
+       .app_wdf_rdy                    (ddr_write_data_ready),
+
+       .app_sr_active                  (),
+       .app_ref_ack                    (),
+       .app_zq_ack                     (),
+
        .app_sr_req                     (1'b0),
        .app_ref_req                    (1'b0),
        .app_zq_req                     (1'b0),
        .ui_clk                         (),
-       .mmcm_locked                    (ddr_ctrl_in[0]),
+//       .mmcm_locked                    (ddr_ctrl_in[0]),
        .init_calib_complete            (ddr_ctrl_in[1]),
        .ui_clk_sync_rst                (ddr_ctrl_in[2]),
       
       
        
 // System Clock Ports
-       .sys_clk_i                      (ctrl_cpu_clock),
+       .sys_clk_i                      (ddr_clock),
 // Reference Clock Ports
-       .clk_ref_i                      (ctrl_cpu_clock),
+       .clk_ref_i                      (ddr_clock),
        .device_temp_i                  (0),
        .device_temp                    (),
       
-       .sys_rst                        (iob.ddr_ctrl_out[0]),
-       .aresetn                        (iob.ddr_ctrl_out[1])
+       .sys_rst                        (iob.ddr_ctrl_out[0])
+//       .aresetn                        (iob.ddr_ctrl_out[1])
 );
 
 endmodule

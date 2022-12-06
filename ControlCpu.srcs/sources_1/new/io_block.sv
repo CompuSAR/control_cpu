@@ -40,7 +40,7 @@ module io_block(
     output logic passthrough_ddr_enable,
     input passthrough_ddr_req_ack,
     input passthrough_ddr_rsp_ready,
-    input [31:0] passthrough_ddr_data,
+    input [63:0] passthrough_ddr_data,
 
     output uart_tx,
     input uart_rx,
@@ -64,7 +64,7 @@ end
 
 logic uart_send_data_ready;
 
-uart_send#(.ClockDivider(890)) // 115,200 BAUD at 102.564Mhz clock
+uart_send#(.ClockDivider(723)) // 115,200 BAUD at 83.3333Mhz clock
 uart_output(
     .clock(clock),
     .data_in(data_in[7:0]),
@@ -107,7 +107,7 @@ always_comb begin
     req_ack = 1'bX;
     if( previous_valid ) begin
         if( is_ddr(previous_address) ) begin
-            data_out = passthrough_ddr_data;
+            data_out = previous_address[4] ? passthrough_ddr_data[63:32] : passthrough_ddr_data[31:0];
             rsp_ready = passthrough_ddr_rsp_ready;
         end else if( is_sram(previous_address) ) begin
             data_out = passthrough_sram_data;

@@ -1,0 +1,7 @@
+#!/usr/bin/python3
+
+import sys
+
+while line:=sys.stdin.readline():
+    value = int(line, 16)
+    print(f"{value:032b}")

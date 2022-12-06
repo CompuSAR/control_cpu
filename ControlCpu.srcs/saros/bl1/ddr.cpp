@@ -13,15 +13,15 @@ void ddr_init() {
     }
 
     uint32_t status = ddr_status();
-    static constexpr uint32_t mask = DDR_STAT_MMCM_LOCKED | DDR_STAT_CALIB_COMPLETE;
+    static constexpr uint32_t mask = DDR_STAT_CALIB_COMPLETE;
     for( j=0; j<1000 && (status & mask)!=mask; ++j ) {
         status = ddr_status();
     }
 
     if( j==1000 )
-        uart_send("-DDR\n");
+        uart_send("D-\n");
     else
-        uart_send("+DDR\n");
+        uart_send("D+\n");
 }
 
 uint32_t ddr_status() {

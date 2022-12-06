@@ -13,6 +13,10 @@ REMOVED_SECTIONS=
 	sed -e '$$s:,:;:' "$<" > "$@".tmp
 	mv "$@".tmp "$@"
 
+%.mif: %.bin
+	hexdump -v -e '1/4 "%08x" "\n"' "$<" | $(srcdir)/makemif > "$@".tmp
+	mv "$@".tmp "$@"
+
 %.raw: %.bin
 	echo -e 'memory_initialization_radix = 16;\nmemory_initialization_vector =' > "$@".tmp
 	hexdump -v -e '1/4 "  %08x" ",\n"' "$<" >> "$@".tmp
@@ -33,4 +37,4 @@ bl1.elf$(EXEEXT): $(bl1_elf_OBJECTS) $(EXTRA_bl1_elf_DEPENDENCIES)
 	$(HOST_TRIPLET)-ld $(LDFLAGS) $(AM_LDFLAGS) $(bl1_elf_LDFLAGS) -melf32lriscv_ilp32 $(bl1_elf_OBJECTS) -o "$@"
 
 clean-local:
-	$(RM) *.mem *.coe *.bin *.raw
+	$(RM) *.mem *.coe *.bin *.raw *.mif
