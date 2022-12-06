@@ -6,28 +6,22 @@
 static volatile unsigned long *ddr_registers = reinterpret_cast<unsigned long *>(0xc001'0000);
 
 void ddr_init() {
-    uint32_t last_status = ddr_status();
-    uart_send("Starting test with status ");
-    print_hex(last_status);
-
-    for( uint32_t i=0; i<4; ++i ) {
-        uart_send("\nSetting control to ");
-        print_hex(i);
-        ddr_control(i);
-
-        for( uint32_t j=0; j<1000; ++j ) {
-            uint32_t status = ddr_status();
-
-            if( status!=last_status ) {
-                uart_send("\nStatus changed to ");
-                print_hex(status);
-                uart_send(" after iteration: ");
-                print_hex(j);
-                last_status = status;
-            }
-        }
+    ddr_control(DDR_CTRL_RESET_N);
+    ddr_control(DDR_CTRL_RESET_P);
+    uint32_t j;
+    for( j=0; j<1000 && (ddr_status() & DDR_STAT_CLK_SYNC_RST)==0; ++j ) {
     }
-    uart_send("\nAll tests done\n");
+
+    uint32_t status = ddr_status();
+    static constexpr uint32_t mask = DDR_STAT_MMCM_LOCKED | DDR_STAT_CALIB_COMPLETE;
+    for( j=0; j<1000 && (status & mask)!=mask; ++j ) {
+        status = ddr_status();
+    }
+
+    if( j==1000 )
+        uart_send("-DDR\n");
+    else
+        uart_send("+DDR\n");
 }
 
 uint32_t ddr_status() {
