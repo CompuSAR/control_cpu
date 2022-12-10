@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000000 ns"></ZoomStartTime>
-      <ZoomEndTime time="73.800001 ns"></ZoomEndTime>
-      <Cursor1Time time="0.000000 ns"></Cursor1Time>
+      <ZoomStartTime time="1,029,111.291666 ns"></ZoomStartTime>
+      <ZoomEndTime time="1,029,189.541667 ns"></ZoomEndTime>
+      <Cursor1Time time="1,029,154.000000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="215"></NameColumnWidth>
-      <ValueColumnWidth column_width="72"></ValueColumnWidth>
+      <NameColumnWidth column_width="210"></NameColumnWidth>
+      <ValueColumnWidth column_width="101"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="60" />
+   <WVObjectSize size="66" />
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -118,6 +118,14 @@
    <wvobject type="array" fp_name="/sim_top/top_module/control_cpu/dBus_rsp_data">
       <obj_property name="ElementShortName">dBus_rsp_data[31:0]</obj_property>
       <obj_property name="ObjectShortName">dBus_rsp_data[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/iob/passthrough_sram_enable">
+      <obj_property name="ElementShortName">passthrough_sram_enable</obj_property>
+      <obj_property name="ObjectShortName">passthrough_sram_enable</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/iob/passthrough_ddr_enable">
+      <obj_property name="ElementShortName">passthrough_ddr_enable</obj_property>
+      <obj_property name="ObjectShortName">passthrough_ddr_enable</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/reset">
       <obj_property name="ElementShortName">reset</obj_property>
@@ -282,5 +290,21 @@
    <wvobject type="array" fp_name="/sim_top/ddr/tdqs_n">
       <obj_property name="ElementShortName">tdqs_n[1:0]</obj_property>
       <obj_property name="ObjectShortName">tdqs_n[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/iob/previous_valid">
+      <obj_property name="ElementShortName">previous_valid</obj_property>
+      <obj_property name="ObjectShortName">previous_valid</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/iob/previous_valid_next">
+      <obj_property name="ElementShortName">previous_valid_next</obj_property>
+      <obj_property name="ObjectShortName">previous_valid_next</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/iob/previous_address">
+      <obj_property name="ElementShortName">previous_address[31:0]</obj_property>
+      <obj_property name="ObjectShortName">previous_address[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/iob/previous_address_next">
+      <obj_property name="ElementShortName">previous_address_next[31:0]</obj_property>
+      <obj_property name="ObjectShortName">previous_address_next[31:0]</obj_property>
    </wvobject>
 </wave_config>

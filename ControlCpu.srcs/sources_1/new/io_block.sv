@@ -74,10 +74,6 @@ uart_output(
     .out_bit(uart_tx)
 );
 
-task default_state_previous();
-    rsp_ready = 1'b1;
-endtask
-
 task default_state_current();
     uart_send_data_ready = 1'b0;
     req_ack = 1'b1;
@@ -85,6 +81,9 @@ task default_state_current();
     previous_valid_next = address_valid;
 
     ddr_ctrl_out_next = ddr_ctrl_out;
+
+    passthrough_ddr_enable = 1'b0;
+    passthrough_sram_enable = 1'b0;
 endtask
 
 function logic is_ddr(logic [31:0]address);
@@ -100,15 +99,13 @@ function logic is_io(logic [31:0]address);
 endfunction
 
 always_comb begin
-    default_state_previous();
-
     // Previous cycle analysis
     rsp_ready = 1'bX;
     data_out = 32'bX;
 
     if( previous_valid ) begin
         if( is_ddr(previous_address) ) begin
-            data_out = previous_address[4] ? passthrough_ddr_data[63:32] : passthrough_ddr_data[31:0];
+            data_out = previous_address[2] ? passthrough_ddr_data[63:32] : passthrough_ddr_data[31:0];
             rsp_ready = passthrough_ddr_rsp_ready;
         end else if( is_sram(previous_address) ) begin
             data_out = passthrough_sram_data;
@@ -117,27 +114,24 @@ always_comb begin
             case( previous_address[19:0] )
                 20'h0: begin                // UART
                     rsp_ready = 1'b1;
-                    if( !previous_write ) begin
-                        data_out = 32'b0;
-                    end
+                    data_out = 32'b0;
                 end
                 20'h10000: begin            // DDR control
                     rsp_ready = 1'b1;
-                    if( !previous_write ) begin
-                        data_out = ddr_ctrl_in;
-                    end
+                    data_out = ddr_ctrl_in;
                 end
                 20'h20000: begin        // GPIO
                     rsp_ready = 1'b1;
-                    if( !previous_write ) begin
-                        data_out = gpio_in;
-                    end
+                    data_out = gpio_in;
                 end
                 20'h30000: begin        // HALT
                     rsp_ready = 1'b0;
                 end
             endcase
         end
+
+        if( previous_write )
+            rsp_ready = 1'b0;
     end
 end
 

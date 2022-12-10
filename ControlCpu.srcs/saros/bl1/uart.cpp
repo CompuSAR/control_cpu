@@ -10,8 +10,9 @@ void uart_send(char c) {
 }
 
 void uart_send(const char *str) {
-    while( *str != '\0' ) {
-        uart_send(*str);
-        ++str;
-    }
+    if( read_gpio(0) & 1 ) // Check external disable output signal
+        while( *str != '\0' ) {
+            uart_send(*str);
+            ++str;
+        }
 }

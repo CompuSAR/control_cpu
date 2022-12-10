@@ -157,7 +157,7 @@ io_block iob(
     .passthrough_sram_rsp_ready(sram_dBus_rsp_ready),
     .passthrough_sram_data(sram_dBus_rsp_data),
 
-    .passthrough_ddr_req_ack(u_ddr.init_calib_complete && (control_cpu.dBus_cmd_payload_wr ? ddr_write_data_ready : ddr_ready)),
+    .passthrough_ddr_req_ack(control_cpu.dBus_cmd_payload_wr ? ddr_write_data_ready : ddr_ready),
     .passthrough_ddr_rsp_ready(ddr_rsp_ready),
     .passthrough_ddr_data(ddr_read_data),
 
@@ -390,61 +390,17 @@ mig_ddr u_ddr (
        .ddr3_dqs_n                     (ddr3_dqs_n),
        .ddr3_dqs_p                     (ddr3_dqs_p),
        .ddr3_reset_n                   (ddr3_reset_n),
-      
        
        .ddr3_dm                        (ddr3_dm),
        .ddr3_odt                       (ddr3_odt),
-// Application interface ports
-/*
-       .s_axi_arready(axi4_arready_w),
-       .s_axi_arsize(3'h1),
-       .s_axi_arlen(axi4_arlen_w),
-       .s_axi_araddr(axi4_araddr_w),
-       .s_axi_arburst(axi4_arburst_w),
-       .s_axi_arvalid(axi4_arvalid_w),
-       .s_axi_arid(axi4_arid_w),
-       .s_axi_rready(axi4_rready_w),
-       .s_axi_rlast(axi4_rlast_w),
-       .s_axi_rid(axi4_rid_w),
-       .s_axi_rresp(axi4_rresp_w),
-       .s_axi_rdata(axi4_rdata_w),
-       .s_axi_rvalid(axi4_rvalid_w),
 
-       .s_axi_awready(axi4_awready_w),
-       .s_axi_awvalid(axi4_awvalid_w),
-       .s_axi_awid(axi4_awid_w),
-       .s_axi_awsize(3'h1),
-       .s_axi_awlen(axi4_awlen_w),
-       .s_axi_awaddr(axi4_awaddr_w),
-       .s_axi_awburst(axi4_awburst_w),
-       .s_axi_wvalid(axi4_wvalid_w),
-       .s_axi_wstrb(axi4_wstrb_w),
-       .s_axi_wdata(axi4_wdata_w),
-       .s_axi_wlast(axi4_wlast_w),
-       .s_axi_wready(axi4_wready_w),
-       .s_axi_bresp(axi4_bresp_w),
-       .s_axi_bvalid(axi4_bvalid_w),
-       .s_axi_bid(axi4_bid_w),
-       .s_axi_bready(axi4_bready_w),
-
-       .s_axi_awcache(4'h0),
-       .s_axi_awlock(2'b00),
-       .s_axi_awprot(3'b000),
-       .s_axi_awqos(4'b0000),
-
-       .s_axi_arcache(4'h0),
-       .s_axi_arlock(2'b00),
-       .s_axi_arprot(3'b000),
-       .s_axi_arqos(4'b0000),
-*/
-
-       .app_addr                       (control_cpu.dBus_cmd_payload_address[31:4]),
+       .app_addr                       (control_cpu.dBus_cmd_payload_address[31:3]),
        .app_cmd                        (control_cpu.dBus_cmd_payload_wr ? 3'b000 : 3'b001),
        .app_en                         (iob.passthrough_ddr_enable),
        .app_wdf_data                   ({ control_cpu.dBus_cmd_payload_data, control_cpu.dBus_cmd_payload_data }),
        .app_wdf_end                    (1'b1),
        .app_wdf_wren                   (iob.passthrough_ddr_enable && control_cpu.dBus_cmd_payload_wr),
-       .app_wdf_mask                   (control_cpu.dBus_cmd_payload_address[3] ? {axi4_wstrb_w, 4'b0000} : {4'b0000, axi4_wstrb_w}),
+       .app_wdf_mask                   (control_cpu.dBus_cmd_payload_address[2] ? {axi4_wstrb_w, 4'b0000} : {4'b0000, axi4_wstrb_w}),
 
        .app_rd_data                    (ddr_read_data),
        .app_rd_data_end                (),

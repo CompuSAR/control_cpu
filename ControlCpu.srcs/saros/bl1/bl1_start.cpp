@@ -15,13 +15,13 @@ unsigned int test_buffer[] = {
 void bl1_start() {
     ddr_init();
 
-    uart_send('1');
+    uart_send("1\n");
     DDR_MEMORY[0]=0x75c8f355;
-    uart_send('2');
+    uart_send("2\n");
     DDR_MEMORY[1]=0x252505f5;
     uint32_t mem = DDR_MEMORY[16];
     print_hex(mem);
-    uart_send('.');
+    uart_send("3\n");
 
     mem = DDR_MEMORY[32];
     print_hex(mem);
