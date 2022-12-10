@@ -11,19 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="234,131.000000 ns"></ZoomStartTime>
-      <ZoomEndTime time="237,661.000001 ns"></ZoomEndTime>
-      <Cursor1Time time="235,306.000000 ns"></Cursor1Time>
+      <ZoomStartTime time="0.000000 ns"></ZoomStartTime>
+      <ZoomEndTime time="73.800001 ns"></ZoomEndTime>
+      <Cursor1Time time="0.000000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="215"></NameColumnWidth>
-      <ValueColumnWidth column_width="104"></ValueColumnWidth>
+      <ValueColumnWidth column_width="72"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="58" />
-   <wave_markers>
-      <marker label="" time="10500250000" />
-      <marker label="" time="68934250000" />
-   </wave_markers>
+   <WVObjectSize size="60" />
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -133,10 +129,6 @@
       <obj_property name="CustomSignalColor">#800000</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/init_calib_complete">
-      <obj_property name="ElementShortName">init_calib_complete</obj_property>
-      <obj_property name="ObjectShortName">init_calib_complete</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/app_addr">
       <obj_property name="ElementShortName">app_addr[27:0]</obj_property>
       <obj_property name="ObjectShortName">app_addr[27:0]</obj_property>
@@ -213,6 +205,14 @@
       <obj_property name="ElementShortName">ddr_ctrl_in[31:0]</obj_property>
       <obj_property name="ObjectShortName">ddr_ctrl_in[31:0]</obj_property>
    </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/init_calib_complete">
+      <obj_property name="ElementShortName">init_calib_complete</obj_property>
+      <obj_property name="ObjectShortName">init_calib_complete</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/sys_rst">
+      <obj_property name="ElementShortName">sys_rst</obj_property>
+      <obj_property name="ObjectShortName">sys_rst</obj_property>
+   </wvobject>
    <wvobject type="logic" fp_name="/sim_top/ddr/rst_n">
       <obj_property name="ElementShortName">rst_n</obj_property>
       <obj_property name="ObjectShortName">rst_n</obj_property>
@@ -234,6 +234,10 @@
       <obj_property name="ObjectShortName">cke</obj_property>
       <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/ddr_cmd">
+      <obj_property name="ElementShortName">ddr_cmd[3:0]</obj_property>
+      <obj_property name="ObjectShortName">ddr_cmd[3:0]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/ddr/cs_n">
       <obj_property name="ElementShortName">cs_n</obj_property>

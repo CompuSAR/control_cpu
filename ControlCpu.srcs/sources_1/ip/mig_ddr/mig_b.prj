@@ -146,14 +146,7 @@
     <mr2AutoSelfRefresh name="Auto Self Refresh">Enabled</mr2AutoSelfRefresh>
     <mr2SelfRefreshTempRange name="High Temparature Self Refresh Rate">Normal</mr2SelfRefreshTempRange>
     <mr2RTTWR name="RTT_WR - Dynamic On Die Termination (ODT)">Dynamic ODT off</mr2RTTWR>
-    <PortInterface>AXI</PortInterface>
-    <AXIParameters>
-      <C0_C_RD_WR_ARB_ALGORITHM>ROUND_ROBIN</C0_C_RD_WR_ARB_ALGORITHM>
-      <C0_S_AXI_ADDR_WIDTH>28</C0_S_AXI_ADDR_WIDTH>
-      <C0_S_AXI_DATA_WIDTH>32</C0_S_AXI_DATA_WIDTH>
-      <C0_S_AXI_ID_WIDTH>4</C0_S_AXI_ID_WIDTH>
-      <C0_S_AXI_SUPPORTS_NARROW_BURST>0</C0_S_AXI_SUPPORTS_NARROW_BURST>
-    </AXIParameters>
+    <PortInterface>NATIVE</PortInterface>
   </Controller>
 
 

@@ -23,6 +23,7 @@
 module top(
     input board_clock,
     input nReset,
+    input uart_output,
 
     output logic running,
 
@@ -117,7 +118,7 @@ VexRiscv control_cpu(
     .externalInterrupt(1'b0),
     .softwareInterrupt(1'b0),
 
-    .iBus_cmd_ready(ctrl_iBus_cmd_ready),
+    .iBus_cmd_ready(1'b1),
     .iBus_rsp_valid(ctrl_iBus_rsp_valid),
     .iBus_rsp_payload_error(ctrl_iBus_rsp_payload_error),
     .iBus_rsp_payload_inst(ctrl_iBus_rsp_payload_inst),
@@ -138,6 +139,7 @@ logic [63:0] ddr_read_data;
 logic ddr_ready, ddr_rsp_ready, ddr_write_data_ready;
 
 assign ddr_ctrl_in[31:3] = 0;
+assign ddr_ctrl_in[0] = 0;
 
 io_block iob(
     .clock(ctrl_cpu_clock),
@@ -147,7 +149,6 @@ io_block iob(
     .write(control_cpu.dBus_cmd_payload_wr),
     .data_in(control_cpu.dBus_cmd_payload_data),
     .data_out(ctrl_dBus_rsp_data),
-    .enable(control_cpu.dBus_cmd_valid),
 
     .req_ack(ctrl_dBus_cmd_ready),
     .rsp_ready(ctrl_dBus_rsp_ready),
@@ -156,19 +157,20 @@ io_block iob(
     .passthrough_sram_rsp_ready(sram_dBus_rsp_ready),
     .passthrough_sram_data(sram_dBus_rsp_data),
 
-    .passthrough_ddr_req_ack(ddr_ready && ddr_write_data_ready),
+    .passthrough_ddr_req_ack(u_ddr.init_calib_complete && (control_cpu.dBus_cmd_payload_wr ? ddr_write_data_ready : ddr_ready)),
     .passthrough_ddr_rsp_ready(ddr_rsp_ready),
     .passthrough_ddr_data(ddr_read_data),
 
     .uart_tx(uart_tx),
     .uart_rx(uart_rx),
 
+    .gpio_in({31'b0, uart_output}),
+
     .ddr_ctrl_in(ddr_ctrl_in)
 );
 
 always_ff@(posedge ctrl_cpu_clock)
 begin
-    ctrl_iBus_cmd_ready <= control_cpu.iBus_cmd_valid;
     ctrl_iBus_rsp_valid <= control_cpu.iBus_cmd_valid;
     sram_dBus_rsp_ready <= iob.passthrough_sram_enable;
 end

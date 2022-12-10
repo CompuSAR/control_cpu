@@ -28,7 +28,6 @@ module io_block(
     input write,
     input [31:0] data_in,
     output logic [31:0] data_out,
-    input enable,
     output logic req_ack,
     output logic rsp_ready,
 
@@ -44,6 +43,8 @@ module io_block(
 
     output uart_tx,
     input uart_rx,
+
+    input [31:0] gpio_in,
 
     output logic [31:0] ddr_ctrl_out = 0,
     input [31:0] ddr_ctrl_in
@@ -73,10 +74,13 @@ uart_output(
     .out_bit(uart_tx)
 );
 
-task default_state();
+task default_state_previous();
+    rsp_ready = 1'b1;
+endtask
+
+task default_state_current();
     uart_send_data_ready = 1'b0;
     req_ack = 1'b1;
-    rsp_ready = 1'b1;
     previous_address_next = address;
     previous_valid_next = address_valid;
 
@@ -96,15 +100,12 @@ function logic is_io(logic [31:0]address);
 endfunction
 
 always_comb begin
-    default_state();
+    default_state_previous();
 
     // Previous cycle analysis
     rsp_ready = 1'bX;
     data_out = 32'bX;
 
-    passthrough_sram_enable = 1'b0;
-    passthrough_ddr_enable = 1'b0;
-    req_ack = 1'bX;
     if( previous_valid ) begin
         if( is_ddr(previous_address) ) begin
             data_out = previous_address[4] ? passthrough_ddr_data[63:32] : passthrough_ddr_data[31:0];
@@ -115,26 +116,36 @@ always_comb begin
         end else begin
             case( previous_address[19:0] )
                 20'h0: begin                // UART
+                    rsp_ready = 1'b1;
                     if( !previous_write ) begin
                         data_out = 32'b0;
-                        rsp_ready = 1'b1;
-                    end else
-                        rsp_ready = 1'b1;
+                    end
                 end
                 20'h10000: begin            // DDR control
+                    rsp_ready = 1'b1;
                     if( !previous_write ) begin
                         data_out = ddr_ctrl_in;
-                        rsp_ready = 1'b1;
-                    end else begin
-                        rsp_ready = 1'b1;
                     end
+                end
+                20'h20000: begin        // GPIO
+                    rsp_ready = 1'b1;
+                    if( !previous_write ) begin
+                        data_out = gpio_in;
+                    end
+                end
+                20'h30000: begin        // HALT
+                    rsp_ready = 1'b0;
                 end
             endcase
         end
     end
+end
+
+always_comb begin
+    default_state_current();
 
     // Current cycle analysis
-    if( previous_valid && !rsp_ready ) begin
+    if( previous_valid && !rsp_ready && !previous_write ) begin
         previous_valid_next = 1'b1;
         previous_address_next = previous_address;
         req_ack = 1'b0;
@@ -163,6 +174,12 @@ always_comb begin
                 end else begin
                     req_ack = 1'b1;
                 end
+            end
+            20'h20000: begin        // GPIO
+                req_ack = 1'b1;
+            end
+            20'h30000: begin        // HALT
+                req_ack = 1'b0;
             end
         endcase
     end

@@ -15,9 +15,10 @@ unsigned int test_buffer[] = {
 void bl1_start() {
     ddr_init();
 
-    DDR_MEMORY[16]=0x75c8f355;
-    uart_send('.');
-    DDR_MEMORY[32]=0x252505f5;
+    uart_send('1');
+    DDR_MEMORY[0]=0x75c8f355;
+    uart_send('2');
+    DDR_MEMORY[1]=0x252505f5;
     uint32_t mem = DDR_MEMORY[16];
     print_hex(mem);
     uart_send('.');
@@ -61,6 +62,7 @@ void bl1_start() {
         uart_send('\n');
     }
 
-    while(true)
-        ;
+    *reinterpret_cast<volatile uint32_t *>(0xc0030000) = 12;
+
+    uart_send("Post halt code reached");
 }
