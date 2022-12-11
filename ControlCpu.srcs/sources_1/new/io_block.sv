@@ -65,7 +65,7 @@ end
 
 logic uart_send_data_ready;
 
-uart_send#(.ClockDivider(723)) // 115,200 BAUD at 83.3333Mhz clock
+uart_send#(.ClockDivider(100000000/115200)) // 115,200 BAUD at 100Mhz clock
 uart_output(
     .clock(clock),
     .data_in(data_in[7:0]),

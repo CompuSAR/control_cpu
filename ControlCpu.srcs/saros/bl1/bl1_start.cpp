@@ -19,20 +19,20 @@ void bl1_start() {
     DDR_MEMORY[0]=0x75c8f355;
     uart_send("2\n");
     DDR_MEMORY[1]=0x252505f5;
-    uint32_t mem = DDR_MEMORY[16];
+    uint32_t mem = DDR_MEMORY[0];
     print_hex(mem);
     uart_send("3\n");
 
-    mem = DDR_MEMORY[32];
+    mem = DDR_MEMORY[1];
     print_hex(mem);
     uart_send('\n');
 
-    mem = DDR_MEMORY[16];
+    mem = DDR_MEMORY[1024];
     print_hex(mem);
     uart_send('\n');
 
     uart_send("Hello, world\n");
-    mem = DDR_MEMORY[15];
+    mem = DDR_MEMORY[0];
     print_hex(mem);
     uart_send('\n');
 
