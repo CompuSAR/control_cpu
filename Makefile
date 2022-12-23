@@ -24,7 +24,8 @@ ControlCpu.srcs/saros/configure:
 	@touch "$@"
 
 ControlCpu.gen/sources_1/ip/blk_mem/blk_mem.mif: ControlCpu.gen/saros/bl1/bl1.mif
-	find -name blk_mem.mif -print0 | xargs -0 rm
+	find -name blk_mem.mif -print0 | xargs -0 --no-run-if-empty rm
+	mkdir -p "$(@D)"
 	cp "$<" "$@"
 
 ControlCpu.gen/saros/bl1/bl1.mif: ControlCpu.gen/saros/config.log
