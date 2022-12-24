@@ -63,6 +63,15 @@ function automatic [3:0] convert_byte_write( logic we, logic[1:0] address, logic
         convert_byte_write = 4'b0;
 endfunction
 
+function automatic [15:0] convert_long_write_mask( logic [3:0] base_mask, logic [3:0] address);
+    case( address[3:2] )
+        2'b00: convert_long_write_mask = { 12'b0, base_mask };
+        2'b01: convert_long_write_mask = { 8'b0, base_mask, 4'b0 };
+        2'b10: convert_long_write_mask = { 4'b0, base_mask, 8'b0 };
+        2'b11: convert_long_write_mask = { base_mask, 12'b0 };
+    endcase
+endfunction
+
 //-----------------------------------------------------------------
 // Clocking / Reset
 //-----------------------------------------------------------------
@@ -74,6 +83,7 @@ wire clk_ddr_w;
 wire clk_ddr_dqs_w;
 wire clk_ref_w;
 
+/*
 // mig requires 166.6666MHz
 // mig version
 clk_converter clocks(
@@ -82,8 +92,8 @@ clk_converter clocks(
     .clk_ddr_w(ddr_clock),
     .locked(clocks_locked)
 );
+*/
 
-/*
 // github version
 clk_converter clocks(
     .clk_in1(board_clock), .reset(1'b0),
@@ -93,7 +103,6 @@ clk_converter clocks(
     .clk_ddr_dqs_w(clk_ddr_dqs_w),
     .locked(clocks_locked)
 );
-*/
 
 logic           ctrl_iBus_cmd_ready;
 logic           ctrl_iBus_rsp_valid;
@@ -157,9 +166,9 @@ io_block iob(
     .passthrough_sram_rsp_ready(sram_dBus_rsp_ready),
     .passthrough_sram_data(sram_dBus_rsp_data),
 
-    .passthrough_ddr_req_ack(control_cpu.dBus_cmd_payload_wr ? ddr_write_data_ready : ddr_ready),
-    .passthrough_ddr_rsp_ready(ddr_rsp_ready),
-    .passthrough_ddr_data(ddr_read_data),
+    .passthrough_ddr_req_ack(u_ddr.inport_accept_o),
+    .passthrough_ddr_rsp_ready(u_ddr.inport_ack_o),
+    .passthrough_ddr_data(u_ddr.inport_read_data_o),
 
     .uart_tx(uart_tx),
     .uart_rx(uart_rx),
@@ -173,6 +182,8 @@ always_ff@(posedge ctrl_cpu_clock)
 begin
     ctrl_iBus_rsp_valid <= control_cpu.iBus_cmd_valid;
     sram_dBus_rsp_ready <= iob.passthrough_sram_enable;
+    if( control_cpu.dBus_cmd_valid )
+        req_id <= req_id + 1;
 end
 
 blk_mem sram(
@@ -247,6 +258,7 @@ wire  [  3:0]  axi4_wstrb_w = convert_byte_write(
                     control_cpu.dBus_cmd_payload_wr,
                     control_cpu.dBus_cmd_payload_address,
                     control_cpu.dBus_cmd_payload_size);
+wire  [15:0]  write_mask_128bit = convert_long_write_mask(axi4_wstrb_w, control_cpu.dBus_cmd_payload_address);
 wire  [  1:0]  axi4_arburst_w = 2'b1;   // INCRemental burst
 wire           axi4_arvalid_w = iob.passthrough_ddr_enable && !control_cpu.dBus_cmd_payload_wr;
 wire  [  3:0]  axi4_awid_w = 3'b0;
@@ -262,63 +274,51 @@ wire           axi4_wready_w;
 wire  [  1:0]  axi4_awburst_w = 1'b1;   // INCRemental burst
 wire           axi4_rvalid_w;
 
-/*
-ddr3_axi
-#(
-     .DDR_WRITE_LATENCY(6)
-    ,.DDR_READ_LATENCY(6)
-    ,.DDR_MHZ(100)
+logic [15:0]   req_id = 0;
+
+ddr3_core#(
+    .DDR_MHZ(100),
+    .DDR_WRITE_LATENCY(6),
+    .DDR_READ_LATENCY(6)
 )
 u_ddr
 (
-    // Inputs
-     .clk_i(clk_w)
-    ,.rst_i(rst_w)
-    ,.inport_awvalid_i(axi4_awvalid_w)
-    ,.inport_awaddr_i(axi4_awaddr_w)
-    ,.inport_awid_i(axi4_awid_w)
-    ,.inport_awlen_i(axi4_awlen_w)
-    ,.inport_awburst_i(axi4_awburst_w)
-    ,.inport_wvalid_i(axi4_wvalid_w)
-    ,.inport_wdata_i(axi4_wdata_w)
-    ,.inport_wstrb_i(axi4_wstrb_w)
-    ,.inport_wlast_i(axi4_wlast_w)
-    ,.inport_bready_i(axi4_bready_w)
-    ,.inport_arvalid_i(axi4_arvalid_w)
-    ,.inport_araddr_i(axi4_araddr_w)
-    ,.inport_arid_i(axi4_arid_w)
-    ,.inport_arlen_i(axi4_arlen_w)
-    ,.inport_arburst_i(axi4_arburst_w)
-    ,.inport_rready_i(axi4_rready_w)
-    ,.dfi_rddata_i(dfi_rddata_w)
-    ,.dfi_rddata_valid_i(dfi_rddata_valid_w)
-    ,.dfi_rddata_dnv_i(dfi_rddata_dnv_w)
+    .clk_i(clk_w),
+    .rst_i(!iob.ddr_ctrl_out[0]),
+    .cfg_enable_i(1'b1),
+    .cfg_stb_i(1'b0),
+    .cfg_data_i(32'b0),
+    .inport_wr_i(control_cpu.dBus_cmd_valid ? write_mask_128bit : 16'b0),
+    .inport_rd_i(control_cpu.dBus_cmd_valid && !control_cpu.dBus_cmd_payload_wr),
+    .inport_addr_i(control_cpu.dBus_cmd_payload_address),
+    .inport_write_data_i(control_cpu.dBus_cmd_payload_data),
+    .inport_req_id_i(req_id),
 
-    // Outputs
-    ,.inport_awready_o(axi4_awready_w)
-    ,.inport_wready_o(axi4_wready_w)
-    ,.inport_bvalid_o(axi4_bvalid_w)
-    ,.inport_bresp_o(axi4_bresp_w)
-    ,.inport_bid_o(axi4_bid_w)
-    ,.inport_arready_o(axi4_arready_w)
-    ,.inport_rvalid_o(axi4_rvalid_w)
-    ,.inport_rdata_o(axi4_rdata_w)
-    ,.inport_rresp_o(axi4_rresp_w)
-    ,.inport_rid_o(axi4_rid_w)
-    ,.inport_rlast_o(axi4_rlast_w)
-    ,.dfi_address_o(dfi_address_w)
-    ,.dfi_bank_o(dfi_bank_w)
-    ,.dfi_cas_n_o(dfi_cas_n_w)
-    ,.dfi_cke_o(dfi_cke_w)
-    ,.dfi_cs_n_o(dfi_cs_n_w)
-    ,.dfi_odt_o(dfi_odt_w)
-    ,.dfi_ras_n_o(dfi_ras_n_w)
-    ,.dfi_reset_n_o(dfi_reset_n_w)
-    ,.dfi_we_n_o(dfi_we_n_w)
-    ,.dfi_wrdata_o(dfi_wrdata_w)
-    ,.dfi_wrdata_en_o(dfi_wrdata_en_w)
-    ,.dfi_wrdata_mask_o(dfi_wrdata_mask_w)
-    ,.dfi_rddata_en_o(dfi_rddata_en_w)
+    .cfg_stall_o(),
+    .inport_accept_o(),
+    .inport_ack_o(),
+    .inport_error_o(),
+    .inport_resp_id_o(),
+    .inport_read_data_o(),
+
+
+    .dfi_rddata_i(dfi_rddata),
+    .dfi_rddata_valid_i(dfi_rddata_valid_w),
+    .dfi_rddata_dnv_i(dfi_rddata_dnv),
+
+    .dfi_address_o(dfi_address_w),
+    .dfi_bank_o(dfi_bank_w),
+    .dfi_cas_n_o(dfi_cas_n_w),
+    .dfi_cke_o(dfi_cke_w),
+    .dfi_cs_n_o(dfi_cs_n_w),
+    .dfi_odt_o(dfi_odt_w),
+    .dfi_ras_n_o(dfi_ras_n_w),
+    .dfi_reset_n_o(dfi_reset_n_w),
+    .dfi_we_n_o(dfi_we_n_w),
+    .dfi_wrdata_o(dfi_wrdata_w),
+    .dfi_wrdata_en_o(dfi_wrdata_en_w),
+    .dfi_wrdata_mask_o(dfi_wrdata_mask_w),
+    .dfi_rddata_en_o(dfi_rddata_en_w)
 );
 
 ddr3_dfi_phy
@@ -330,7 +330,7 @@ ddr3_dfi_phy
 u_phy
 (
      .clk_i(clk_w)
-    ,.rst_i(rst_w)
+    ,.rst_i(!iob.ddr_ctrl_out[0])
 
     ,.clk_ddr_i(clk_ddr_w)
     ,.clk_ddr90_i(clk_ddr_dqs_w)
@@ -372,9 +372,9 @@ u_phy
     ,.ddr3_dqs_p_io(ddr3_dqs_p)
     ,.ddr3_dqs_n_io(ddr3_dqs_n)
 );
-*/
 
 
+/*
 mig_ddr u_ddr (
     // Inputs
 // Memory interface ports
@@ -432,5 +432,6 @@ mig_ddr u_ddr (
        .sys_rst                        (iob.ddr_ctrl_out[0])
 //       .aresetn                        (iob.ddr_ctrl_out[1])
 );
+*/
 
 endmodule

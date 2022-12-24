@@ -11,15 +11,20 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="1,029,111.291666 ns"></ZoomStartTime>
-      <ZoomEndTime time="1,029,189.541667 ns"></ZoomEndTime>
-      <Cursor1Time time="1,029,154.000000 ns"></Cursor1Time>
+      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
+      <ZoomEndTime time="7,895.000001 us"></ZoomEndTime>
+      <Cursor1Time time="842.165000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="210"></NameColumnWidth>
-      <ValueColumnWidth column_width="101"></ValueColumnWidth>
+      <ValueColumnWidth column_width="85"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="66" />
+   <WVObjectSize size="47" />
+   <wave_markers>
+      <marker label="" time="821870000" />
+      <marker label="" time="652260000" />
+      <marker label="" time="842165000" />
+   </wave_markers>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -131,95 +136,13 @@
       <obj_property name="ElementShortName">reset</obj_property>
       <obj_property name="ObjectShortName">reset</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/sys_rst">
-      <obj_property name="ElementShortName">sys_rst</obj_property>
-      <obj_property name="ObjectShortName">sys_rst</obj_property>
-      <obj_property name="CustomSignalColor">#800000</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/app_addr">
-      <obj_property name="ElementShortName">app_addr[27:0]</obj_property>
-      <obj_property name="ObjectShortName">app_addr[27:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/app_cmd">
-      <obj_property name="ElementShortName">app_cmd[2:0]</obj_property>
-      <obj_property name="ObjectShortName">app_cmd[2:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/app_en">
-      <obj_property name="ElementShortName">app_en</obj_property>
-      <obj_property name="ObjectShortName">app_en</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/app_rd_data">
-      <obj_property name="ElementShortName">app_rd_data[63:0]</obj_property>
-      <obj_property name="ObjectShortName">app_rd_data[63:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/app_rd_data_end">
-      <obj_property name="ElementShortName">app_rd_data_end</obj_property>
-      <obj_property name="ObjectShortName">app_rd_data_end</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/app_rd_data_valid">
-      <obj_property name="ElementShortName">app_rd_data_valid</obj_property>
-      <obj_property name="ObjectShortName">app_rd_data_valid</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/app_rdy">
-      <obj_property name="ElementShortName">app_rdy</obj_property>
-      <obj_property name="ObjectShortName">app_rdy</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/app_ref_ack">
-      <obj_property name="ElementShortName">app_ref_ack</obj_property>
-      <obj_property name="ObjectShortName">app_ref_ack</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/app_ref_req">
-      <obj_property name="ElementShortName">app_ref_req</obj_property>
-      <obj_property name="ObjectShortName">app_ref_req</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/app_sr_active">
-      <obj_property name="ElementShortName">app_sr_active</obj_property>
-      <obj_property name="ObjectShortName">app_sr_active</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/app_sr_req">
-      <obj_property name="ElementShortName">app_sr_req</obj_property>
-      <obj_property name="ObjectShortName">app_sr_req</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/app_wdf_data">
-      <obj_property name="ElementShortName">app_wdf_data[63:0]</obj_property>
-      <obj_property name="ObjectShortName">app_wdf_data[63:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/app_wdf_end">
-      <obj_property name="ElementShortName">app_wdf_end</obj_property>
-      <obj_property name="ObjectShortName">app_wdf_end</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/app_wdf_mask">
-      <obj_property name="ElementShortName">app_wdf_mask[7:0]</obj_property>
-      <obj_property name="ObjectShortName">app_wdf_mask[7:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/app_wdf_rdy">
-      <obj_property name="ElementShortName">app_wdf_rdy</obj_property>
-      <obj_property name="ObjectShortName">app_wdf_rdy</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/app_wdf_wren">
-      <obj_property name="ElementShortName">app_wdf_wren</obj_property>
-      <obj_property name="ObjectShortName">app_wdf_wren</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/app_zq_ack">
-      <obj_property name="ElementShortName">app_zq_ack</obj_property>
-      <obj_property name="ObjectShortName">app_zq_ack</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/app_zq_req">
-      <obj_property name="ElementShortName">app_zq_req</obj_property>
-      <obj_property name="ObjectShortName">app_zq_req</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/iob/ddr_ctrl_out">
+      <obj_property name="ElementShortName">ddr_ctrl_out[31:0]</obj_property>
+      <obj_property name="ObjectShortName">ddr_ctrl_out[31:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/iob/ddr_ctrl_in">
       <obj_property name="ElementShortName">ddr_ctrl_in[31:0]</obj_property>
       <obj_property name="ObjectShortName">ddr_ctrl_in[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/init_calib_complete">
-      <obj_property name="ElementShortName">init_calib_complete</obj_property>
-      <obj_property name="ObjectShortName">init_calib_complete</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/u_ddr/sys_rst">
-      <obj_property name="ElementShortName">sys_rst</obj_property>
-      <obj_property name="ObjectShortName">sys_rst</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/ddr/rst_n">
       <obj_property name="ElementShortName">rst_n</obj_property>
@@ -306,5 +229,9 @@
    <wvobject type="array" fp_name="/sim_top/top_module/iob/previous_address_next">
       <obj_property name="ElementShortName">previous_address_next[31:0]</obj_property>
       <obj_property name="ObjectShortName">previous_address_next[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/u_ddr/state_q">
+      <obj_property name="ElementShortName">state_q[3:0]</obj_property>
+      <obj_property name="ObjectShortName">state_q[3:0]</obj_property>
    </wvobject>
 </wave_config>

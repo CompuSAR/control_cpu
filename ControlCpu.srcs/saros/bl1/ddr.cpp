@@ -8,10 +8,13 @@ static volatile unsigned long *ddr_registers = reinterpret_cast<unsigned long *>
 void ddr_init() {
     ddr_control(0);
     volatile uint32_t i;
-    for( i=0; i<4000; ++i ) {
+    for( i=0; i<1200; ++i ) {
     }
 
     ddr_control(DDR_CTRL_RESET_P|DDR_CTRL_RESET_N);
+
+    for( i=0; i<15000; ++i ) {
+    }
 }
 
 uint32_t ddr_status() {
