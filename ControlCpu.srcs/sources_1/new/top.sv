@@ -83,24 +83,10 @@ wire clk_ddr_w;
 wire clk_ddr_dqs_w;
 wire clk_ref_w;
 
-/*
-// mig requires 166.6666MHz
-// mig version
-clk_converter clocks(
-    .clk_in1(board_clock), .reset(1'b0),
-    .clk_ctrl_cpu(ctrl_cpu_clock),
-    .clk_ddr_w(ddr_clock),
-    .locked(clocks_locked)
-);
-*/
-
-// github version
 clk_converter clocks(
     .clk_in1(board_clock), .reset(1'b0),
     .clk_ctrl_cpu(ctrl_cpu_clock),
     .clk_ddr_w(clk_ddr_w),
-    .clk_ref_w(clk_ref_w),
-    .clk_ddr_dqs_w(clk_ddr_dqs_w),
     .locked(clocks_locked)
 );
 
@@ -143,12 +129,10 @@ assign ctrl_dBus_rsp_error = 0;
 
 logic sram_dBus_rsp_ready;
 logic [31:0] sram_dBus_rsp_data;
-logic [31:0] ddr_ctrl_in;
+logic [31:0] ddr_ctrl_in = 0;
+logic [31:0] ddr_ctrl_out;
 logic [63:0] ddr_read_data;
 logic ddr_ready, ddr_rsp_ready, ddr_write_data_ready;
-
-assign ddr_ctrl_in[31:3] = 0;
-assign ddr_ctrl_in[0] = 0;
 
 io_block iob(
     .clock(ctrl_cpu_clock),
@@ -175,7 +159,8 @@ io_block iob(
 
     .gpio_in({31'b0, uart_output}),
 
-    .ddr_ctrl_in(ddr_ctrl_in)
+    .ddr_ctrl_in(ddr_ctrl_in),
+    .ddr_ctrl_out(ddr_ctrl_out)
 );
 
 always_ff@(posedge ctrl_cpu_clock)
@@ -277,8 +262,12 @@ wire           axi4_rvalid_w;
 logic [15:0]   req_id = 0;
 
 
-sddr_phy_xilinx phy2(
-     .ddr3_ck_p_o(ddr3_ck_p)
+sddr_phy_xilinx ddr_phy(
+     .in_ddr_clock_i(clk_ddr_w)
+    ,.in_ddr_reset_n_i(ddr_ctrl_out[0])
+    ,.in_phy_reset_n_i(ddr_ctrl_out[1])
+
+    ,.ddr3_ck_p_o(ddr3_ck_p)
     ,.ddr3_ck_n_o(ddr3_ck_n)
     ,.ddr3_cke_o(ddr3_cke)
     ,.ddr3_reset_n_o(ddr3_reset_n)

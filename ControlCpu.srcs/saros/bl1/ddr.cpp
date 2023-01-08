@@ -11,10 +11,11 @@ void ddr_init() {
     for( i=0; i<1200; ++i ) {
     }
 
-    ddr_control(DDR_CTRL_RESET_P|DDR_CTRL_RESET_N);
+    ddr_control(DDR_RESET_N);
 
-    for( i=0; i<15000; ++i ) {
+    for( i=0; i<1500; ++i ) {
     }
+    ddr_control(DDR_RESET_N|DDR_PHY_RESET_N);
 }
 
 uint32_t ddr_status() {
