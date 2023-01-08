@@ -166,9 +166,9 @@ io_block iob(
     .passthrough_sram_rsp_ready(sram_dBus_rsp_ready),
     .passthrough_sram_data(sram_dBus_rsp_data),
 
-    .passthrough_ddr_req_ack(u_ddr.inport_accept_o),
-    .passthrough_ddr_rsp_ready(u_ddr.inport_ack_o),
-    .passthrough_ddr_data(u_ddr.inport_read_data_o),
+    .passthrough_ddr_req_ack(),
+    .passthrough_ddr_rsp_ready(),
+    .passthrough_ddr_data(),
 
     .uart_tx(uart_tx),
     .uart_rx(uart_rx),
@@ -276,87 +276,9 @@ wire           axi4_rvalid_w;
 
 logic [15:0]   req_id = 0;
 
-ddr3_core#(
-    .DDR_MHZ(100),
-    .DDR_WRITE_LATENCY(6),
-    .DDR_READ_LATENCY(6)
-)
-u_ddr
-(
-    .clk_i(clk_w),
-    .rst_i(!iob.ddr_ctrl_out[0]),
-    .cfg_enable_i(1'b1),
-    .cfg_stb_i(1'b0),
-    .cfg_data_i(32'b0),
-    .inport_wr_i(control_cpu.dBus_cmd_valid ? write_mask_128bit : 16'b0),
-    .inport_rd_i(control_cpu.dBus_cmd_valid && !control_cpu.dBus_cmd_payload_wr),
-    .inport_addr_i(control_cpu.dBus_cmd_payload_address),
-    .inport_write_data_i(control_cpu.dBus_cmd_payload_data),
-    .inport_req_id_i(req_id),
 
-    .cfg_stall_o(),
-    .inport_accept_o(),
-    .inport_ack_o(),
-    .inport_error_o(),
-    .inport_resp_id_o(),
-    .inport_read_data_o(),
-
-
-    .dfi_rddata_i(dfi_rddata),
-    .dfi_rddata_valid_i(dfi_rddata_valid_w),
-    .dfi_rddata_dnv_i(dfi_rddata_dnv),
-
-    .dfi_address_o(dfi_address_w),
-    .dfi_bank_o(dfi_bank_w),
-    .dfi_cas_n_o(dfi_cas_n_w),
-    .dfi_cke_o(dfi_cke_w),
-    .dfi_cs_n_o(dfi_cs_n_w),
-    .dfi_odt_o(dfi_odt_w),
-    .dfi_ras_n_o(dfi_ras_n_w),
-    .dfi_reset_n_o(dfi_reset_n_w),
-    .dfi_we_n_o(dfi_we_n_w),
-    .dfi_wrdata_o(dfi_wrdata_w),
-    .dfi_wrdata_en_o(dfi_wrdata_en_w),
-    .dfi_wrdata_mask_o(dfi_wrdata_mask_w),
-    .dfi_rddata_en_o(dfi_rddata_en_w)
-);
-
-ddr3_dfi_phy
-#(
-     .DQS_TAP_DELAY_INIT(27)
-    ,.DQ_TAP_DELAY_INIT(0)
-    ,.TPHY_RDLAT(5)
-)
-u_phy
-(
-     .clk_i(clk_w)
-    ,.rst_i(!iob.ddr_ctrl_out[0])
-
-    ,.clk_ddr_i(clk_ddr_w)
-    ,.clk_ddr90_i(clk_ddr_dqs_w)
-    ,.clk_ref_i(clk_ref_w)
-
-    ,.cfg_valid_i(1'b0)
-    ,.cfg_i(32'b0)
-
-    ,.dfi_address_i(dfi_address_w)
-    ,.dfi_bank_i(dfi_bank_w)
-    ,.dfi_cas_n_i(dfi_cas_n_w)
-    ,.dfi_cke_i(dfi_cke_w)
-    ,.dfi_cs_n_i(dfi_cs_n_w)
-    ,.dfi_odt_i(dfi_odt_w)
-    ,.dfi_ras_n_i(dfi_ras_n_w)
-    ,.dfi_reset_n_i(dfi_reset_n_w)
-    ,.dfi_we_n_i(dfi_we_n_w)
-    ,.dfi_wrdata_i(dfi_wrdata_w)
-    ,.dfi_wrdata_en_i(dfi_wrdata_en_w)
-    ,.dfi_wrdata_mask_i(dfi_wrdata_mask_w)
-    ,.dfi_rddata_en_i(dfi_rddata_en_w)
-    ,.dfi_rddata_o(dfi_rddata_w)
-    ,.dfi_rddata_valid_o(dfi_rddata_valid_w)
-    ,.dfi_rddata_dnv_o(dfi_rddata_dnv_w)
-
-    ,.ddr3_ck_p_o(ddr3_ck_p)
+sddr_phy_xilinx phy2(
+     .ddr3_ck_p_o(ddr3_ck_p)
     ,.ddr3_ck_n_o(ddr3_ck_n)
     ,.ddr3_cke_o(ddr3_cke)
     ,.ddr3_reset_n_o(ddr3_reset_n)
@@ -371,67 +293,6 @@ u_phy
     ,.ddr3_dq_io(ddr3_dq)
     ,.ddr3_dqs_p_io(ddr3_dqs_p)
     ,.ddr3_dqs_n_io(ddr3_dqs_n)
-);
-
-
-/*
-mig_ddr u_ddr (
-    // Inputs
-// Memory interface ports
-       .ddr3_addr                      (ddr3_addr),
-       .ddr3_ba                        (ddr3_ba),
-       .ddr3_cas_n                     (ddr3_cas_n),
-       .ddr3_ck_n                      (ddr3_ck_n),
-       .ddr3_ck_p                      (ddr3_ck_p),
-       .ddr3_cke                       (ddr3_cke),
-       .ddr3_ras_n                     (ddr3_ras_n),
-       .ddr3_we_n                      (ddr3_we_n),
-       .ddr3_dq                        (ddr3_dq),
-       .ddr3_dqs_n                     (ddr3_dqs_n),
-       .ddr3_dqs_p                     (ddr3_dqs_p),
-       .ddr3_reset_n                   (ddr3_reset_n),
-       
-       .ddr3_dm                        (ddr3_dm),
-       .ddr3_odt                       (ddr3_odt),
-
-       .app_addr                       (control_cpu.dBus_cmd_payload_address[31:3]),
-       .app_cmd                        (control_cpu.dBus_cmd_payload_wr ? 3'b000 : 3'b001),
-       .app_en                         (iob.passthrough_ddr_enable),
-       .app_wdf_data                   ({ control_cpu.dBus_cmd_payload_data, control_cpu.dBus_cmd_payload_data }),
-       .app_wdf_end                    (1'b1),
-       .app_wdf_wren                   (iob.passthrough_ddr_enable && control_cpu.dBus_cmd_payload_wr),
-       .app_wdf_mask                   (control_cpu.dBus_cmd_payload_address[2] ? {axi4_wstrb_w, 4'b0000} : {4'b0000, axi4_wstrb_w}),
-
-       .app_rd_data                    (ddr_read_data),
-       .app_rd_data_end                (),
-       .app_rd_data_valid              (ddr_rsp_ready),
-       .app_rdy                        (ddr_ready),
-       .app_wdf_rdy                    (ddr_write_data_ready),
-
-       .app_sr_active                  (),
-       .app_ref_ack                    (),
-       .app_zq_ack                     (),
-
-       .app_sr_req                     (1'b0),
-       .app_ref_req                    (1'b0),
-       .app_zq_req                     (1'b0),
-       .ui_clk                         (),
-//       .mmcm_locked                    (ddr_ctrl_in[0]),
-       .init_calib_complete            (ddr_ctrl_in[1]),
-       .ui_clk_sync_rst                (ddr_ctrl_in[2]),
-      
-      
-       
-// System Clock Ports
-       .sys_clk_i                      (ddr_clock),
-// Reference Clock Ports
-       .clk_ref_i                      (ddr_clock),
-       .device_temp_i                  (0),
-       .device_temp                    (),
-      
-       .sys_rst                        (iob.ddr_ctrl_out[0])
-//       .aresetn                        (iob.ddr_ctrl_out[1])
-);
-*/
+    );
 
 endmodule

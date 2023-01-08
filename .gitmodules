@@ -4,3 +4,6 @@
 [submodule "ControlCpu.srcs/core_ddr3_controller"]
 	path = ControlCpu.srcs/core_ddr3_controller
 	url = https://github.com/ultraembedded/core_ddr3_controller.git
+[submodule "ControlCpu.srcs/simple_ddr_ctrl"]
+	path = ControlCpu.srcs/simple_ddr_ctrl
+	url = https://github.com/CompuSAR/simple_ddr_ctrl.git
