@@ -47,6 +47,7 @@ SECTIONS
     .debug_line_str : { *(.debug_line_str) } >discard
     .debug_loclists : { *(.debug_loclists) } >discard
     .debug_rnglists : { *(.debug_rnglists) } >discard
+    .debug_frame : { *(.debug_frame) } >discard
     .riscv.attributes : { *(.riscv.attributes) } >discard
     .comment : { *(.comment) } >discard
 

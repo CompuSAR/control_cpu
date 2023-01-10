@@ -1,20 +1,40 @@
 #include "ddr.h"
 
 #include "uart.h"
+#include "irq.h"
 #include "format.h"
 
 static volatile unsigned long *ddr_registers = reinterpret_cast<unsigned long *>(0xc001'0000);
 
+enum class DdrCommands {
+    ModeRegisterSet     = 0x0,
+    Refresh             = 0x1,
+    Precharge           = 0x2,
+    BankActivate        = 0x3,
+    Write               = 0x4,
+    Read                = 0x5,
+    NoOperation         = 0xf,
+    Calibrate           = 0xe
+};
+
+void override_command(DdrCommands cmd) {
+}
+
 void ddr_init() {
     ddr_control(0);
-    volatile uint32_t i;
-    for( i=0; i<1200; ++i ) {
-    }
 
+    delay_ns(200'000);
+
+    // Take the DDR out of reset
     ddr_control(DDR_RESET_N);
 
-    for( i=0; i<1500; ++i ) {
-    }
+    delay_ns(500'000);
+
+    // Take the DDR PHY out of reset
+    ddr_control(DDR_RESET_N|DDR_PHY_RESET_N);
+
+    // Take the DDR controller out of reset, leave in bypass mode with a NOP command loaded
+    override_command(DdrCommands::NoOperation);
     ddr_control(DDR_RESET_N|DDR_PHY_RESET_N);
 }
 

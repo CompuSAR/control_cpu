@@ -1,6 +1,7 @@
 #include "uart.h"
 #include "format.h"
 #include "ddr.h"
+#include "irq.h"
 
 extern "C" void bl1_start();
 
@@ -65,4 +66,6 @@ void bl1_start() {
     *reinterpret_cast<volatile uint32_t *>(0xc0030000) = 12;
 
     uart_send("Post halt code reached");
+
+    halt();
 }

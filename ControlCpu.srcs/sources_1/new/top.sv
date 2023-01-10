@@ -20,7 +20,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module top(
+module top
+(
     input board_clock,
     input nReset,
     input uart_output,
@@ -46,7 +47,8 @@ module top(
     inout   wire    [1:0]   ddr3_dqs_p,
     inout   wire    [1:0]   ddr3_dqs_n,
     inout   wire    [15:0]  ddr3_dq
-    );
+);
+localparam CTRL_CLOCK_HZ = 100000000;
 
 function automatic [3:0] convert_byte_write( logic we, logic[1:0] address, logic[1:0] size );
     if( we ) begin
@@ -133,8 +135,10 @@ logic [31:0] ddr_ctrl_in = 0;
 logic [31:0] ddr_ctrl_out;
 logic [63:0] ddr_read_data;
 logic ddr_ready, ddr_rsp_ready, ddr_write_data_ready;
+logic irq_enable, irq_req_ack, irq_rsp_ready;
+logic [31:0] irq_rsp_data;
 
-io_block iob(
+io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
     .clock(ctrl_cpu_clock),
 
     .address(control_cpu.dBus_cmd_payload_address),
@@ -153,6 +157,11 @@ io_block iob(
     .passthrough_ddr_req_ack(),
     .passthrough_ddr_rsp_ready(),
     .passthrough_ddr_data(),
+
+    .passthrough_irq_enable(irq_enable),
+    .passthrough_irq_req_ack(irq_req_ack),
+    .passthrough_irq_rsp_data(irq_rsp_data),
+    .passthrough_irq_rsp_ready(irq_rsp_ready),
 
     .uart_tx(uart_tx),
     .uart_rx(uart_rx),
@@ -263,7 +272,8 @@ logic [15:0]   req_id = 0;
 
 
 sddr_phy_xilinx ddr_phy(
-     .in_ddr_clock_i(clk_ddr_w)
+//     .in_ddr_clock_i(clk_ddr_w)
+     .in_ddr_clock_i(ctrl_cpu_clock)
     ,.in_ddr_reset_n_i(ddr_ctrl_out[0])
     ,.in_phy_reset_n_i(ddr_ctrl_out[1])
 
@@ -283,5 +293,17 @@ sddr_phy_xilinx ddr_phy(
     ,.ddr3_dqs_p_io(ddr3_dqs_p)
     ,.ddr3_dqs_n_io(ddr3_dqs_n)
     );
+
+timer_int_ctrl#(.CLOCK_HZ(CTRL_CLOCK_HZ)) timer_interrupt(
+    .clock(ctrl_cpu_clock),
+    .req_addr_i(control_cpu.dBus_cmd_payload_address[15:0]),
+    .req_data_i(control_cpu.dBus_cmd_payload_data),
+    .req_write_i(control_cpu.dBus_cmd_payload_wr),
+    .req_valid_i(irq_enable),
+    .req_ready_o(irq_req_ack),
+
+    .rsp_data_o(irq_rsp_data),
+    .rsp_valid_o(irq_rsp_ready)
+);
 
 endmodule
