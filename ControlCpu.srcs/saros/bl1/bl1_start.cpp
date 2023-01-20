@@ -63,9 +63,7 @@ void bl1_start() {
         uart_send('\n');
     }
 
-    *reinterpret_cast<volatile uint32_t *>(0xc0030000) = 12;
+    halt();
 
     uart_send("Post halt code reached");
-
-    halt();
 }

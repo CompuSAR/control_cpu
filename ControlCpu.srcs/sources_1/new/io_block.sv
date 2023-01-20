@@ -44,31 +44,27 @@ module io_block#(
     input passthrough_ddr_rsp_ready,
     input [63:0] passthrough_ddr_data,
 
+    output logic passthrough_ddr_ctrl_enable,
+    input passthrough_ddr_ctrl_req_ack,
+    input passthrough_ddr_ctrl_rsp_ready,
+    input [31:0] passthrough_ddr_ctrl_data,
+
     output logic passthrough_irq_enable,
     input passthrough_irq_req_ack,
     input passthrough_irq_rsp_ready,
     input [31:0] passthrough_irq_rsp_data,
 
     output uart_tx,
-    input uart_rx,
-
-    input [31:0] gpio_in,
-
-    output logic [31:0] ddr_ctrl_out = 0,
-    input [31:0] ddr_ctrl_in
+    input uart_rx
     );
 
 logic [31:0] previous_address, previous_address_next;
 logic previous_valid=0, previous_valid_next, previous_write;
 
-logic [31:0] ddr_ctrl_out_next;
-
 always_ff@(posedge clock) begin
     previous_address <= previous_address_next;
     previous_valid <= previous_valid_next;
     previous_write <= previous_valid_next ? 1'b0 : write;
-
-    ddr_ctrl_out <= ddr_ctrl_out_next;
 end
 
 logic uart_send_data_ready;
@@ -88,9 +84,8 @@ task default_state_current();
     previous_address_next = address;
     previous_valid_next = address_valid;
 
-    ddr_ctrl_out_next = ddr_ctrl_out;
-
     passthrough_ddr_enable = 1'b0;
+    passthrough_ddr_ctrl_enable = 1'b0;
     passthrough_sram_enable = 1'b0;
     passthrough_irq_enable = 1'b0;
 endtask
@@ -127,11 +122,10 @@ always_comb begin
                 end
                 8'h1: begin                     // DDR control
                     rsp_ready = 1'b1;
-                    data_out = ddr_ctrl_in;
+                    data_out = passthrough_ddr_ctrl_data;
                 end
                 8'h2: begin                     // GPIO
                     rsp_ready = 1'b1;
-                    data_out = gpio_in;
                 end
                 8'h3: begin                     // Interrupt controller
                     rsp_ready = passthrough_irq_rsp_ready;
@@ -172,12 +166,8 @@ always_comb begin
                     end
                 end
                 8'h1: begin                // DDR control
-                    if( write ) begin
-                        req_ack = 1'b1;
-                        ddr_ctrl_out_next = data_in;
-                    end else begin
-                        req_ack = 1'b1;
-                    end
+                    passthrough_ddr_ctrl_enable = 1'b1;
+                    req_ack = 1'b1;
                 end
                 8'h2: begin                 // GPIO
                     req_ack = 1'b1;

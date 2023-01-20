@@ -131,10 +131,9 @@ assign ctrl_dBus_rsp_error = 0;
 
 logic sram_dBus_rsp_ready;
 logic [31:0] sram_dBus_rsp_data;
-logic [31:0] ddr_ctrl_in = 0;
-logic [31:0] ddr_ctrl_out;
-logic [63:0] ddr_read_data;
 logic ddr_ready, ddr_rsp_ready, ddr_write_data_ready;
+logic ddr_ctrl_cmd_valid, ddr_ctrl_cmd_ready, ddr_ctrl_rsp_ready;
+logic [31:0] ddr_ctrl_rsp_data;
 logic irq_enable, irq_req_ack, irq_rsp_ready;
 logic [31:0] irq_rsp_data;
 
@@ -158,26 +157,24 @@ io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
     .passthrough_ddr_rsp_ready(),
     .passthrough_ddr_data(),
 
+    .passthrough_ddr_ctrl_enable(ddr_ctrl_cmd_valid),
+    .passthrough_ddr_ctrl_req_ack(ddr_ctrl_cmd_ready),
+    .passthrough_ddr_ctrl_rsp_ready(ddr_ctrl_rsp_ready),
+    .passthrough_ddr_ctrl_data(ddr_ctrl_rsp_data),
+
     .passthrough_irq_enable(irq_enable),
     .passthrough_irq_req_ack(irq_req_ack),
     .passthrough_irq_rsp_data(irq_rsp_data),
     .passthrough_irq_rsp_ready(irq_rsp_ready),
 
     .uart_tx(uart_tx),
-    .uart_rx(uart_rx),
-
-    .gpio_in({31'b0, uart_output}),
-
-    .ddr_ctrl_in(ddr_ctrl_in),
-    .ddr_ctrl_out(ddr_ctrl_out)
+    .uart_rx(uart_rx)
 );
 
 always_ff@(posedge ctrl_cpu_clock)
 begin
     ctrl_iBus_rsp_valid <= control_cpu.iBus_cmd_valid;
     sram_dBus_rsp_ready <= iob.passthrough_sram_enable;
-    if( control_cpu.dBus_cmd_valid )
-        req_id <= req_id + 1;
 end
 
 blk_mem sram(
@@ -200,82 +197,64 @@ blk_mem sram(
     .web( 4'b0 )
 );
 
-/*
-cache_port::port_in cache_ports_in[1:0];
-
-cache#(.NUM_PORTS(2))(
-    .clock(ctrl_cpu_clock),
-    .ports_in(cache_ports_in)
-);
-
-assign cache_ports_in[0].valid = iob.passthrough_enable;
-assign cache_ports_in[0].address = control_cpu.dBus_cmd_payload_address;
-assign cache_ports_in[0].write = control_cpu.dBus_cmd_payload_wr;
-assign cache_ports_in[0].write_data = control_cpu.dBus_cmd_payload_data;
-*/
-
-
-
 //-----------------------------------------------------------------
 // DDR Core + PHY
 //-----------------------------------------------------------------
-wire [ 13:0]   dfi_address_w;
-wire [  2:0]   dfi_bank_w;
-wire           dfi_cas_n_w;
-wire           dfi_cke_w;
-wire           dfi_cs_n_w;
-wire           dfi_odt_w;
-wire           dfi_ras_n_w;
-wire           dfi_reset_n_w;
-wire           dfi_we_n_w;
-wire [ 31:0]   dfi_wrdata_w;
-wire           dfi_wrdata_en_w;
-wire [  3:0]   dfi_wrdata_mask_w;
-wire           dfi_rddata_en_w;
-wire [ 31:0]   dfi_rddata_w;
-wire           dfi_rddata_valid_w;
-wire [  1:0]   dfi_rddata_dnv_w;
+wire ddr_reset_n;
+wire ddr_phy_reset_n;
 
-wire           axi4_awready_w;
-wire           axi4_arready_w;
-wire  [  7:0]  axi4_arlen_w = 8'h00;    // XXX Burst length of 1
-wire           axi4_wvalid_w = iob.passthrough_ddr_enable && control_cpu.dBus_cmd_payload_wr;
-wire  [ 31:0]  axi4_araddr_w = control_cpu.dBus_cmd_payload_address;
-wire  [  1:0]  axi4_bresp_w;
-wire  [ 31:0]  axi4_wdata_w = control_cpu.dBus_cmd_payload_data;
-wire           axi4_rlast_w;
-wire           axi4_awvalid_w = axi4_wvalid_w;
-wire  [  3:0]  axi4_rid_w = 4'h0;
-wire  [  1:0]  axi4_rresp_w;
-wire           axi4_bvalid_w;
-wire  [  3:0]  axi4_wstrb_w = convert_byte_write(
-                    control_cpu.dBus_cmd_payload_wr,
-                    control_cpu.dBus_cmd_payload_address,
-                    control_cpu.dBus_cmd_payload_size);
-wire  [15:0]  write_mask_128bit = convert_long_write_mask(axi4_wstrb_w, control_cpu.dBus_cmd_payload_address);
-wire  [  1:0]  axi4_arburst_w = 2'b1;   // INCRemental burst
-wire           axi4_arvalid_w = iob.passthrough_ddr_enable && !control_cpu.dBus_cmd_payload_wr;
-wire  [  3:0]  axi4_awid_w = 3'b0;
-wire  [  3:0]  axi4_bid_w;
-wire  [  3:0]  axi4_arid_w = 3'b0;
-wire           axi4_rready_w = 1'b1;
-wire  [  7:0]  axi4_awlen_w = 8'h00;    // XXX Burst length of 1
-wire           axi4_wlast_w = 1'b1;     // XXX Burst length of 1 means we are always the last one
-wire  [ 31:0]  axi4_rdata_w;
-wire           axi4_bready_w = 1'b1;
-wire  [ 31:0]  axi4_awaddr_w = control_cpu.dBus_cmd_payload_address;
-wire           axi4_wready_w;
-wire  [  1:0]  axi4_awburst_w = 1'b1;   // INCRemental burst
-wire           axi4_rvalid_w;
+wire ddr_phy_cke;
+wire ddr_phy_odt;
+wire ddr_phy_ras_n;
+wire ddr_phy_cas_n;
+wire ddr_phy_we_n;
 
-logic [15:0]   req_id = 0;
+wire ddr_phy_cs_n;
+wire [2:0] ddr_phy_ba;
+wire [13:0] ddr_phy_addr;
+wire [1:0] ddr_phy_dm;
+wire [1:0] ddr_phy_dqs_i, ddr_phy_dqs_o;
+wire [15:0] ddr_phy_dq_i, ddr_phy_dq_o;
 
+sddr_ctrl ddr_ctrl(
+    .cpu_clock_i(ctrl_cpu_clock),
+    .ddr_clock_i(clk_ddr_w),
+    .ddr_reset_n_o(ddr_reset_n),
+    .ddr_phy_reset_n_o(ddr_phy_reset_n),
+
+    .ctrl_cmd_valid(ddr_ctrl_cmd_valid),
+    .ctrl_cmd_address(control_cpu.dBus_cmd_payload_address),
+    .ctrl_cmd_data(control_cpu.dBus_cmd_payload_data),
+    .ctrl_cmd_write(control_cpu.dBus_cmd_payload_wr),
+    .ctrl_cmd_ack(ddr_ctrl_cmd_ready),
+    .ctrl_rsp_ready(ddr_ctrl_rsp_ready),
+    .ctrl_rsp_data(ddr_ctrl_rsp_data),
+
+    .ddr3_cke_o(ddr_phy_cke),
+    .ddr3_ras_n_o(ddr_phy_ras_n),
+    .ddr3_cas_n_o(ddr_phy_cas_n),
+    .ddr3_we_n_o(ddr_phy_we_n),
+    .ddr3_ba_o(ddr_phy_ba),
+    .ddr3_addr_o(ddr_phy_addr),
+    .ddr3_odt_o(ddr_phy_odt),
+    .ddr3_dm_o(ddr_phy_dm),
+    .ddr3_dqs_o(ddr_phy_dqs_o),
+    .ddr3_dqs_i(ddr_phy_dqs_i),
+    .ddr3_dq_o(ddr_phy_dq_o),
+    .ddr3_dq_i(ddr_phy_dq_i)
+);
 
 sddr_phy_xilinx ddr_phy(
-//     .in_ddr_clock_i(clk_ddr_w)
-     .in_ddr_clock_i(ctrl_cpu_clock)
-    ,.in_ddr_reset_n_i(ddr_ctrl_out[0])
-    ,.in_phy_reset_n_i(ddr_ctrl_out[1])
+     .in_ddr_clock_i(clk_ddr_w)
+//     .in_ddr_clock_i(ctrl_cpu_clock)
+    ,.in_ddr_reset_n_i(ddr_reset_n)
+    ,.in_phy_reset_n_i(ddr_phy_reset_n)
+
+    ,.ctl_odt_i(ddr_phy_odt)
+    ,.ctl_cke_i(ddr_phy_cke)
+    ,.ctl_ras_n_i(ddr_phy_ras_n)
+    ,.ctl_cas_n_i(ddr_phy_cas_n)
+    ,.ctl_we_n_i(ddr_phy_we_n)
 
     ,.ddr3_ck_p_o(ddr3_ck_p)
     ,.ddr3_ck_n_o(ddr3_ck_n)
