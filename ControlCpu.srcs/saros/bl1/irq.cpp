@@ -9,8 +9,12 @@
 #define REG_WAIT_COUNT 4
 
 void delay_ns(uint64_t nanoseconds) {
+    delay_cycles(nanoseconds*reg_read_32(DEVICE_NUM, REG_CPU_CLOCK_FREQ) / 1'000'000'000);
+}
+
+void delay_cycles(uint64_t cycles) {
     uint64_t cycle_count = reg_read_64(DEVICE_NUM, REG_CYCLE_COUNT);
-    reg_write_64(DEVICE_NUM, REG_WAIT_COUNT, cycle_count + nanoseconds*reg_read_32(DEVICE_NUM, REG_CPU_CLOCK_FREQ) / 1'000'000'000);
+    reg_write_64(DEVICE_NUM, REG_WAIT_COUNT, cycle_count + cycles);
     reg_read_32(DEVICE_NUM, REG_HALT);
 }
 

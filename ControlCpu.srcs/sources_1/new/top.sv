@@ -258,6 +258,7 @@ sddr_phy_xilinx ddr_phy(
     ,.ctl_cas_n_i(ddr_phy_cas_n)
     ,.ctl_we_n_i(ddr_phy_we_n)
     ,.ctl_addr_i(ddr_phy_addr)
+    ,.ctl_ba_i(ddr_phy_ba)
 
     ,.ddr3_ck_p_o(ddr3_ck_p)
     ,.ddr3_ck_n_o(ddr3_ck_n)
