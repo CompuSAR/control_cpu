@@ -37,17 +37,17 @@ SECTIONS
 
     /DISCARD/ : { *(.eh_frame) }
 
-    .debug_info : { *(.debug_info) } >discard
-    .debug_abbrev : { *(.debug_abbrev) } >discard
-    .debug_loc : { *(.debug_loc) } >discard
-    .debug_aranges : { *(.debug_aranges) } >discard
-    .debug_line : { *(.debug_line) } >discard
-    .debug_str : { *(.debug_str) } >discard
-    .debug_ranges : { *(.debug_ranges) } >discard
-    .debug_line_str : { *(.debug_line_str) } >discard
-    .debug_loclists : { *(.debug_loclists) } >discard
-    .debug_rnglists : { *(.debug_rnglists) } >discard
-    .debug_frame : { *(.debug_frame) } >discard
+    .debug_info : { *(.debug_info) }
+    .debug_abbrev : { *(.debug_abbrev) }
+    .debug_loc : { *(.debug_loc) }
+    .debug_aranges : { *(.debug_aranges) }
+    .debug_line : { *(.debug_line) }
+    .debug_str : { *(.debug_str) }
+    .debug_ranges : { *(.debug_ranges) }
+    .debug_line_str : { *(.debug_line_str) }
+    .debug_loclists : { *(.debug_loclists) }
+    .debug_rnglists : { *(.debug_rnglists) }
+    .debug_frame : { *(.debug_frame) }
     .riscv.attributes : { *(.riscv.attributes) } >discard
     .comment : { *(.comment) } >discard
 

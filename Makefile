@@ -1,4 +1,4 @@
-all: ControlCpu.gen/sources_1/ip/blk_mem/blk_mem.mif ControlCpu.srcs/saros/bl1/bl1.coe
+all: ControlCpu.gen/saros/bl1/mif.tag ControlCpu.srcs/saros/bl1/bl1.coe
 
 ControlCpu.runs/ControlCpu.mcs:
 
@@ -23,10 +23,9 @@ ControlCpu.srcs/saros/configure:
 	mkdir -p "$(@D)"
 	@touch "$@"
 
-ControlCpu.gen/sources_1/ip/blk_mem/blk_mem.mif: ControlCpu.gen/saros/bl1/bl1.mif
-	find -name blk_mem.mif -print0 | xargs -0 --no-run-if-empty rm
-	mkdir -p "$(@D)"
-	cp "$<" "$@"
+ControlCpu.gen/saros/bl1/mif.tag: ControlCpu.gen/saros/bl1/bl1.mif
+	find -name blk_mem.mif -print0 | xargs -0 --no-run-if-empty -n1 cp -a $<
+	touch $@
 
 ControlCpu.gen/saros/bl1/bl1.mif: ControlCpu.gen/saros/config.log
 	$(MAKE) -C "$(@D)" "$(@F)"
