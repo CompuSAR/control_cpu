@@ -81,14 +81,14 @@ logic ctrl_cpu_clock, clocks_locked;
 wire clk_w = ctrl_cpu_clock;
 wire ddr_clock;
 wire rst_w = !clocks_locked;
-wire clk_ddr_w;
+//wire clk_ddr_w;
 wire clk_ddr_dqs_w;
 wire clk_ref_w;
 
 clk_converter clocks(
     .clk_in1(board_clock), .reset(1'b0),
     .clk_ctrl_cpu(ctrl_cpu_clock),
-    .clk_ddr_w(clk_ddr_w),
+    //.clk_ddr_w(clk_ddr_w),
     .locked(clocks_locked)
 );
 
@@ -218,7 +218,7 @@ wire [15:0] ddr_phy_dq_i, ddr_phy_dq_o;
 
 sddr_ctrl ddr_ctrl(
     .cpu_clock_i(ctrl_cpu_clock),
-    .ddr_clock_i(clk_ddr_w),
+    //.ddr_clock_i(clk_ddr_w),
     .ddr_reset_n_o(ddr_reset_n),
     .ddr_phy_reset_n_o(ddr_phy_reset_n),
 
@@ -230,6 +230,7 @@ sddr_ctrl ddr_ctrl(
     .ctrl_rsp_ready(ddr_ctrl_rsp_ready),
     .ctrl_rsp_data(ddr_ctrl_rsp_data),
 
+    .ddr3_cs_n_o(ddr_phy_cs_n),
     .ddr3_cke_o(ddr_phy_cke),
     .ddr3_ras_n_o(ddr_phy_ras_n),
     .ddr3_cas_n_o(ddr_phy_cas_n),
@@ -245,11 +246,12 @@ sddr_ctrl ddr_ctrl(
 );
 
 sddr_phy_xilinx ddr_phy(
-     .in_ddr_clock_i(clk_ddr_w)
-//     .in_ddr_clock_i(ctrl_cpu_clock)
+//     .in_ddr_clock_i(clk_ddr_w)
+     .in_ddr_clock_i(ctrl_cpu_clock)
     ,.in_ddr_reset_n_i(ddr_reset_n)
     ,.in_phy_reset_n_i(ddr_phy_reset_n)
 
+    ,.ctl_cs_n_i(ddr_phy_cs_n)
     ,.ctl_odt_i(ddr_phy_odt)
     ,.ctl_cke_i(ddr_phy_cke)
     ,.ctl_ras_n_i(ddr_phy_ras_n)
@@ -264,7 +266,7 @@ sddr_phy_xilinx ddr_phy(
     ,.ddr3_ras_n_o(ddr3_ras_n)
     ,.ddr3_cas_n_o(ddr3_cas_n)
     ,.ddr3_we_n_o(ddr3_we_n)
-    ,.ddr3_cs_n_o()
+    ,.ddr3_cs_n_o()                     // No chip select in design
     ,.ddr3_ba_o(ddr3_ba)
     ,.ddr3_addr_o(ddr3_addr[13:0])
     ,.ddr3_odt_o(ddr3_odt)
