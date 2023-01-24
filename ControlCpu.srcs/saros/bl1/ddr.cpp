@@ -142,19 +142,19 @@ void ddr_init() {
     // Reset EVERYTHING
     ddr_control(DdrCtrl_ResetAll);
 
-    delay_ns(200'000);
+    sleep_ns(200'000);
 
     // Take the DDR out of reset
     ddr_control(DdrCtrl_nMemReset);
 
-    delay_ns(500'000);
+    sleep_ns(500'000);
 
     // Take the DDR PHY out of reset
     ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset);
     // Set clock enable.
     ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke);
 
-    delay_ns(360);      // tXPR = tRFC (350ns) + 10ns
+    sleep_ns(360);      // tXPR = tRFC (350ns) + 10ns
 
     write_mode_reg2(
             1,          // CAS write latency 6 due to DLL disabled
@@ -185,11 +185,13 @@ void ddr_init() {
             0           // Precharge PD DLL off
         );
 
-    delay_ns(120);
+    sleep_ns(120);
 
     reg_write_32( DdrDevice, DdrAddress, 1<<10 ); // Select long calibration
     override_command(DdrCommands::Calibrate);
 
-    delay_cycles(512);
+    sleep_cycles(512);
+
+    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke|DdrCtrl_nBypass);
 }
 

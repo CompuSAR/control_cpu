@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="895,602.833 ns"></ZoomStartTime>
-      <ZoomEndTime time="895,743.434 ns"></ZoomEndTime>
-      <Cursor1Time time="895,720.000 ns"></Cursor1Time>
+      <ZoomStartTime time="2,807,141.434 ns"></ZoomStartTime>
+      <ZoomEndTime time="2,807,282.835 ns"></ZoomEndTime>
+      <Cursor1Time time="2,807,165.000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="198"></NameColumnWidth>
-      <ValueColumnWidth column_width="124"></ValueColumnWidth>
+      <ValueColumnWidth column_width="120"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="84" />
+   <WVObjectSize size="85" />
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -320,6 +320,10 @@
    <wvobject type="array" fp_name="/sim_top/top_module/ddr3_cke">
       <obj_property name="ElementShortName">ddr3_cke[0:0]</obj_property>
       <obj_property name="ObjectShortName">ddr3_cke[0:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/clocks/clk_ddr_90deg">
+      <obj_property name="ElementShortName">clk_ddr_90deg</obj_property>
+      <obj_property name="ObjectShortName">clk_ddr_90deg</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/ddr3_ck_p">
       <obj_property name="ElementShortName">ddr3_ck_p[0:0]</obj_property>

@@ -79,16 +79,19 @@ endfunction
 //-----------------------------------------------------------------
 logic ctrl_cpu_clock, clocks_locked;
 wire clk_w = ctrl_cpu_clock;
-wire ddr_clock;
+wire ddr_clock, ddr_clock_90deg;
 wire rst_w = !clocks_locked;
-//wire clk_ddr_w;
 wire clk_ddr_dqs_w;
 wire clk_ref_w;
+wire clock_feedback;
 
 clk_converter clocks(
     .clk_in1(board_clock), .reset(1'b0),
     .clk_ctrl_cpu(ctrl_cpu_clock),
-    //.clk_ddr_w(clk_ddr_w),
+    //.clk_ddr_w(ddr_clock),
+    .clk_ddr_90deg(ddr_clock_90deg),
+    .clkfb_in(clock_feedback),
+    .clkfb_out(clock_feedback),
     .locked(clocks_locked)
 );
 
@@ -134,6 +137,8 @@ logic [31:0] sram_dBus_rsp_data;
 logic ddr_ready, ddr_rsp_ready, ddr_write_data_ready;
 logic ddr_ctrl_cmd_valid, ddr_ctrl_cmd_ready, ddr_ctrl_rsp_ready;
 logic [31:0] ddr_ctrl_rsp_data;
+logic ddr_data_cmd_valid, ddr_data_cmd_ack, ddr_data_rsp_ready;
+logic [31:0] ddr_data_rsp_data;
 logic irq_enable, irq_req_ack, irq_rsp_ready;
 logic [31:0] irq_rsp_data;
 
@@ -153,9 +158,10 @@ io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
     .passthrough_sram_rsp_ready(sram_dBus_rsp_ready),
     .passthrough_sram_data(sram_dBus_rsp_data),
 
-    .passthrough_ddr_req_ack(),
-    .passthrough_ddr_rsp_ready(),
-    .passthrough_ddr_data(),
+    .passthrough_ddr_enable(ddr_data_cmd_valid),
+    .passthrough_ddr_req_ack(ddr_data_cmd_ack),
+    .passthrough_ddr_rsp_ready(ddr_data_rsp_ready),
+    .passthrough_ddr_data(ddr_data_rsp_data),
 
     .passthrough_ddr_ctrl_enable(ddr_ctrl_cmd_valid),
     .passthrough_ddr_ctrl_req_ack(ddr_ctrl_cmd_ready),
@@ -214,6 +220,7 @@ wire [2:0] ddr_phy_ba;
 wire [13:0] ddr_phy_addr;
 wire [1:0] ddr_phy_dm;
 wire [1:0] ddr_phy_dqs_i, ddr_phy_dqs_o;
+wire ddr_phy_data_transfer, ddr_phy_data_write;
 wire [15:0] ddr_phy_dq_i, ddr_phy_dq_o;
 
 sddr_ctrl ddr_ctrl(
@@ -230,6 +237,14 @@ sddr_ctrl ddr_ctrl(
     .ctrl_rsp_ready(ddr_ctrl_rsp_ready),
     .ctrl_rsp_data(ddr_ctrl_rsp_data),
 
+    .data_cmd_valid(ddr_data_cmd_valid),
+    .data_cmd_ack(ddr_data_cmd_ack),
+    .data_cmd_data_i(control_cpu.dBus_cmd_payload_data),
+    .data_cmd_address({ control_cpu.dBus_cmd_payload_address, 2'b00 }),
+    .data_cmd_write(control_cpu.dBus_cmd_payload_wr),
+    .data_rsp_ready(ddr_data_rsp_ready),
+    .data_data_o(ddr_data_rsp_data),
+
     .ddr3_cs_n_o(ddr_phy_cs_n),
     .ddr3_cke_o(ddr_phy_cke),
     .ddr3_ras_n_o(ddr_phy_ras_n),
@@ -239,15 +254,18 @@ sddr_ctrl ddr_ctrl(
     .ddr3_addr_o(ddr_phy_addr),
     .ddr3_odt_o(ddr_phy_odt),
     .ddr3_dm_o(ddr_phy_dm),
-    .ddr3_dqs_o(ddr_phy_dqs_o),
-    .ddr3_dqs_i(ddr_phy_dqs_i),
+    .ddr3_dq_enable_o(ddr_phy_dq_enable),
     .ddr3_dq_o(ddr_phy_dq_o),
-    .ddr3_dq_i(ddr_phy_dq_i)
+    .ddr3_dq_i(ddr_phy_dq_i),
+
+    .data_transfer_o(ddr_phy_data_transfer),
+    .data_write_o(ddr_phy_data_write)
 );
 
 sddr_phy_xilinx ddr_phy(
 //     .in_ddr_clock_i(clk_ddr_w)
      .in_ddr_clock_i(ctrl_cpu_clock)
+    ,.in_ddr_clock_90deg_i(ddr_clock_90deg)
     ,.in_ddr_reset_n_i(ddr_reset_n)
     ,.in_phy_reset_n_i(ddr_phy_reset_n)
 
@@ -259,6 +277,11 @@ sddr_phy_xilinx ddr_phy(
     ,.ctl_we_n_i(ddr_phy_we_n)
     ,.ctl_addr_i(ddr_phy_addr)
     ,.ctl_ba_i(ddr_phy_ba)
+    ,.ctl_dq_i(ddr_phy_dq_o)
+    ,.ctl_dq_o(ddr_phy_dq_i)
+
+    ,.ctl_data_transfer_i(ddr_phy_data_transfer)
+    ,.ctl_data_write_i(ddr_phy_data_write)
 
     ,.ddr3_ck_p_o(ddr3_ck_p)
     ,.ddr3_ck_n_o(ddr3_ck_n)
