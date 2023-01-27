@@ -11,17 +11,17 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="835,916.300 ns"></ZoomStartTime>
-      <ZoomEndTime time="836,058.501 ns"></ZoomEndTime>
-      <Cursor1Time time="835,940.000 ns"></Cursor1Time>
+      <ZoomStartTime time="860,948.833 ns"></ZoomStartTime>
+      <ZoomEndTime time="861,264.434 ns"></ZoomEndTime>
+      <Cursor1Time time="861,075.000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="198"></NameColumnWidth>
-      <ValueColumnWidth column_width="116"></ValueColumnWidth>
+      <ValueColumnWidth column_width="100"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="61" />
+   <WVObjectSize size="59" />
    <wave_markers>
-      <marker label="" time="835940000" />
+      <marker label="" time="861015000" />
    </wave_markers>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
       <obj_property name="ElementShortName">clk</obj_property>
@@ -233,12 +233,13 @@
       <obj_property name="ObjectShortName">ddr3_dq_enable_o</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/ddr3_dq_o">
-      <obj_property name="ElementShortName">ddr3_dq_o[31:0]</obj_property>
-      <obj_property name="ObjectShortName">ddr3_dq_o[31:0]</obj_property>
+      <obj_property name="ElementShortName">ddr3_dq_o[1:0][15:0]</obj_property>
+      <obj_property name="ObjectShortName">ddr3_dq_o[1:0][15:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/ddr3_dq_i">
-      <obj_property name="ElementShortName">ddr3_dq_i[31:0]</obj_property>
-      <obj_property name="ObjectShortName">ddr3_dq_i[31:0]</obj_property>
+      <obj_property name="ElementShortName">ddr3_dq_i[1:0][15:0]</obj_property>
+      <obj_property name="ObjectShortName">ddr3_dq_i[1:0][15:0]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_transfer_o">
       <obj_property name="ElementShortName">data_transfer_o</obj_property>
@@ -252,18 +253,6 @@
       <obj_property name="ElementShortName">ddr_clock_i</obj_property>
       <obj_property name="ObjectShortName">ddr_clock_i</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/reset_state">
-      <obj_property name="ElementShortName">reset_state[31:0]</obj_property>
-      <obj_property name="ObjectShortName">reset_state[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/output_cmd">
-      <obj_property name="ElementShortName">output_cmd[3:0]</obj_property>
-      <obj_property name="ObjectShortName">output_cmd[3:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/override_addr">
-      <obj_property name="ElementShortName">override_addr[31:0]</obj_property>
-      <obj_property name="ObjectShortName">override_addr[31:0]</obj_property>
-   </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/ctrl_reset">
       <obj_property name="ElementShortName">ctrl_reset</obj_property>
       <obj_property name="ObjectShortName">ctrl_reset</obj_property>
@@ -271,5 +260,10 @@
    <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/bypass">
       <obj_property name="ElementShortName">bypass</obj_property>
       <obj_property name="ObjectShortName">bypass</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/write_value">
+      <obj_property name="ElementShortName">write_value[1:0][63:0]</obj_property>
+      <obj_property name="ObjectShortName">write_value[1:0][63:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
 </wave_config>

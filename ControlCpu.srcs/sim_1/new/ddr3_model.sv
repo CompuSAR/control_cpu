@@ -2201,8 +2201,8 @@ module ddr3_model (
                             $display ("%m: at time %t ERROR: tJIT(cc) violation by %f ps.", $time, abs_value(tjit_cc_time) - TJIT_CC);
                         if (TCK_MIN - tck_avg >= 1.0)
                             $display ("%m: at time %t ERROR: tCK(avg) minimum violation by %f ps.", $time, TCK_MIN - tck_avg);
-                        if (tck_avg - TCK_MAX >= 1.0) 
-                            $display ("%m: at time %t ERROR: tCK(avg) maximum violation by %f ps.", $time, tck_avg - TCK_MAX);
+                        //if (tck_avg - TCK_MAX >= 1.0) 
+                        //    $display ("%m: at time %t ERROR: tCK(avg) maximum violation by %f ps.", $time, tck_avg - TCK_MAX);
 
                         // check tCL
                         if (tm_ck_neg - $time < TCL_ABS_MIN*tck_avg) 

@@ -221,7 +221,7 @@ wire [13:0] ddr_phy_addr;
 wire [1:0] ddr_phy_dm;
 wire [1:0] ddr_phy_dqs_i, ddr_phy_dqs_o;
 wire ddr_phy_data_transfer, ddr_phy_data_write;
-wire [15:0] ddr_phy_dq_i, ddr_phy_dq_o;
+wire [15:0] ddr_phy_dq_i[1:0], ddr_phy_dq_o[1:0];
 
 sddr_ctrl ddr_ctrl(
     .cpu_clock_i(ctrl_cpu_clock),

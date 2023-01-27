@@ -25,7 +25,11 @@ static constexpr int DdrDevice = 1;
 enum DdrRegister {
     DdrControl = 0,
     DdrOverrideCommand,
-    DdrAddress,
+    DdrOverrideAddress,
+    DdrClCwl,
+    Ddr_tRCD,
+    Ddr_tRC,
+    Ddr_tRP,
 };
 
 static constexpr uint32_t DdrCtrl_ResetAll    = 0x0000;
@@ -71,7 +75,7 @@ void write_mode_reg0(uint32_t bl, uint32_t cl, uint32_t bt, bool dllReset, uint3
     // Prechard PD
     value |= prechardPd << 12;
 
-    reg_write_32(DdrDevice, DdrAddress, composeDdrAddress(0, value));
+    reg_write_32(DdrDevice, DdrOverrideAddress, composeDdrAddress(0, value));
     override_command(DdrCommands::ModeRegisterSet);
 }
 
@@ -102,7 +106,7 @@ void write_mode_reg1(bool dllDisable, uint32_t ods, uint32_t rtt, uint32_t al, b
     // Output enable
     value |= outputEnable ? 0 : 1<<12;
 
-    reg_write_32( DdrDevice, DdrAddress, composeDdrAddress(1, value) );
+    reg_write_32( DdrDevice, DdrOverrideAddress, composeDdrAddress(1, value) );
     override_command(DdrCommands::ModeRegisterSet);
 }
 
@@ -121,7 +125,7 @@ void write_mode_reg2(uint32_t casWriteLatency, bool autoSelfRefresh, uint32_t se
     // Dynamic ODT RTT(WR)
     value |= rtt << 9;
 
-    reg_write_32( DdrDevice, DdrAddress, composeDdrAddress(2, value) );
+    reg_write_32( DdrDevice, DdrOverrideAddress, composeDdrAddress(2, value) );
     override_command(DdrCommands::ModeRegisterSet);
 }
 
@@ -134,7 +138,7 @@ void write_mode_reg3(uint32_t mpr_rf, bool mprEnable) {
     // MPR enable
     value |= mprEnable ? 1<<2 : 0;
 
-    reg_write_32( DdrDevice, DdrAddress, composeDdrAddress(3, value) );
+    reg_write_32( DdrDevice, DdrOverrideAddress, composeDdrAddress(3, value) );
     override_command(DdrCommands::ModeRegisterSet);
 }
 
@@ -197,12 +201,21 @@ void ddr_init() {
 
     sleep_cycles(12);   // tMOD
 
-    reg_write_32( DdrDevice, DdrAddress, 1<<10 ); // Select long calibration
+    reg_write_32( DdrDevice, DdrOverrideAddress, 1<<10 ); // Select long calibration
     override_command(DdrCommands::Calibrate);
 
     sleep_cycles(512);  // tZQinit
 
     // Initialization complete. Initiate switch to DLL off mode
+
+    // Enter self refresh mode
+    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset); // CKE low will take effect at next override command
+    override_command(DdrCommands::Refresh);
+    sleep_cycles(10);   // tCKSRE + tCKSRX. tCKESR is just 4, and is probably the correct one, but we're playing it safe.
+
+    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke); // CKE high will take effect at next override command
+    override_command(DdrCommands::NoOperation);
+    sleep_ns(360);      // tXS = tRFC + 10ns
 
     write_mode_reg1(
             true,       // DLL disabled
@@ -225,16 +238,12 @@ void ddr_init() {
 
     sleep_cycles(12);   // tMOD
 
-    // Enter self refresh mode
-    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset); // CKE low will take effect at next override command
-    override_command(DdrCommands::Refresh);
-    sleep_cycles(10);   // tCKSRE + tCKSRX. tCKESR is just 4, and is probably the correct one, but we're playing it safe.
+    reg_write_32( DdrDevice, DdrClCwl, 6<<16 | 6 );     // CL=6, CWL = 6
+    reg_write_32( DdrDevice, Ddr_tRCD, 2 );             // ACTIVATE to READ/WRITE is 13.75ns, which is 2 cycles.
+    reg_write_32( DdrDevice, Ddr_tRC, 5 );              // ACTIVATE to REFRESH is 48.75ns, which are 5 cycles.
+    reg_write_32( DdrDevice, Ddr_tRP, 2 );              // PRECHARGE period is 13.75ns, which is 2 cycles
 
-    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke); // CKE high will take effect at next override command
-    override_command(DdrCommands::NoOperation);
-    sleep_ns(360);      // tXS = tRFC + 10ns
-
-    reg_write_32( DdrDevice, DdrAddress, 1<<10 ); // Select long calibration
+    reg_write_32( DdrDevice, DdrOverrideAddress, 1<<10 ); // Select long calibration
     override_command(DdrCommands::Calibrate);
     sleep_cycles(256);  // tZQoper
 
