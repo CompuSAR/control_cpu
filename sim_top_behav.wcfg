@@ -11,17 +11,20 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="861,116.083 ns"></ZoomStartTime>
-      <ZoomEndTime time="861,189.184 ns"></ZoomEndTime>
-      <Cursor1Time time="861,177.000 ns"></Cursor1Time>
+      <ZoomStartTime time="1,035,753.833 ns"></ZoomStartTime>
+      <ZoomEndTime time="1,035,785.234 ns"></ZoomEndTime>
+      <Cursor1Time time="1,035,780.000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="198"></NameColumnWidth>
-      <ValueColumnWidth column_width="96"></ValueColumnWidth>
+      <NameColumnWidth column_width="199"></NameColumnWidth>
+      <ValueColumnWidth column_width="107"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="61" />
+   <WVObjectSize size="62" />
    <wave_markers>
-      <marker label="" time="861015000" />
+      <marker label="" time="1035502000" />
+      <marker label="" time="861965000" />
+      <marker label="" time="1035600000" />
+      <marker label="" time="1035650000" />
    </wave_markers>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
       <obj_property name="ElementShortName">clk</obj_property>
@@ -51,6 +54,8 @@
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_valid">
       <obj_property name="ElementShortName">dBus_cmd_valid</obj_property>
       <obj_property name="ObjectShortName">dBus_cmd_valid</obj_property>
+      <obj_property name="CustomSignalColor">#800080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_ready">
       <obj_property name="ElementShortName">dBus_cmd_ready</obj_property>
@@ -59,6 +64,8 @@
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_payload_wr">
       <obj_property name="ElementShortName">dBus_cmd_payload_wr</obj_property>
       <obj_property name="ObjectShortName">dBus_cmd_payload_wr</obj_property>
+      <obj_property name="CustomSignalColor">#FF0000</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_payload_address">
       <obj_property name="ElementShortName">dBus_cmd_payload_address[31:0]</obj_property>
@@ -265,15 +272,7 @@
    <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/write_value">
       <obj_property name="ElementShortName">write_value[1:0][63:0]</obj_property>
       <obj_property name="ObjectShortName">write_value[1:0][63:0]</obj_property>
-      <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/write_value[1]">
-         <obj_property name="ElementShortName">[1][63:0]</obj_property>
-         <obj_property name="ObjectShortName">[1][63:0]</obj_property>
-      </wvobject>
-      <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/write_value[0]">
-         <obj_property name="ElementShortName">[0][63:0]</obj_property>
-         <obj_property name="ObjectShortName">[0][63:0]</obj_property>
-         <obj_property name="isExpanded"></obj_property>
-      </wvobject>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/bank_state_counter">
       <obj_property name="ElementShortName">bank_state_counter[31:0]</obj_property>
@@ -282,5 +281,9 @@
    <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/bank_state">
       <obj_property name="ElementShortName">bank_state[31:0]</obj_property>
       <obj_property name="ObjectShortName">bank_state[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/state">
+      <obj_property name="ElementShortName">state[31:0]</obj_property>
+      <obj_property name="ObjectShortName">state[31:0]</obj_property>
    </wvobject>
 </wave_config>

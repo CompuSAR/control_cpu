@@ -42,7 +42,7 @@ module io_block#(
     output logic passthrough_ddr_enable,
     input passthrough_ddr_req_ack,
     input passthrough_ddr_rsp_ready,
-    input [63:0] passthrough_ddr_data,
+    input [31:0] passthrough_ddr_data,
 
     output logic passthrough_ddr_ctrl_enable,
     input passthrough_ddr_ctrl_req_ack,
@@ -109,7 +109,7 @@ always_comb begin
 
     if( previous_valid ) begin
         if( is_ddr(previous_address) ) begin
-            data_out = previous_address[2] ? passthrough_ddr_data[63:32] : passthrough_ddr_data[31:0];
+            data_out = passthrough_ddr_data;
             rsp_ready = passthrough_ddr_rsp_ready;
         end else if( is_sram(previous_address) ) begin
             data_out = passthrough_sram_data;

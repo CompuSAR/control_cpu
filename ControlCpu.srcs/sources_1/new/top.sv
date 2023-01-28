@@ -138,7 +138,7 @@ logic ddr_ready, ddr_rsp_ready, ddr_write_data_ready;
 logic ddr_ctrl_cmd_valid, ddr_ctrl_cmd_ready, ddr_ctrl_rsp_ready;
 logic [31:0] ddr_ctrl_rsp_data;
 logic ddr_data_cmd_valid, ddr_data_cmd_ack, ddr_data_rsp_ready;
-logic [31:0] ddr_data_rsp_data;
+logic [127:0] ddr_data_rsp_data;
 logic irq_enable, irq_req_ack, irq_rsp_ready;
 logic [31:0] irq_rsp_data;
 
@@ -161,7 +161,7 @@ io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
     .passthrough_ddr_enable(ddr_data_cmd_valid),
     .passthrough_ddr_req_ack(ddr_data_cmd_ack),
     .passthrough_ddr_rsp_ready(ddr_data_rsp_ready),
-    .passthrough_ddr_data(ddr_data_rsp_data),
+    .passthrough_ddr_data(ddr_data_rsp_data[31:0]),
 
     .passthrough_ddr_ctrl_enable(ddr_ctrl_cmd_valid),
     .passthrough_ddr_ctrl_req_ack(ddr_ctrl_cmd_ready),
