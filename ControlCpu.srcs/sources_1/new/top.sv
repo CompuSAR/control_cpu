@@ -239,7 +239,7 @@ sddr_ctrl ddr_ctrl(
 
     .data_cmd_valid(ddr_data_cmd_valid),
     .data_cmd_ack(ddr_data_cmd_ack),
-    .data_cmd_data_i( {96'b0, control_cpu.dBus_cmd_payload_data} ),
+    .data_cmd_data_i( {96'h0123456789abcdefeca86420, control_cpu.dBus_cmd_payload_data} ),
     .data_cmd_address({ control_cpu.dBus_cmd_payload_address, 2'b00 }),
     .data_cmd_write(control_cpu.dBus_cmd_payload_wr),
     .data_rsp_ready(ddr_data_rsp_ready),

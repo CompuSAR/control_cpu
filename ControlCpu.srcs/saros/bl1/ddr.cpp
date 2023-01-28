@@ -30,6 +30,8 @@ enum DdrRegister {
     Ddr_tRCD,
     Ddr_tRC,
     Ddr_tRP,
+    Ddr_tRFC,
+    Ddr_tREFI,
 };
 
 static constexpr uint32_t DdrCtrl_ResetAll    = 0x0000;
@@ -242,6 +244,8 @@ void ddr_init() {
     reg_write_32( DdrDevice, Ddr_tRCD, 2 );             // ACTIVATE to READ/WRITE is 13.75ns, which is 2 cycles.
     reg_write_32( DdrDevice, Ddr_tRC, 5 );              // ACTIVATE to REFRESH is 48.75ns, which are 5 cycles.
     reg_write_32( DdrDevice, Ddr_tRP, 2 );              // PRECHARGE period is 13.75ns, which is 2 cycles
+    reg_write_32( DdrDevice, Ddr_tRFC, 16 );            // REFRESH to ACTIVATE for 2Gb: minimum 160ns
+    reg_write_32( DdrDevice, Ddr_tREFI, 770 );          // Maximum average periodic refresh: 7812.5ns, so we're setting to 7.7us
 
     reg_write_32( DdrDevice, DdrOverrideAddress, 1<<10 ); // Select long calibration
     override_command(DdrCommands::Calibrate);
