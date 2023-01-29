@@ -3,7 +3,7 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="sim_top_behav.wdb" id="1">
+      <db_ref path="sim_top_func_synth.wdb" id="1">
          <top_modules>
             <top_module name="glbl" />
             <top_module name="sim_top" />
@@ -11,34 +11,21 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="1,035,753.833 ns"></ZoomStartTime>
-      <ZoomEndTime time="1,035,785.234 ns"></ZoomEndTime>
-      <Cursor1Time time="1,035,780.000 ns"></Cursor1Time>
+      <ZoomStartTime time="89,355.649 ns"></ZoomStartTime>
+      <ZoomEndTime time="89,442.360 ns"></ZoomEndTime>
+      <Cursor1Time time="89,380.100 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="199"></NameColumnWidth>
-      <ValueColumnWidth column_width="107"></ValueColumnWidth>
+      <ValueColumnWidth column_width="103"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="62" />
+   <WVObjectSize size="24" />
    <wave_markers>
       <marker label="" time="1035502000" />
       <marker label="" time="861965000" />
       <marker label="" time="1035600000" />
       <marker label="" time="1035650000" />
    </wave_markers>
-   <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
-      <obj_property name="ElementShortName">clk</obj_property>
-      <obj_property name="ObjectShortName">clk</obj_property>
-      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/iob/uart_output/data_in">
-      <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="ElementShortName">data_in[7:0]</obj_property>
-      <obj_property name="ObjectShortName">data_in[7:0]</obj_property>
-      <obj_property name="Radix">ASCIIRADIX</obj_property>
-      <obj_property name="label">UART data</obj_property>
-   </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/iBus_cmd_valid">
       <obj_property name="ElementShortName">iBus_cmd_valid</obj_property>
       <obj_property name="ObjectShortName">iBus_cmd_valid</obj_property>
@@ -47,19 +34,11 @@
       <obj_property name="ElementShortName">iBus_cmd_payload_pc[31:0]</obj_property>
       <obj_property name="ObjectShortName">iBus_cmd_payload_pc[31:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/control_cpu/iBus_rsp_payload_inst">
-      <obj_property name="ElementShortName">iBus_rsp_payload_inst[31:0]</obj_property>
-      <obj_property name="ObjectShortName">iBus_rsp_payload_inst[31:0]</obj_property>
-   </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_valid">
       <obj_property name="ElementShortName">dBus_cmd_valid</obj_property>
       <obj_property name="ObjectShortName">dBus_cmd_valid</obj_property>
       <obj_property name="CustomSignalColor">#800080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_ready">
-      <obj_property name="ElementShortName">dBus_cmd_ready</obj_property>
-      <obj_property name="ObjectShortName">dBus_cmd_ready</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_payload_wr">
       <obj_property name="ElementShortName">dBus_cmd_payload_wr</obj_property>
@@ -67,41 +46,13 @@
       <obj_property name="CustomSignalColor">#FF0000</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_payload_address">
-      <obj_property name="ElementShortName">dBus_cmd_payload_address[31:0]</obj_property>
-      <obj_property name="ObjectShortName">dBus_cmd_payload_address[31:0]</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_payload_data">
       <obj_property name="ElementShortName">dBus_cmd_payload_data[31:0]</obj_property>
       <obj_property name="ObjectShortName">dBus_cmd_payload_data[31:0]</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/dBus_rsp_ready">
-      <obj_property name="ElementShortName">dBus_rsp_ready</obj_property>
-      <obj_property name="ObjectShortName">dBus_rsp_ready</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/control_cpu/dBus_rsp_data">
-      <obj_property name="ElementShortName">dBus_rsp_data[31:0]</obj_property>
-      <obj_property name="ObjectShortName">dBus_rsp_data[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/iob/passthrough_ddr_enable">
-      <obj_property name="ElementShortName">passthrough_ddr_enable</obj_property>
-      <obj_property name="ObjectShortName">passthrough_ddr_enable</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/reset">
-      <obj_property name="ElementShortName">reset</obj_property>
-      <obj_property name="ObjectShortName">reset</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/sim_top/ddr_cmd">
       <obj_property name="ElementShortName">ddr_cmd[3:0]</obj_property>
       <obj_property name="ObjectShortName">ddr_cmd[3:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_phy/in_ddr_clock_i">
-      <obj_property name="ElementShortName">in_ddr_clock_i</obj_property>
-      <obj_property name="ObjectShortName">in_ddr_clock_i</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/ctrl_cmd_ack">
-      <obj_property name="ElementShortName">ctrl_cmd_ack</obj_property>
-      <obj_property name="ObjectShortName">ctrl_cmd_ack</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/ddr3_reset_n">
       <obj_property name="ElementShortName">ddr3_reset_n</obj_property>
@@ -167,123 +118,12 @@
       <obj_property name="ElementShortName">ddr3_dq[15:0]</obj_property>
       <obj_property name="ObjectShortName">ddr3_dq[15:0]</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/cpu_clock_i">
-      <obj_property name="ElementShortName">cpu_clock_i</obj_property>
-      <obj_property name="ObjectShortName">cpu_clock_i</obj_property>
+   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/override_cmd_cpu_send1">
+      <obj_property name="ElementShortName">override_cmd_cpu_send1</obj_property>
+      <obj_property name="ObjectShortName">override_cmd_cpu_send1</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_cmd_valid">
-      <obj_property name="ElementShortName">data_cmd_valid</obj_property>
-      <obj_property name="ObjectShortName">data_cmd_valid</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/data_cmd_address">
-      <obj_property name="ElementShortName">data_cmd_address[26:0]</obj_property>
-      <obj_property name="ObjectShortName">data_cmd_address[26:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_cmd_write">
-      <obj_property name="ElementShortName">data_cmd_write</obj_property>
-      <obj_property name="ObjectShortName">data_cmd_write</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_cmd_ack">
-      <obj_property name="ElementShortName">data_cmd_ack</obj_property>
-      <obj_property name="ObjectShortName">data_cmd_ack</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_rsp_ready">
-      <obj_property name="ElementShortName">data_rsp_ready</obj_property>
-      <obj_property name="ObjectShortName">data_rsp_ready</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/data_cmd_data_i">
-      <obj_property name="ElementShortName">data_cmd_data_i[127:0]</obj_property>
-      <obj_property name="ObjectShortName">data_cmd_data_i[127:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/data_data_o">
-      <obj_property name="ElementShortName">data_data_o[127:0]</obj_property>
-      <obj_property name="ObjectShortName">data_data_o[127:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/ddr3_cke_o">
-      <obj_property name="ElementShortName">ddr3_cke_o</obj_property>
-      <obj_property name="ObjectShortName">ddr3_cke_o</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/ddr3_ras_n_o">
-      <obj_property name="ElementShortName">ddr3_ras_n_o</obj_property>
-      <obj_property name="ObjectShortName">ddr3_ras_n_o</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/ddr3_cas_n_o">
-      <obj_property name="ElementShortName">ddr3_cas_n_o</obj_property>
-      <obj_property name="ObjectShortName">ddr3_cas_n_o</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/ddr3_we_n_o">
-      <obj_property name="ElementShortName">ddr3_we_n_o</obj_property>
-      <obj_property name="ObjectShortName">ddr3_we_n_o</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/ddr3_cs_n_o">
-      <obj_property name="ElementShortName">ddr3_cs_n_o</obj_property>
-      <obj_property name="ObjectShortName">ddr3_cs_n_o</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/ddr3_ba_o">
-      <obj_property name="ElementShortName">ddr3_ba_o[2:0]</obj_property>
-      <obj_property name="ObjectShortName">ddr3_ba_o[2:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/ddr3_addr_o">
-      <obj_property name="ElementShortName">ddr3_addr_o[13:0]</obj_property>
-      <obj_property name="ObjectShortName">ddr3_addr_o[13:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/ddr3_odt_o">
-      <obj_property name="ElementShortName">ddr3_odt_o</obj_property>
-      <obj_property name="ObjectShortName">ddr3_odt_o</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/ddr3_dm_o">
-      <obj_property name="ElementShortName">ddr3_dm_o[1:0]</obj_property>
-      <obj_property name="ObjectShortName">ddr3_dm_o[1:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/ddr3_dq_enable_o">
-      <obj_property name="ElementShortName">ddr3_dq_enable_o</obj_property>
-      <obj_property name="ObjectShortName">ddr3_dq_enable_o</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/ddr3_dq_o">
-      <obj_property name="ElementShortName">ddr3_dq_o[1:0][15:0]</obj_property>
-      <obj_property name="ObjectShortName">ddr3_dq_o[1:0][15:0]</obj_property>
-      <obj_property name="isExpanded"></obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/ddr3_dq_i">
-      <obj_property name="ElementShortName">ddr3_dq_i[1:0][15:0]</obj_property>
-      <obj_property name="ObjectShortName">ddr3_dq_i[1:0][15:0]</obj_property>
-      <obj_property name="isExpanded"></obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_transfer_o">
-      <obj_property name="ElementShortName">data_transfer_o</obj_property>
-      <obj_property name="ObjectShortName">data_transfer_o</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_write_o">
-      <obj_property name="ElementShortName">data_write_o</obj_property>
-      <obj_property name="ObjectShortName">data_write_o</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/ddr_clock_i">
-      <obj_property name="ElementShortName">ddr_clock_i</obj_property>
-      <obj_property name="ObjectShortName">ddr_clock_i</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/ctrl_reset">
-      <obj_property name="ElementShortName">ctrl_reset</obj_property>
-      <obj_property name="ObjectShortName">ctrl_reset</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/bypass">
-      <obj_property name="ElementShortName">bypass</obj_property>
-      <obj_property name="ObjectShortName">bypass</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/write_value">
-      <obj_property name="ElementShortName">write_value[1:0][63:0]</obj_property>
-      <obj_property name="ObjectShortName">write_value[1:0][63:0]</obj_property>
-      <obj_property name="isExpanded"></obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/bank_state_counter">
-      <obj_property name="ElementShortName">bank_state_counter[31:0]</obj_property>
-      <obj_property name="ObjectShortName">bank_state_counter[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/bank_state">
-      <obj_property name="ElementShortName">bank_state[31:0]</obj_property>
-      <obj_property name="ObjectShortName">bank_state[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/state">
-      <obj_property name="ElementShortName">state[31:0]</obj_property>
-      <obj_property name="ObjectShortName">state[31:0]</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/bank_state__0">
+      <obj_property name="ElementShortName">bank_state__0[2:0]</obj_property>
+      <obj_property name="ObjectShortName">bank_state__0[2:0]</obj_property>
    </wvobject>
 </wave_config>

@@ -14,6 +14,7 @@ unsigned int test_buffer[] = {
 };
 
 void bl1_start() {
+    uart_send("0\n");
     ddr_init();
 
     uart_send("1\n");

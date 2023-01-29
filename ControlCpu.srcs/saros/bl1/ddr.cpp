@@ -27,6 +27,7 @@ enum DdrRegister {
     DdrOverrideCommand,
     DdrOverrideAddress,
     DdrClCwl,
+    DdrWriteRecovery,
     Ddr_tRCD,
     Ddr_tRC,
     Ddr_tRP,
@@ -241,6 +242,7 @@ void ddr_init() {
     sleep_cycles(12);   // tMOD
 
     reg_write_32( DdrDevice, DdrClCwl, 6<<16 | 6 );     // CL=6, CWL = 6
+    reg_write_32(DdrDevice, DdrWriteRecovery, 5);
     reg_write_32( DdrDevice, Ddr_tRCD, 2 );             // ACTIVATE to READ/WRITE is 13.75ns, which is 2 cycles.
     reg_write_32( DdrDevice, Ddr_tRC, 5 );              // ACTIVATE to REFRESH is 48.75ns, which are 5 cycles.
     reg_write_32( DdrDevice, Ddr_tRP, 2 );              // PRECHARGE period is 13.75ns, which is 2 cycles
