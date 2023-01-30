@@ -7,7 +7,7 @@ set_property IOSTANDARD LVCMOS15 [get_ports nReset]
 
 set_property PACKAGE_PIN L14 [get_ports uart_output]
 set_property IOSTANDARD LVCMOS33 [get_ports uart_output]
-set_property PULLTYPE PULLUP [get_ports uart_output]
+set_property PULLUP true [get_ports uart_output]
 
 set_property PACKAGE_PIN E11 [get_ports running]
 set_property IOSTANDARD LVCMOS33 [get_ports running]
