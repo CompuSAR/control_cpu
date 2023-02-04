@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
-      <ZoomEndTime time="3,285.000001 us"></ZoomEndTime>
-      <Cursor1Time time="1,126.630000 us"></Cursor1Time>
+      <ZoomStartTime time="1,462.563698 us"></ZoomStartTime>
+      <ZoomEndTime time="1,643.411261 us"></ZoomEndTime>
+      <Cursor1Time time="1,613.270000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="277"></NameColumnWidth>
-      <ValueColumnWidth column_width="91"></ValueColumnWidth>
+      <ValueColumnWidth column_width="79"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="30" />
+   <WVObjectSize size="31" />
    <wave_markers>
       <marker label="" time="1122420000" />
    </wave_markers>
@@ -66,6 +66,10 @@
    <wvobject type="array" fp_name="/sim_top/top_module/control_cpu/dBus_rsp_data">
       <obj_property name="ElementShortName">dBus_rsp_data[31:0]</obj_property>
       <obj_property name="ObjectShortName">dBus_rsp_data[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/ddr/init_done">
+      <obj_property name="ElementShortName">init_done</obj_property>
+      <obj_property name="ObjectShortName">init_done</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/ddr3_reset_n">
       <obj_property name="ElementShortName">ddr3_reset_n</obj_property>

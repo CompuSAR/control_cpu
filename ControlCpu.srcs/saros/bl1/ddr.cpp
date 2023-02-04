@@ -166,11 +166,10 @@ void ddr_init() {
     sleep_ns(360);      // tXPR = tRFC (350ns) + 10ns
 
     write_mode_reg2(
-            1,          // CAS write latency 6 due to DLL disabled
-                        // 0 (5) if DLL is on
+            0,          // CAS write latency 5
             false,      // Manual refersh
-            0,          // Normal selft refresh temperature
-            0           // RTT disabled
+            0,          // Normal self refresh temperature
+            0           // Dynamic ODT (rTT) disabled
         );
     sleep_cycles(4);    // tMRD
 
@@ -195,7 +194,7 @@ void ddr_init() {
 
     write_mode_reg0(
             0,          // Burst length fixed BL8
-            4,          // CAS latency 6 (due to DLL off, default 5)
+            2,          // CAS latency 5
             0,          // Burst type sequential
             true,       // Reset the DLL for the init process (default)
             1,          // Write recovery 5 (tWR=15ns, tCK=10ns at 100MHz. tWR/tCK=1.5. 5 is minimal allowed value.
@@ -209,49 +208,13 @@ void ddr_init() {
 
     sleep_cycles(512);  // tZQinit
 
-    // Initialization complete. Initiate switch to DLL off mode
-
-    // Enter self refresh mode
-    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset); // CKE low will take effect at next override command
-    override_command(DdrCommands::Refresh);
-    sleep_cycles(10);   // tCKSRE + tCKSRX. tCKESR is just 4, and is probably the correct one, but we're playing it safe.
-
-    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke); // CKE high will take effect at next override command
-    override_command(DdrCommands::NoOperation);
-    sleep_ns(360);      // tXS = tRFC + 10ns
-
-    write_mode_reg1(
-            true,       // DLL disabled
-            1,          // Out drive stength 34Ohm (default)
-            1,          // RTT 60ohm (default)
-            0,          // Additive latency disabled (we have enough latency already)
-            false,      // Write leveling disabled
-            false,      // TDQS disabled (and irrelevant for our x16 chip)
-            true        // Output enabled
-        );
-    sleep_cycles(4);    // tMRD
-    write_mode_reg0(
-            0,          // Burst length fixed BL8
-            4,          // CAS latency 6 (due to DLL off, default 5)
-            0,          // Burst type sequential
-            false,      // Don't reset the DLL, as we're not using it (default TRUE)
-            1,          // Write recovery 5 (tWR=15ns, tCK=10ns at 100MHz. tWR/tCK=1.5. 5 is minimal allowed value.
-            0           // Precharge PD DLL off
-        );
-
-    sleep_cycles(12);   // tMOD
-
-    reg_write_32( DdrDevice, DdrClCwl, 6<<16 | 6 );     // CL=6, CWL = 6
+    reg_write_32( DdrDevice, DdrClCwl, 5<<16 | 5 );     // CL=6, CWL = 6
     reg_write_32(DdrDevice, DdrWriteRecovery, 5);
     reg_write_32( DdrDevice, Ddr_tRCD, 2 );             // ACTIVATE to READ/WRITE is 13.75ns, which is 2 cycles.
     reg_write_32( DdrDevice, Ddr_tRC, 5 );              // ACTIVATE to REFRESH is 48.75ns, which are 5 cycles.
     reg_write_32( DdrDevice, Ddr_tRP, 2 );              // PRECHARGE period is 13.75ns, which is 2 cycles
     reg_write_32( DdrDevice, Ddr_tRFC, 16 );            // REFRESH to ACTIVATE for 2Gb: minimum 160ns
     reg_write_32( DdrDevice, Ddr_tREFI, 770 );          // Maximum average periodic refresh: 7812.5ns, so we're setting to 7.7us
-
-    reg_write_32( DdrDevice, DdrOverrideAddress, 1<<10 ); // Select long calibration
-    override_command(DdrCommands::Calibrate);
-    sleep_cycles(256);  // tZQoper
 
     ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke|DdrCtrl_nBypass);
 }
