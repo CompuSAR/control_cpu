@@ -88,7 +88,7 @@ wire clock_feedback;
 clk_converter clocks(
     .clk_in1(board_clock), .reset(1'b0),
     .clk_ctrl_cpu(ctrl_cpu_clock),
-    //.clk_ddr_w(ddr_clock),
+    .clk_ddr(ddr_clock),
     .clk_ddr_90deg(ddr_clock_90deg),
     .clkfb_in(clock_feedback),
     .clkfb_out(clock_feedback),
@@ -225,7 +225,7 @@ wire [15:0] ddr_phy_dq_i[1:0], ddr_phy_dq_o[1:0];
 
 sddr_ctrl ddr_ctrl(
     .cpu_clock_i(ctrl_cpu_clock),
-    //.ddr_clock_i(clk_ddr_w),
+    .ddr_clock_i(ddr_clock),
     .ddr_reset_n_o(ddr_reset_n),
     .ddr_phy_reset_n_o(ddr_phy_reset_n),
 
@@ -263,8 +263,8 @@ sddr_ctrl ddr_ctrl(
 );
 
 sddr_phy_xilinx ddr_phy(
-//     .in_ddr_clock_i(clk_ddr_w)
-     .in_ddr_clock_i(ctrl_cpu_clock)
+     .in_ddr_clock_i(ddr_clock)
+//     .in_ddr_clock_i(ctrl_cpu_clock)
     ,.in_ddr_clock_90deg_i(ddr_clock_90deg)
     ,.in_ddr_reset_n_i(ddr_reset_n)
     ,.in_phy_reset_n_i(ddr_phy_reset_n)
