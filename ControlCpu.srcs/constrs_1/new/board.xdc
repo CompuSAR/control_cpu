@@ -1,4 +1,4 @@
-#create_clock -period 20.000 [get_ports board_clk]
+create_clock -period 20.000 [get_ports board_clock]
 set_property PACKAGE_PIN H13 [get_ports board_clock]
 set_property IOSTANDARD LVCMOS33 [get_ports board_clock]
 

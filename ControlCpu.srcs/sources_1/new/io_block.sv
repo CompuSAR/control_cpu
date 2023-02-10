@@ -59,12 +59,11 @@ module io_block#(
     );
 
 logic [31:0] previous_address, previous_address_next;
-logic previous_valid=0, previous_valid_next, previous_write;
+logic previous_valid=0, previous_valid_next;
 
 always_ff@(posedge clock) begin
     previous_address <= previous_address_next;
     previous_valid <= previous_valid_next;
-    previous_write <= previous_valid_next ? 1'b0 : write;
 end
 
 logic uart_send_data_ready;
@@ -82,7 +81,7 @@ task default_state_current();
     uart_send_data_ready = 1'b0;
     req_ack = 1'b1;
     previous_address_next = address;
-    previous_valid_next = address_valid;
+    previous_valid_next = address_valid && !write;
 
     passthrough_ddr_enable = 1'b0;
     passthrough_ddr_ctrl_enable = 1'b0;
@@ -133,9 +132,6 @@ always_comb begin
                 end
             endcase
         end
-
-        if( previous_write )
-            rsp_ready = 1'b1;   // CPU ignores this on writes anyways
     end
 end
 
