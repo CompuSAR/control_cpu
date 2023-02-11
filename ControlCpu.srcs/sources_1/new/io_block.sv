@@ -59,11 +59,18 @@ module io_block#(
     );
 
 logic [31:0] previous_address, previous_address_next;
-logic previous_valid=0, previous_valid_next;
+logic previous_valid=1'b0;
 
 always_ff@(posedge clock) begin
     previous_address <= previous_address_next;
-    previous_valid <= previous_valid_next;
+
+    if( previous_valid && !rsp_ready )
+        // Previous cycle still waiting for response. Don't advance.
+        previous_valid <= 1'b1;
+    else if( address_valid && req_ack )
+        previous_valid = !write;
+    else
+        previous_valid = 1'b0;
 end
 
 logic uart_send_data_ready;
@@ -81,7 +88,6 @@ task default_state_current();
     uart_send_data_ready = 1'b0;
     req_ack = 1'b1;
     previous_address_next = address;
-    previous_valid_next = address_valid && !write;
 
     passthrough_ddr_enable = 1'b0;
     passthrough_ddr_ctrl_enable = 1'b0;
@@ -141,7 +147,6 @@ always_comb begin
     // Current cycle analysis
     if( previous_valid && !rsp_ready ) begin
         // Previous cycle still waiting for response. Don't advance.
-        previous_valid_next = 1'b1;
         previous_address_next = previous_address;
         req_ack = 1'b0;
     end else begin

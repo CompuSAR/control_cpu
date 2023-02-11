@@ -48,7 +48,7 @@ module top
     inout   wire    [1:0]   ddr3_dqs_n,
     inout   wire    [15:0]  ddr3_dq
 );
-localparam CTRL_CLOCK_HZ = 75781250;
+localparam CTRL_CLOCK_HZ = 101041667;
 
 function automatic [3:0] convert_byte_write( logic we, logic[1:0] address, logic[1:0] size );
     if( we ) begin
@@ -249,7 +249,7 @@ sddr_ctrl#(
     .data_cmd_address({ control_cpu.dBus_cmd_payload_address, 2'b00 }),
     .data_cmd_write(control_cpu.dBus_cmd_payload_wr),
     .data_rsp_ready(ddr_data_rsp_ready),
-    .data_data_o(ddr_data_rsp_data),
+    .data_rsp_data_o(ddr_data_rsp_data),
 
     .ddr3_cs_n_o(ddr_phy_cs_n),
     .ddr3_cke_o(ddr_phy_cke),
