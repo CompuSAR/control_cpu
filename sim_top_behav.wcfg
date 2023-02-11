@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="1,103,449.983 ns"></ZoomStartTime>
-      <ZoomEndTime time="1,103,527.384 ns"></ZoomEndTime>
-      <Cursor1Time time="1,103,464.432 ns"></Cursor1Time>
+      <ZoomStartTime time="465,090.699 ns"></ZoomStartTime>
+      <ZoomEndTime time="465,441.200 ns"></ZoomEndTime>
+      <Cursor1Time time="465,382.783 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="268"></NameColumnWidth>
-      <ValueColumnWidth column_width="60"></ValueColumnWidth>
+      <NameColumnWidth column_width="218"></NameColumnWidth>
+      <ValueColumnWidth column_width="106"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="57" />
+   <WVObjectSize size="67" />
    <wave_markers>
       <marker label="" time="1103462883" />
    </wave_markers>
@@ -79,6 +79,50 @@
       <obj_property name="ElementShortName">dBus_rsp_data[31:0]</obj_property>
       <obj_property name="ObjectShortName">dBus_rsp_data[31:0]</obj_property>
    </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/timer_interrupt/wait_cycle">
+      <obj_property name="ElementShortName">wait_cycle[63:0]</obj_property>
+      <obj_property name="ObjectShortName">wait_cycle[63:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/timer_interrupt/cycles_counter">
+      <obj_property name="ElementShortName">cycles_counter[63:0]</obj_property>
+      <obj_property name="ObjectShortName">cycles_counter[63:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/\cycles_compare[0].gt ">
+      <obj_property name="ElementShortName">\cycles_compare[0].gt </obj_property>
+      <obj_property name="ObjectShortName">\cycles_compare[0].gt </obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/\cycles_compare[0].eq ">
+      <obj_property name="ElementShortName">\cycles_compare[0].eq </obj_property>
+      <obj_property name="ObjectShortName">\cycles_compare[0].eq </obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/\cycles_compare[1].gt ">
+      <obj_property name="ElementShortName">\cycles_compare[1].gt </obj_property>
+      <obj_property name="ObjectShortName">\cycles_compare[1].gt </obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/\cycles_compare[1].eq ">
+      <obj_property name="ElementShortName">\cycles_compare[1].eq </obj_property>
+      <obj_property name="ObjectShortName">\cycles_compare[1].eq </obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/\cycles_compare[2].gt ">
+      <obj_property name="ElementShortName">\cycles_compare[2].gt </obj_property>
+      <obj_property name="ObjectShortName">\cycles_compare[2].gt </obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/\cycles_compare[2].eq ">
+      <obj_property name="ElementShortName">\cycles_compare[2].eq </obj_property>
+      <obj_property name="ObjectShortName">\cycles_compare[2].eq </obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/\cycles_compare[3].gt ">
+      <obj_property name="ElementShortName">\cycles_compare[3].gt </obj_property>
+      <obj_property name="ObjectShortName">\cycles_compare[3].gt </obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/\cycles_compare[3].eq ">
+      <obj_property name="ElementShortName">\cycles_compare[3].eq </obj_property>
+      <obj_property name="ObjectShortName">\cycles_compare[3].eq </obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/wait_expired">
+      <obj_property name="ElementShortName">wait_expired</obj_property>
+      <obj_property name="ObjectShortName">wait_expired</obj_property>
+   </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/iob/previous_valid">
       <obj_property name="ElementShortName">previous_valid</obj_property>
       <obj_property name="ObjectShortName">previous_valid</obj_property>
@@ -102,12 +146,8 @@
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/bank_state_counter">
-      <obj_property name="ElementShortName">bank_state_counter[31:0]</obj_property>
-      <obj_property name="ObjectShortName">bank_state_counter[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/bank_refersh_counter">
-      <obj_property name="ElementShortName">bank_refersh_counter[31:0]</obj_property>
-      <obj_property name="ObjectShortName">bank_refersh_counter[31:0]</obj_property>
+      <obj_property name="ElementShortName">bank_state_counter[16:0]</obj_property>
+      <obj_property name="ObjectShortName">bank_state_counter[16:0]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_cmd_valid_cpu">
       <obj_property name="ElementShortName">data_cmd_valid_cpu</obj_property>

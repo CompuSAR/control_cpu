@@ -57,6 +57,12 @@ always_comb begin
     end
 end
 
+logic wait_expired;
+
+always_ff@(posedge clock) begin
+    wait_expired <= wait_cycle <= cycles_counter;
+end
+
 always_comb begin
     // Handle response
     cycles_counter_save_flag = 1'b0;
@@ -67,7 +73,7 @@ always_comb begin
         rsp_valid_o = 1'b1;
         case( pending_address )
             16'h0000: begin     // Halt
-                if(wait_cycle > cycles_counter) begin
+                if(!wait_expired) begin
                     rsp_valid_o = 1'b0;
                 end else begin
                     rsp_valid_o = 1'b1;
