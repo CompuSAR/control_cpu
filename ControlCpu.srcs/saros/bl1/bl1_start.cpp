@@ -5,64 +5,54 @@
 
 extern "C" void bl1_start();
 
-extern volatile unsigned int DDR_MEMORY[256*1024*1024/4];
+static constexpr unsigned int FIBONACCI_COEF = 0x9E3779B9;
+static constexpr unsigned int RANDOM_WALK_COEF = 0x26fcb789;
 
-unsigned int test_buffer[] = {
-    0x70befbfb,
-    0xe4be39ff,
-    0xcd58d3be
-};
+static constexpr unsigned int MEMORY_SIZE=32*1024*1024/4;
+extern volatile unsigned int DDR_MEMORY[MEMORY_SIZE];
 
 void bl1_start() {
-    uart_send("0\n");
+    uart_send("Initializing memory\n");
     ddr_init();
 
-    uart_send("1\n");
-    DDR_MEMORY[0]=0x75c8f355;
-    uart_send("2\n");
-    DDR_MEMORY[1]=0x252505f5;
-    uint32_t mem = DDR_MEMORY[0];
-    print_hex(mem);
-    uart_send("3\n");
+    uart_send("Memory initialized\n");
 
-    mem = DDR_MEMORY[1];
-    print_hex(mem);
-    uart_send('\n');
+    for( unsigned int i=0; i<MEMORY_SIZE; ++i ) {
+        if( i%(1024*1024/4)==0 ) {
+            uart_send("Filled ");
+            print_hex(i/(1024*1024/4));
+            uart_send(" MB\n");
+        }
 
-    mem = DDR_MEMORY[1024];
-    print_hex(mem);
-    uart_send('\n');
-
-    uart_send("Hello, world\n");
-    mem = DDR_MEMORY[0];
-    print_hex(mem);
-    uart_send('\n');
-
-    mem = DDR_MEMORY[32];
-    print_hex(mem);
-    uart_send('\n');
-
-    DDR_MEMORY[0] = 12;
-    mem = DDR_MEMORY[16];
-    print_hex(mem);
-
-    uart_send("\nWorld's still here\n");
-
-    mem = DDR_MEMORY[16];
-    print_hex(mem);
-    uart_send('\n');
-
-    mem = DDR_MEMORY[32];
-    print_hex(mem);
-    uart_send('\n');
-
-    if( DDR_MEMORY[0]==12 )
-        uart_send("Verified\n");
-    else {
-        uart_send("Verification failed\n");
-        print_hex(DDR_MEMORY[1]);
-        uart_send('\n');
+        unsigned int j = i; //(i*RANDOM_WALK_COEF) % MEMORY_SIZE;
+        DDR_MEMORY[ j ] = j*FIBONACCI_COEF;
     }
+
+    uart_send("Filled all memory. Beginning verify.\n");
+
+    unsigned int num = 0;
+    for( unsigned int i=0; i<MEMORY_SIZE; ++i ) {
+        if( i%(1024*1024/4)==0 ) {
+            uart_send("Verified ");
+            print_hex(i/(1024*1024/4));
+            uart_send(" MB\n");
+        }
+
+        unsigned int val=DDR_MEMORY[ i ];
+        if( val != num ) {
+            uart_send("Verification failed: Memory location ");
+            print_hex(i*4);
+            uart_send(" should have been ");
+            print_hex(num);
+            uart_send(". Instead it's ");
+            print_hex(val);
+            uart_send("\n");
+        }
+
+        num+=FIBONACCI_COEF;
+    }
+
+    uart_send("Verification complete\n");
 
     halt();
 

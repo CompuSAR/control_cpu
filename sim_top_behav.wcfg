@@ -11,17 +11,17 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="465,090.699 ns"></ZoomStartTime>
-      <ZoomEndTime time="465,441.200 ns"></ZoomEndTime>
-      <Cursor1Time time="465,382.783 ns"></Cursor1Time>
+      <ZoomStartTime time="1,103,476.610 ns"></ZoomStartTime>
+      <ZoomEndTime time="1,103,547.111 ns"></ZoomEndTime>
+      <Cursor1Time time="1,103,535.360 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="218"></NameColumnWidth>
-      <ValueColumnWidth column_width="106"></ValueColumnWidth>
+      <ValueColumnWidth column_width="102"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="67" />
+   <WVObjectSize size="59" />
    <wave_markers>
-      <marker label="" time="1103462883" />
+      <marker label="" time="1103492474" />
    </wave_markers>
    <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/cpu_clock_i">
       <obj_property name="ElementShortName">cpu_clock_i</obj_property>
@@ -86,38 +86,6 @@
    <wvobject type="array" fp_name="/sim_top/top_module/timer_interrupt/cycles_counter">
       <obj_property name="ElementShortName">cycles_counter[63:0]</obj_property>
       <obj_property name="ObjectShortName">cycles_counter[63:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/\cycles_compare[0].gt ">
-      <obj_property name="ElementShortName">\cycles_compare[0].gt </obj_property>
-      <obj_property name="ObjectShortName">\cycles_compare[0].gt </obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/\cycles_compare[0].eq ">
-      <obj_property name="ElementShortName">\cycles_compare[0].eq </obj_property>
-      <obj_property name="ObjectShortName">\cycles_compare[0].eq </obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/\cycles_compare[1].gt ">
-      <obj_property name="ElementShortName">\cycles_compare[1].gt </obj_property>
-      <obj_property name="ObjectShortName">\cycles_compare[1].gt </obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/\cycles_compare[1].eq ">
-      <obj_property name="ElementShortName">\cycles_compare[1].eq </obj_property>
-      <obj_property name="ObjectShortName">\cycles_compare[1].eq </obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/\cycles_compare[2].gt ">
-      <obj_property name="ElementShortName">\cycles_compare[2].gt </obj_property>
-      <obj_property name="ObjectShortName">\cycles_compare[2].gt </obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/\cycles_compare[2].eq ">
-      <obj_property name="ElementShortName">\cycles_compare[2].eq </obj_property>
-      <obj_property name="ObjectShortName">\cycles_compare[2].eq </obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/\cycles_compare[3].gt ">
-      <obj_property name="ElementShortName">\cycles_compare[3].gt </obj_property>
-      <obj_property name="ObjectShortName">\cycles_compare[3].gt </obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/\cycles_compare[3].eq ">
-      <obj_property name="ElementShortName">\cycles_compare[3].eq </obj_property>
-      <obj_property name="ObjectShortName">\cycles_compare[3].eq </obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/wait_expired">
       <obj_property name="ElementShortName">wait_expired</obj_property>
