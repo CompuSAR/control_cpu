@@ -235,7 +235,7 @@ sddr_ctrl#(
     .tRC(15),           // 48.75ns
     .tRP(5),            // 13.75ns
     .tRFC(49),          // 160ns minimum
-    .tREFI(2383)        // 7.8us
+    .tREFI(2365)        // 7.8us
 ) ddr_ctrl(
     .cpu_clock_i(ctrl_cpu_clock),
     .ddr_clock_i(ddr_clock),
