@@ -48,7 +48,8 @@ module top
     inout   wire    [1:0]   ddr3_dqs_n,
     inout   wire    [15:0]  ddr3_dq
 );
-localparam CTRL_CLOCK_HZ = 101041667;
+//localparam CTRL_CLOCK_HZ = 101041667;
+localparam CTRL_CLOCK_HZ =86607143;
 
 function automatic [3:0] convert_byte_write( logic we, logic[1:0] address, logic[1:0] size );
     if( we ) begin
@@ -235,7 +236,7 @@ sddr_ctrl#(
     .tRC(15),           // 48.75ns
     .tRP(5),            // 13.75ns
     .tRFC(49),          // 160ns minimum
-    .tREFI(2365)        // 7.8us
+    .tREFI(674)         // 7.8us at CPU clock
 ) ddr_ctrl(
     .cpu_clock_i(ctrl_cpu_clock),
     .ddr_clock_i(ddr_clock),
