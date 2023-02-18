@@ -141,6 +141,8 @@ logic ddr_data_cmd_valid, ddr_data_cmd_ack, ddr_data_rsp_ready;
 logic [127:0] ddr_data_rsp_data;
 logic irq_enable, irq_req_ack, irq_rsp_ready;
 logic [31:0] irq_rsp_data;
+logic gpio_enable, gpio_req_ack, gpio_rsp_ready;
+logic [31:0] gpio_rsp_data;
 
 io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
     .clock(ctrl_cpu_clock),
@@ -172,6 +174,11 @@ io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
     .passthrough_irq_req_ack(irq_req_ack),
     .passthrough_irq_rsp_data(irq_rsp_data),
     .passthrough_irq_rsp_ready(irq_rsp_ready),
+
+    .passthrough_gpio_enable(gpio_enable),
+    .passthrough_gpio_req_ack(gpio_req_ack),
+    .passthrough_gpio_rsp_data(gpio_rsp_data),
+    .passthrough_gpio_rsp_ready(gpio_rsp_ready),
 
     .uart_tx(uart_tx),
     .uart_rx(uart_rx)
@@ -316,6 +323,21 @@ timer_int_ctrl#(.CLOCK_HZ(CTRL_CLOCK_HZ)) timer_interrupt(
 
     .rsp_data_o(irq_rsp_data),
     .rsp_valid_o(irq_rsp_ready)
+);
+
+gpio#(.NUM_IN_PORTS(1)) gpio(
+    .clock_i(ctrl_cpu_clock),
+    .req_addr_i(control_cpu.dBus_cmd_payload_address[15:0]),
+    .req_data_i(control_cpu.dBus_cmd_payload_data),
+    .req_write_i(control_cpu.dBus_cmd_payload_wr),
+    .req_valid_i(gpio_enable),
+    .req_ready_o(gpio_req_ack),
+
+    .rsp_data_o(gpio_rsp_data),
+    .rsp_valid_o(gpio_rsp_ready),
+
+    .gp_in( '{ { 31'b0, uart_output } } ),
+    .gp_out()
 );
 
 endmodule

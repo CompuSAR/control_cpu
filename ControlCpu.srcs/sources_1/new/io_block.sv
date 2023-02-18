@@ -49,6 +49,11 @@ module io_block#(
     input passthrough_ddr_ctrl_rsp_ready,
     input [31:0] passthrough_ddr_ctrl_data,
 
+    output logic passthrough_gpio_enable,
+    input passthrough_gpio_req_ack,
+    input passthrough_gpio_rsp_ready,
+    input [31:0] passthrough_gpio_rsp_data,
+
     output logic passthrough_irq_enable,
     input passthrough_irq_req_ack,
     input passthrough_irq_rsp_ready,
@@ -92,6 +97,7 @@ task default_state_current();
     passthrough_ddr_enable = 1'b0;
     passthrough_ddr_ctrl_enable = 1'b0;
     passthrough_sram_enable = 1'b0;
+    passthrough_gpio_enable = 1'b0;
     passthrough_irq_enable = 1'b0;
 endtask
 
@@ -130,7 +136,8 @@ always_comb begin
                     data_out = passthrough_ddr_ctrl_data;
                 end
                 8'h2: begin                     // GPIO
-                    rsp_ready = 1'b1;
+                    rsp_ready = passthrough_gpio_rsp_ready;
+                    data_out = passthrough_gpio_rsp_data;
                 end
                 8'h3: begin                     // Interrupt controller
                     rsp_ready = passthrough_irq_rsp_ready;
@@ -171,7 +178,8 @@ always_comb begin
                     req_ack = 1'b1;
                 end
                 8'h2: begin                 // GPIO
-                    req_ack = 1'b1;
+                    passthrough_gpio_enable = 1'b1;
+                    req_ack = passthrough_gpio_req_ack;
                 end
                 8'h3: begin                 // Interrupt/timer controller
                     passthrough_irq_enable = 1'b1;

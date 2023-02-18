@@ -57,20 +57,20 @@
     <Option Name="IPUserFilesDir" Val="$PIPUSERFILESDIR"/>
     <Option Name="IPStaticSourceDir" Val="$PIPUSERFILESDIR/ipstatic"/>
     <Option Name="EnableBDX" Val="FALSE"/>
-    <Option Name="WTXSimLaunchSim" Val="571"/>
+    <Option Name="WTXSimLaunchSim" Val="599"/>
     <Option Name="WTModelSimLaunchSim" Val="0"/>
     <Option Name="WTQuestaLaunchSim" Val="0"/>
     <Option Name="WTIesLaunchSim" Val="0"/>
     <Option Name="WTVcsLaunchSim" Val="0"/>
     <Option Name="WTRivieraLaunchSim" Val="0"/>
     <Option Name="WTActivehdlLaunchSim" Val="0"/>
-    <Option Name="WTXSimExportSim" Val="132"/>
-    <Option Name="WTModelSimExportSim" Val="132"/>
-    <Option Name="WTQuestaExportSim" Val="132"/>
+    <Option Name="WTXSimExportSim" Val="139"/>
+    <Option Name="WTModelSimExportSim" Val="139"/>
+    <Option Name="WTQuestaExportSim" Val="139"/>
     <Option Name="WTIesExportSim" Val="0"/>
-    <Option Name="WTVcsExportSim" Val="132"/>
-    <Option Name="WTRivieraExportSim" Val="132"/>
-    <Option Name="WTActivehdlExportSim" Val="132"/>
+    <Option Name="WTVcsExportSim" Val="139"/>
+    <Option Name="WTRivieraExportSim" Val="139"/>
+    <Option Name="WTActivehdlExportSim" Val="139"/>
     <Option Name="GenerateIPUpgradeLog" Val="TRUE"/>
     <Option Name="XSimRadix" Val="hex"/>
     <Option Name="XSimTimeUnit" Val="ns"/>
@@ -96,6 +96,13 @@
         </FileInfo>
       </File>
       <File Path="$PSRCDIR/sources_1/new/clk_converter.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/new/gpio.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>

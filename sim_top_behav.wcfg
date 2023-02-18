@@ -11,17 +11,18 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="1,103,476.610 ns"></ZoomStartTime>
-      <ZoomEndTime time="1,103,547.111 ns"></ZoomEndTime>
-      <Cursor1Time time="1,103,535.360 ns"></Cursor1Time>
+      <ZoomStartTime time="1,555,991.584 ns"></ZoomStartTime>
+      <ZoomEndTime time="1,556,147.985 ns"></ZoomEndTime>
+      <Cursor1Time time="1,556,121.751 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="218"></NameColumnWidth>
-      <ValueColumnWidth column_width="102"></ValueColumnWidth>
+      <ValueColumnWidth column_width="94"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="59" />
    <wave_markers>
-      <marker label="" time="1103492474" />
+      <marker label="" time="758260309" />
+      <marker label="" time="758893711" />
    </wave_markers>
    <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/cpu_clock_i">
       <obj_property name="ElementShortName">cpu_clock_i</obj_property>
@@ -194,7 +195,10 @@
       <obj_property name="ObjectShortName">shift_value[1:0][63:0]</obj_property>
       <obj_property name="CustomSignalColor">#008080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
-      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_phy/ctl_data_write_i">
+      <obj_property name="ElementShortName">ctl_data_write_i</obj_property>
+      <obj_property name="ObjectShortName">ctl_data_write_i</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/ddr/init_done">
       <obj_property name="ElementShortName">init_done</obj_property>
@@ -203,10 +207,6 @@
    <wvobject type="logic" fp_name="/sim_top/top_module/ddr3_reset_n">
       <obj_property name="ElementShortName">ddr3_reset_n</obj_property>
       <obj_property name="ObjectShortName">ddr3_reset_n</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_phy/naked_clock_signal">
-      <obj_property name="ElementShortName">naked_clock_signal</obj_property>
-      <obj_property name="ObjectShortName">naked_clock_signal</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/ddr3_cke">
       <obj_property name="ElementShortName">ddr3_cke[0:0]</obj_property>

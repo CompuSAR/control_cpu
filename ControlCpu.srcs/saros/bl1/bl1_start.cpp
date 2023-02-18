@@ -25,7 +25,20 @@ void bl1_start() {
         }
 
         unsigned int j = i; //(i*RANDOM_WALK_COEF) % MEMORY_SIZE;
-        DDR_MEMORY[ j ] = j*FIBONACCI_COEF;
+        unsigned int val = j*FIBONACCI_COEF;
+        DDR_MEMORY[ j ] = val;
+        unsigned int readback = DDR_MEMORY[ j ];
+        if( j<100 && val!=readback ) {
+            uart_send("Verify after read failed at ");
+            print_hex(j);
+            uart_send(": wrote ");
+            print_hex(val);
+            uart_send(", read back ");
+            print_hex(readback);
+            uart_send(", reread ");
+            print_hex(DDR_MEMORY[ j ]);
+            uart_send("\n");
+        }
     }
 
     uart_send("Filled all memory. Beginning verify.\n");
