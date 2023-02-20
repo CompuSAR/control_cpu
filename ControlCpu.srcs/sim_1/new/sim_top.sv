@@ -25,7 +25,7 @@ module sim_top(
     );
 
 logic clock, nReset;
-logic running;
+logic debug;
 
 assign nReset = 1;
 
@@ -33,7 +33,7 @@ wire    [1:0]   ddr3_dqs_p;
 wire    [1:0]   ddr3_dqs_n;
 wire    [15:0]  ddr3_dq;
 
-top top_module(.board_clock(clock), .nReset(nReset), .uart_output(1'b0), .running(running), .ddr3_dqs_p(ddr3_dqs_p), .ddr3_dqs_n(ddr3_dqs_n), .ddr3_dq(ddr3_dq));
+top top_module(.board_clock(clock), .nReset(nReset), .uart_output(1'b0), .debug(debug), .ddr3_dqs_p(ddr3_dqs_p), .ddr3_dqs_n(ddr3_dqs_n), .ddr3_dq(ddr3_dq));
 
 ddr3_model ddr(
     .rst_n      (top_module.ddr3_reset_n),

@@ -24,7 +24,7 @@ MMCME2_BASE#(
     .CLKOUT1_DIVIDE(7),         // 86.6071428571MHz output
     .CLKOUT2_DIVIDE(2),         // 303.125MHz output
     .CLKOUT3_DIVIDE(2),         // 303.125MHz output
-    .CLKOUT3_PHASE(90)
+    .CLKOUT3_PHASE(135)
 ) mmcm(
     .CLKIN1(clk_in1),
 

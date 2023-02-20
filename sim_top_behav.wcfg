@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="1,555,991.584 ns"></ZoomStartTime>
-      <ZoomEndTime time="1,556,147.985 ns"></ZoomEndTime>
-      <Cursor1Time time="1,556,121.751 ns"></Cursor1Time>
+      <ZoomStartTime time="1,160,481.971 ns"></ZoomStartTime>
+      <ZoomEndTime time="1,160,840.472 ns"></ZoomEndTime>
+      <Cursor1Time time="1,160,780.721 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="218"></NameColumnWidth>
-      <ValueColumnWidth column_width="94"></ValueColumnWidth>
+      <ValueColumnWidth column_width="90"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="59" />
+   <WVObjectSize size="67" />
    <wave_markers>
       <marker label="" time="758260309" />
       <marker label="" time="758893711" />
@@ -177,6 +177,40 @@
    <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_transfer_o">
       <obj_property name="ElementShortName">data_transfer_o</obj_property>
       <obj_property name="ObjectShortName">data_transfer_o</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_cmd_valid">
+      <obj_property name="ElementShortName">data_cmd_valid</obj_property>
+      <obj_property name="ObjectShortName">data_cmd_valid</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/data_cmd_cdc/src_in">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">src_in[155:0]</obj_property>
+      <obj_property name="ObjectShortName">src_in[155:0]</obj_property>
+      <obj_property name="label">data cdc src_in</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_cmd_cdc/src_send">
+      <obj_property name="ElementShortName">src_send</obj_property>
+      <obj_property name="ObjectShortName">src_send</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_cmd_cdc/src_rcv">
+      <obj_property name="ElementShortName">src_rcv</obj_property>
+      <obj_property name="ObjectShortName">src_rcv</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/data_cmd_cdc/dest_out">
+      <obj_property name="ElementShortName">dest_out[155:0]</obj_property>
+      <obj_property name="ObjectShortName">dest_out[155:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_cmd_cdc/dest_ack">
+      <obj_property name="ElementShortName">dest_ack</obj_property>
+      <obj_property name="ObjectShortName">dest_ack</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_cmd_cdc/dest_req">
+      <obj_property name="ElementShortName">dest_req</obj_property>
+      <obj_property name="ObjectShortName">dest_req</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_cmd_ack">
+      <obj_property name="ElementShortName">data_cmd_ack</obj_property>
+      <obj_property name="ObjectShortName">data_cmd_ack</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/read_data_ddr">
       <obj_property name="ElementShortName">read_data_ddr[127:0]</obj_property>

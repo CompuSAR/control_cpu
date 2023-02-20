@@ -79,6 +79,7 @@ always_ff@(posedge clock) begin
 end
 
 logic uart_send_data_ready;
+logic uart_recv_ready;
 
 uart_send#(.ClockDivider(CLOCK_HZ/115200)) // 115,200 BAUD at 100Mhz clock
 uart_output(
@@ -86,7 +87,8 @@ uart_output(
     .data_in(data_in[7:0]),
     .data_in_ready(uart_send_data_ready),
 
-    .out_bit(uart_tx)
+    .out_bit(uart_tx),
+    .receive_ready(uart_recv_ready)
 );
 
 task default_state_current();
@@ -167,7 +169,7 @@ always_comb begin
             case( address[23:16] )
                 8'h0: begin                // UART
                     if( write ) begin
-                        req_ack = uart_output.receive_ready;
+                        req_ack = uart_recv_ready;
                         uart_send_data_ready = 1'b1;
                     end else begin
                         req_ack = 1;        // XXX No UART receive yet

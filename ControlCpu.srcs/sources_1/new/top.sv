@@ -26,7 +26,7 @@ module top
     input nReset,
     input uart_output,
 
-    output logic running,
+    output logic debug,
 
     output uart_tx,
     input uart_rx,
@@ -97,9 +97,18 @@ clk_converter clocks(
 );
 
 logic           ctrl_iBus_cmd_ready;
+logic           ctrl_iBus_cmd_valid;
+logic [31:0]    ctrl_iBus_cmd_pc;
 logic           ctrl_iBus_rsp_valid;
 logic           ctrl_iBus_rsp_payload_error;
 logic [31:0]    ctrl_iBus_rsp_payload_inst;
+
+logic           ctrl_dBus_cmd_valid;
+logic [31:0]    ctrl_dBus_cmd_payload_address;
+logic           ctrl_dBus_cmd_payload_wr;
+logic [31:0]    ctrl_dBus_cmd_payload_data;
+logic [1:0]     ctrl_dBus_cmd_payload_size;
+
 
 logic           ctrl_dBus_cmd_ready;
 logic           ctrl_dBus_rsp_ready;
@@ -111,6 +120,7 @@ logic           ctrl_interrupt;
 logic           ctrl_software_interrupt;
 
 
+
 VexRiscv control_cpu(
     .clk(ctrl_cpu_clock),
     .reset(!nReset || !clocks_locked),
@@ -120,10 +130,17 @@ VexRiscv control_cpu(
     .softwareInterrupt(1'b0),
 
     .iBus_cmd_ready(1'b1),
+    .iBus_cmd_valid(ctrl_iBus_cmd_valid),
+    .iBus_cmd_payload_pc(ctrl_iBus_cmd_pc),
     .iBus_rsp_valid(ctrl_iBus_rsp_valid),
     .iBus_rsp_payload_error(ctrl_iBus_rsp_payload_error),
     .iBus_rsp_payload_inst(ctrl_iBus_rsp_payload_inst),
 
+    .dBus_cmd_valid(ctrl_dBus_cmd_valid),
+    .dBus_cmd_payload_address(ctrl_dBus_cmd_payload_address),
+    .dBus_cmd_payload_wr(ctrl_dBus_cmd_payload_wr),
+    .dBus_cmd_payload_data(ctrl_dBus_cmd_payload_data),
+    .dBus_cmd_payload_size(ctrl_dBus_cmd_payload_size),
     .dBus_cmd_ready(ctrl_dBus_cmd_ready),
     .dBus_rsp_ready(ctrl_dBus_rsp_ready),
     .dBus_rsp_error(ctrl_dBus_rsp_error),
@@ -133,6 +150,7 @@ VexRiscv control_cpu(
 assign ctrl_iBus_rsp_payload_error = 0;
 assign ctrl_dBus_rsp_error = 0;
 
+logic sram_enable;
 logic sram_dBus_rsp_ready;
 logic [31:0] sram_dBus_rsp_data;
 logic ddr_ready, ddr_rsp_ready, ddr_write_data_ready;
@@ -148,15 +166,16 @@ logic [31:0] gpio_rsp_data;
 io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
     .clock(ctrl_cpu_clock),
 
-    .address(control_cpu.dBus_cmd_payload_address),
-    .address_valid(control_cpu.dBus_cmd_valid),
-    .write(control_cpu.dBus_cmd_payload_wr),
-    .data_in(control_cpu.dBus_cmd_payload_data),
+    .address(ctrl_dBus_cmd_payload_address),
+    .address_valid(ctrl_dBus_cmd_valid),
+    .write(ctrl_dBus_cmd_payload_wr),
+    .data_in(ctrl_dBus_cmd_payload_data),
     .data_out(ctrl_dBus_rsp_data),
 
     .req_ack(ctrl_dBus_cmd_ready),
     .rsp_ready(ctrl_dBus_rsp_ready),
 
+    .passthrough_sram_enable(sram_enable),
     .passthrough_sram_req_ack(1'b1),
     .passthrough_sram_rsp_ready(sram_dBus_rsp_ready),
     .passthrough_sram_data(sram_dBus_rsp_data),
@@ -187,27 +206,27 @@ io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
 
 always_ff@(posedge ctrl_cpu_clock)
 begin
-    ctrl_iBus_rsp_valid <= control_cpu.iBus_cmd_valid;
-    sram_dBus_rsp_ready <= iob.passthrough_sram_enable;
+    ctrl_iBus_rsp_valid <= ctrl_iBus_cmd_valid;
+    sram_dBus_rsp_ready <= sram_enable;
 end
 
 blk_mem sram(
-    .addra( control_cpu.dBus_cmd_payload_address[14:2] ),
+    .addra( ctrl_dBus_cmd_payload_address[14:2] ),
     .clka( ctrl_cpu_clock),
-    .dina( control_cpu.dBus_cmd_payload_data ),
+    .dina( ctrl_dBus_cmd_payload_data ),
     .douta( sram_dBus_rsp_data ),
-    .ena( iob.passthrough_sram_enable ),
+    .ena( sram_enable ),
     .wea( convert_byte_write(
-        control_cpu.dBus_cmd_payload_wr,
-        control_cpu.dBus_cmd_payload_address,
-        control_cpu.dBus_cmd_payload_size)
+        ctrl_dBus_cmd_payload_wr,
+        ctrl_dBus_cmd_payload_address,
+        ctrl_dBus_cmd_payload_size)
     ),
 
-    .addrb( control_cpu.iBus_cmd_payload_pc[14:2] ),
+    .addrb( ctrl_iBus_cmd_pc[14:2] ),
     .clkb( ctrl_cpu_clock ),
     .dinb( 32'hX ),
     .doutb( ctrl_iBus_rsp_payload_inst ),
-    .enb( control_cpu.iBus_cmd_valid ),
+    .enb( ctrl_iBus_cmd_valid ),
     .web( 4'b0 )
 );
 
@@ -226,7 +245,6 @@ wire ddr_phy_we_n;
 wire ddr_phy_cs_n;
 wire [2:0] ddr_phy_ba;
 wire [13:0] ddr_phy_addr;
-wire [1:0] ddr_phy_dm;
 wire [1:0] ddr_phy_dqs_i, ddr_phy_dqs_o;
 wire ddr_phy_data_transfer, ddr_phy_data_write;
 wire [15:0] ddr_phy_dq_i[1:0], ddr_phy_dq_o[1:0];
@@ -244,18 +262,18 @@ sddr_ctrl#(
     .ddr_phy_reset_n_o(ddr_phy_reset_n),
 
     .ctrl_cmd_valid(ddr_ctrl_cmd_valid),
-    .ctrl_cmd_address(control_cpu.dBus_cmd_payload_address),
-    .ctrl_cmd_data(control_cpu.dBus_cmd_payload_data),
-    .ctrl_cmd_write(control_cpu.dBus_cmd_payload_wr),
+    .ctrl_cmd_address(ctrl_dBus_cmd_payload_address[15:0]),
+    .ctrl_cmd_data(ctrl_dBus_cmd_payload_data),
+    .ctrl_cmd_write(ctrl_dBus_cmd_payload_wr),
     .ctrl_cmd_ack(ddr_ctrl_cmd_ready),
     .ctrl_rsp_ready(ddr_ctrl_rsp_ready),
     .ctrl_rsp_data(ddr_ctrl_rsp_data),
 
     .data_cmd_valid(ddr_data_cmd_valid),
     .data_cmd_ack(ddr_data_cmd_ack),
-    .data_cmd_data_i( {96'h0123456789abcdefeca86420, control_cpu.dBus_cmd_payload_data} ),
-    .data_cmd_address({ control_cpu.dBus_cmd_payload_address, 2'b00 }),
-    .data_cmd_write(control_cpu.dBus_cmd_payload_wr),
+    .data_cmd_data_i( {96'h0123456789abcdefeca86420, ctrl_dBus_cmd_payload_data} ),
+    .data_cmd_address({ ctrl_dBus_cmd_payload_address, 2'b00 }),
+    .data_cmd_write(ctrl_dBus_cmd_payload_wr),
     .data_rsp_ready(ddr_data_rsp_ready),
     .data_rsp_data_o(ddr_data_rsp_data),
 
@@ -267,8 +285,6 @@ sddr_ctrl#(
     .ddr3_ba_o(ddr_phy_ba),
     .ddr3_addr_o(ddr_phy_addr),
     .ddr3_odt_o(ddr_phy_odt),
-    .ddr3_dm_o(ddr_phy_dm),
-    .ddr3_dq_enable_o(ddr_phy_dq_enable),
     .ddr3_dq_o(ddr_phy_dq_o),
     .ddr3_dq_i(ddr_phy_dq_i),
 
@@ -277,7 +293,8 @@ sddr_ctrl#(
 );
 
 sddr_phy_xilinx ddr_phy(
-     .in_ddr_clock_i(ddr_clock)
+     .in_cpu_clock_i(ctrl_cpu_clock)
+    ,.in_ddr_clock_i(ddr_clock)
 //     .in_ddr_clock_i(ctrl_cpu_clock)
     ,.in_ddr_clock_90deg_i(ddr_clock_90deg)
     ,.in_ddr_reset_n_i(ddr_reset_n)
@@ -316,9 +333,9 @@ sddr_phy_xilinx ddr_phy(
 
 timer_int_ctrl#(.CLOCK_HZ(CTRL_CLOCK_HZ)) timer_interrupt(
     .clock(ctrl_cpu_clock),
-    .req_addr_i(control_cpu.dBus_cmd_payload_address[15:0]),
-    .req_data_i(control_cpu.dBus_cmd_payload_data),
-    .req_write_i(control_cpu.dBus_cmd_payload_wr),
+    .req_addr_i(ctrl_dBus_cmd_payload_address[15:0]),
+    .req_data_i(ctrl_dBus_cmd_payload_data),
+    .req_write_i(ctrl_dBus_cmd_payload_wr),
     .req_valid_i(irq_enable),
     .req_ready_o(irq_req_ack),
 
@@ -328,9 +345,9 @@ timer_int_ctrl#(.CLOCK_HZ(CTRL_CLOCK_HZ)) timer_interrupt(
 
 gpio#(.NUM_IN_PORTS(1)) gpio(
     .clock_i(ctrl_cpu_clock),
-    .req_addr_i(control_cpu.dBus_cmd_payload_address[15:0]),
-    .req_data_i(control_cpu.dBus_cmd_payload_data),
-    .req_write_i(control_cpu.dBus_cmd_payload_wr),
+    .req_addr_i(ctrl_dBus_cmd_payload_address[15:0]),
+    .req_data_i(ctrl_dBus_cmd_payload_data),
+    .req_write_i(ctrl_dBus_cmd_payload_wr),
     .req_valid_i(gpio_enable),
     .req_ready_o(gpio_req_ack),
 
