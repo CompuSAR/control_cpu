@@ -29,11 +29,10 @@ set_property CONFIG_MODE SPIx4 [current_design]
 set_property BITSTREAM.CONFIG.CONFIGRATE 50 [current_design]
 
 
-#create_clock -period 3.299 -name VIRTUAL_ddr_clock -waveform {0.000 1.649}
-
-set_output_delay -clock [get_clocks ddr_clock] -min -add_delay -0.300 [get_ports ddr3_cas_n]
-set_output_delay -clock [get_clocks ddr_clock] -max -add_delay 0.400 [get_ports ddr3_cas_n]
-set_output_delay -clock [get_clocks ddr_clock] -min -add_delay -0.300 [get_ports ddr3_ras_n]
-set_output_delay -clock [get_clocks ddr_clock] -max -add_delay 0.400 [get_ports ddr3_ras_n]
-set_output_delay -clock [get_clocks ddr_clock] -min -add_delay -0.300 [get_ports ddr3_we_n]
-set_output_delay -clock [get_clocks ddr_clock] -max -add_delay 0.400 [get_ports ddr3_we_n]
+create_clock -period 3.299 -name VIRTUAL_ddr_clock -waveform {0.000 1.649}
+#set_output_delay -clock [get_clocks VIRTUAL_ddr_clock] -clock_fall -min -add_delay -4.949 [get_ports ddr3_cas_n]
+#set_output_delay -clock [get_clocks VIRTUAL_ddr_clock] -clock_fall -max -add_delay -1.464 [get_ports ddr3_cas_n]
+#set_output_delay -clock [get_clocks VIRTUAL_ddr_clock] -clock_fall -min -add_delay -4.949 [get_ports ddr3_ras_n]
+#set_output_delay -clock [get_clocks VIRTUAL_ddr_clock] -clock_fall -max -add_delay -1.464 [get_ports ddr3_ras_n]
+#set_output_delay -clock [get_clocks VIRTUAL_ddr_clock] -clock_fall -min -add_delay -4.949 [get_ports ddr3_we_n]
+#set_output_delay -clock [get_clocks VIRTUAL_ddr_clock] -clock_fall -max -add_delay -1.464 [get_ports ddr3_we_n]

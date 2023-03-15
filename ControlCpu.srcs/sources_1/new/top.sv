@@ -246,7 +246,7 @@ wire ddr_phy_cs_n;
 wire [2:0] ddr_phy_ba;
 wire [13:0] ddr_phy_addr;
 wire [1:0] ddr_phy_dqs_i, ddr_phy_dqs_o;
-wire ddr_phy_data_transfer, ddr_phy_data_write;
+wire ddr_phy_data_transfer, ddr_phy_data_write, ddr_phy_write_level;
 wire [15:0] ddr_phy_dq_i[1:0], ddr_phy_dq_o[1:0];
 
 sddr_ctrl#(
@@ -289,7 +289,8 @@ sddr_ctrl#(
     .ddr3_dq_i(ddr_phy_dq_i),
 
     .data_transfer_o(ddr_phy_data_transfer),
-    .data_write_o(ddr_phy_data_write)
+    .data_write_o(ddr_phy_data_write),
+    .write_level_o(ddr_phy_write_level)
 );
 
 sddr_phy_xilinx ddr_phy(
@@ -313,6 +314,7 @@ sddr_phy_xilinx ddr_phy(
 
     ,.ctl_data_transfer_i(ddr_phy_data_transfer)
     ,.ctl_data_write_i(ddr_phy_data_write)
+    ,.ctl_write_level_i(ddr_phy_write_level)
 
     ,.ddr3_ck_p_o(ddr3_ck_p)
     ,.ddr3_ck_n_o(ddr3_ck_n)

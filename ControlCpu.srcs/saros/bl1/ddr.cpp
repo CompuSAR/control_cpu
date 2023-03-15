@@ -35,6 +35,7 @@ static constexpr uint32_t DdrCtrl_nCtrlReset  = 0x0004;
 static constexpr uint32_t DdrCtrl_nBypass     = 0x0008;
 static constexpr uint32_t DdrCtrl_Odt         = 0x0010;
 static constexpr uint32_t DdrCtrl_Cke         = 0x0020;
+static constexpr uint32_t DdrCtrl_WriteLevel  = 0x0040;
 
 static void ddr_control(uint32_t ctrl) {
     reg_write_32(DdrDevice, DdrControl, ctrl);
@@ -201,6 +202,34 @@ void ddr_init() {
 
     sleep_cycles(512);  // tZQinit
 
+    // Start write leveling
+    write_mode_reg1(
+            false,      // DLL enabled during init (default)
+            1,          // Out drive stength 34Ohm (default)
+            1,          // RTT 60ohm (default)
+            0,          // Additive latency disabled (we have enough latency already)
+            true,       // Write leveling enabled
+            false,      // TDQS disabled (and irrelevant for our x16 chip)
+            true        // Output enabled
+        );
+    sleep_cycles(12);   // tMOD
+    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke|DdrCtrl_nBypass|DdrCtrl_WriteLevel|DdrCtrl_Odt);
+
+    sleep_cycles(1000);
+
+    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke|DdrCtrl_nBypass);
+
+    // Finished
+    write_mode_reg1(
+            false,      // DLL enabled during init (default)
+            1,          // Out drive stength 34Ohm (default)
+            1,          // RTT 60ohm (default)
+            0,          // Additive latency disabled (we have enough latency already)
+            false,      // Write leveling disabled
+            false,      // TDQS disabled (and irrelevant for our x16 chip)
+            true        // Output enabled
+        );
+    sleep_cycles(12);   // tMOD
     ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke|DdrCtrl_nBypass);
 }
 
