@@ -36,6 +36,7 @@ static constexpr uint32_t DdrCtrl_nBypass     = 0x0008;
 static constexpr uint32_t DdrCtrl_Odt         = 0x0010;
 static constexpr uint32_t DdrCtrl_Cke         = 0x0020;
 static constexpr uint32_t DdrCtrl_WriteLevel  = 0x0040;
+static constexpr uint32_t DdrCtrl_OutDqs      = 0x0080;
 
 static void ddr_control(uint32_t ctrl) {
     reg_write_32(DdrDevice, DdrControl, ctrl);
@@ -212,12 +213,15 @@ void ddr_init() {
             false,      // TDQS disabled (and irrelevant for our x16 chip)
             true        // Output enabled
         );
-    sleep_cycles(12);   // tMOD
-    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke|DdrCtrl_nBypass|DdrCtrl_WriteLevel|DdrCtrl_Odt);
+    sleep_cycles(12+24);   // tMOD + tWLDQSEN
+    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke|DdrCtrl_OutDqs|DdrCtrl_Odt);
+    sleep_cycles(40);      // tWLDMRD
+
+    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke|DdrCtrl_OutDqs|DdrCtrl_WriteLevel|DdrCtrl_Odt);
 
     sleep_cycles(1000);
 
-    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke|DdrCtrl_nBypass);
+    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke|DdrCtrl_OutDqs|DdrCtrl_Odt);
 
     // Finished
     write_mode_reg1(
