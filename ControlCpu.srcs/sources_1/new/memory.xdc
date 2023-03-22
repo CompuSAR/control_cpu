@@ -350,4 +350,3 @@ set_property INTERNAL_VREF 0.75 [get_iobanks 34]
 #set_false_path -through [get_nets -hier -filter {NAME =~ */u_iodelay_ctrl/sys_rst_i}]
 #
 
-
