@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="778,048.070 ns"></ZoomStartTime>
-      <ZoomEndTime time="778,128.571 ns"></ZoomEndTime>
-      <Cursor1Time time="778,115.154 ns"></Cursor1Time>
+      <ZoomStartTime time="777,992.855 ns"></ZoomStartTime>
+      <ZoomEndTime time="778,073.456 ns"></ZoomEndTime>
+      <Cursor1Time time="778,006.288 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="204"></NameColumnWidth>
       <ValueColumnWidth column_width="60"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="50" />
+   <WVObjectSize size="46" />
    <wave_markers>
       <marker label="" time="778006288" />
    </wave_markers>
@@ -132,22 +132,6 @@
    <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/bank_state_counter">
       <obj_property name="ElementShortName">bank_state_counter[16:0]</obj_property>
       <obj_property name="ObjectShortName">bank_state_counter[16:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_phy/\dqs_gen[0].direction ">
-      <obj_property name="ElementShortName">\dqs_gen[0].direction </obj_property>
-      <obj_property name="ObjectShortName">\dqs_gen[0].direction </obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_phy/\dqs_gen[1].direction ">
-      <obj_property name="ElementShortName">\dqs_gen[1].direction </obj_property>
-      <obj_property name="ObjectShortName">\dqs_gen[1].direction </obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_phy/\data_gen[0].in_data_bit ">
-      <obj_property name="ElementShortName">\data_gen[0].in_data_bit </obj_property>
-      <obj_property name="ObjectShortName">\data_gen[0].in_data_bit </obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_phy/\data_gen[8].in_data_bit ">
-      <obj_property name="ElementShortName">\data_gen[8].in_data_bit </obj_property>
-      <obj_property name="ObjectShortName">\data_gen[8].in_data_bit </obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/ddr_phy/delay_inc">
       <obj_property name="ElementShortName">delay_inc</obj_property>

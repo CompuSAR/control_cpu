@@ -247,7 +247,7 @@ wire [2:0] ddr_phy_ba;
 wire [13:0] ddr_phy_addr;
 wire [1:0] ddr_phy_dqs_i, ddr_phy_dqs_o;
 wire ddr_phy_data_transfer, ddr_phy_data_write, ddr_phy_write_level, ddr_phy_dqs_out;
-wire [15:0] ddr_phy_dq_i[1:0], ddr_phy_dq_o[1:0];
+wire [15:0] ddr_phy_dq_i[7:0], ddr_phy_dq_o[1:0];
 
 sddr_ctrl#(
     .tRCD(5),           // 13.75ns
