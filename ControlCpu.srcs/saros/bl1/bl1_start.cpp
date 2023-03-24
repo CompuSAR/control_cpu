@@ -28,9 +28,9 @@ void bl1_start() {
         unsigned int val = j*FIBONACCI_COEF;
         DDR_MEMORY[ j ] = val;
         unsigned int readback = DDR_MEMORY[ j ];
-        if( j<100 && val!=readback ) {
+        if( val!=readback ) {
             uart_send("Verify after read failed at ");
-            print_hex(j);
+            print_hex(j*4);
             uart_send(": wrote ");
             print_hex(val);
             uart_send(", read back ");

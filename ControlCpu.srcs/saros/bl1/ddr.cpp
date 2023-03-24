@@ -27,6 +27,7 @@ enum DdrRegister {
     DdrOverrideCommand,
     DdrOverrideAddress,
     DdrReadOp,
+    DdrIncDelay,
 };
 
 static constexpr uint32_t DdrCtrl_ResetAll    = 0x0000;
@@ -241,7 +242,13 @@ void ddr_init() {
     sleep_cycles(12);   // tMOD
 
     reg_write_32(DdrDevice, DdrOverrideAddress, 0);
-    reg_read_32(DdrDevice, DdrReadOp);
+
+    for( int i=0; i<1000; ++i ) {
+        if( reg_read_32(DdrDevice, DdrReadOp)!=0xffff0000 ) {
+            uart_send("Increase read delay\n");
+            reg_write_32(DdrDevice, DdrIncDelay, 0x2);
+        }
+    }
 
     write_mode_reg3( 0, false );
     sleep_cycles(12);   // tMOD

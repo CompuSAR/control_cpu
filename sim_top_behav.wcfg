@@ -11,17 +11,18 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="777,992.855 ns"></ZoomStartTime>
-      <ZoomEndTime time="778,073.456 ns"></ZoomEndTime>
-      <Cursor1Time time="778,006.288 ns"></Cursor1Time>
+      <ZoomStartTime time="779,383.124 ns"></ZoomStartTime>
+      <ZoomEndTime time="779,613.658 ns"></ZoomEndTime>
+      <Cursor1Time time="779,486.835 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="204"></NameColumnWidth>
+      <NameColumnWidth column_width="200"></NameColumnWidth>
       <ValueColumnWidth column_width="60"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="46" />
+   <WVObjectSize size="52" />
    <wave_markers>
-      <marker label="" time="778006288" />
+      <marker label="" time="778174536" />
+      <marker label="" time="779421546" />
    </wave_markers>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
       <obj_property name="ElementShortName">clk</obj_property>
@@ -62,6 +63,14 @@
    <wvobject type="array" fp_name="/sim_top/top_module/control_cpu/dBus_rsp_data">
       <obj_property name="ElementShortName">dBus_rsp_data[31:0]</obj_property>
       <obj_property name="ObjectShortName">dBus_rsp_data[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_cmd_valid">
+      <obj_property name="ElementShortName">data_cmd_valid</obj_property>
+      <obj_property name="ObjectShortName">data_cmd_valid</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_cmd_ack">
+      <obj_property name="ElementShortName">data_cmd_ack</obj_property>
+      <obj_property name="ObjectShortName">data_cmd_ack</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/bypass_cpu">
       <obj_property name="ElementShortName">bypass_cpu</obj_property>
@@ -136,6 +145,22 @@
    <wvobject type="logic" fp_name="/sim_top/top_module/ddr_phy/delay_inc">
       <obj_property name="ElementShortName">delay_inc</obj_property>
       <obj_property name="ObjectShortName">delay_inc</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/data_rsp_ready_ddr">
+      <obj_property name="ElementShortName">data_rsp_ready_ddr</obj_property>
+      <obj_property name="ObjectShortName">data_rsp_ready_ddr</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/data_rsp_data_o">
+      <obj_property name="ElementShortName">data_rsp_data_o[127:0]</obj_property>
+      <obj_property name="ObjectShortName">data_rsp_data_o[127:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/rsp_ready">
+      <obj_property name="ElementShortName">rsp_ready</obj_property>
+      <obj_property name="ObjectShortName">rsp_ready</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/ddr3_dq_i">
+      <obj_property name="ElementShortName">ddr3_dq_i[7:0][15:0]</obj_property>
+      <obj_property name="ObjectShortName">ddr3_dq_i[7:0][15:0]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/ddr3_reset_n">
       <obj_property name="ElementShortName">ddr3_reset_n</obj_property>

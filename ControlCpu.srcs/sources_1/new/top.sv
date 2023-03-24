@@ -248,6 +248,7 @@ wire [13:0] ddr_phy_addr;
 wire [1:0] ddr_phy_dqs_i, ddr_phy_dqs_o;
 wire ddr_phy_data_transfer, ddr_phy_data_write, ddr_phy_write_level, ddr_phy_dqs_out;
 wire [15:0] ddr_phy_dq_i[7:0], ddr_phy_dq_o[1:0];
+wire [31:0] ddr_phy_delay_inc;
 
 sddr_ctrl#(
     .tRCD(5),           // 13.75ns
@@ -291,6 +292,7 @@ sddr_ctrl#(
     .data_transfer_o(ddr_phy_data_transfer),
     .data_write_o(ddr_phy_data_write),
     .write_level_o(ddr_phy_write_level),
+    .delay_inc_o(ddr_phy_delay_inc),
     .dqs_out_o(ddr_phy_dqs_out)
 );
 
@@ -316,6 +318,7 @@ sddr_phy_xilinx ddr_phy(
     ,.ctl_data_transfer_i(ddr_phy_data_transfer)
     ,.ctl_data_write_i(ddr_phy_data_write)
     ,.ctl_write_level_i(ddr_phy_write_level)
+    ,.ctl_delay_inc_i(ddr_phy_delay_inc)
     ,.ctl_out_dqs_i(ddr_phy_dqs_out)
 
     ,.ddr3_ck_p_o(ddr3_ck_p)
