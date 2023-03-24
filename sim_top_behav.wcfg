@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="777,969.976 ns"></ZoomStartTime>
-      <ZoomEndTime time="778,013.551 ns"></ZoomEndTime>
-      <Cursor1Time time="778,006.288 ns"></Cursor1Time>
+      <ZoomStartTime time="778,048.070 ns"></ZoomStartTime>
+      <ZoomEndTime time="778,128.571 ns"></ZoomEndTime>
+      <Cursor1Time time="778,115.154 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="212"></NameColumnWidth>
+      <NameColumnWidth column_width="204"></NameColumnWidth>
       <ValueColumnWidth column_width="60"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="48" />
+   <WVObjectSize size="50" />
    <wave_markers>
       <marker label="" time="778006288" />
    </wave_markers>
@@ -63,9 +63,9 @@
       <obj_property name="ElementShortName">dBus_rsp_data[31:0]</obj_property>
       <obj_property name="ObjectShortName">dBus_rsp_data[31:0]</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/ctrl_rsp_ready">
-      <obj_property name="ElementShortName">ctrl_rsp_ready</obj_property>
-      <obj_property name="ObjectShortName">ctrl_rsp_ready</obj_property>
+   <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/bypass_cpu">
+      <obj_property name="ElementShortName">bypass_cpu</obj_property>
+      <obj_property name="ObjectShortName">bypass_cpu</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/timer_interrupt/wait_expired">
       <obj_property name="ElementShortName">wait_expired</obj_property>
@@ -124,6 +124,14 @@
    <wvobject type="logic" fp_name="/sim_top/top_module/ddr_ctrl/write_level_o">
       <obj_property name="ElementShortName">write_level_o</obj_property>
       <obj_property name="ObjectShortName">write_level_o</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/bank_state">
+      <obj_property name="ElementShortName">bank_state[31:0]</obj_property>
+      <obj_property name="ObjectShortName">bank_state[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/ddr_ctrl/bank_state_counter">
+      <obj_property name="ElementShortName">bank_state_counter[16:0]</obj_property>
+      <obj_property name="ObjectShortName">bank_state_counter[16:0]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/ddr_phy/\dqs_gen[0].direction ">
       <obj_property name="ElementShortName">\dqs_gen[0].direction </obj_property>

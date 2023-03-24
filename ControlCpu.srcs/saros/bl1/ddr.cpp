@@ -240,11 +240,9 @@ void ddr_init() {
     write_mode_reg3( 0, true );
     sleep_cycles(12);   // tMOD
 
-    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke|DdrCtrl_Odt);
     reg_write_32(DdrDevice, DdrOverrideAddress, 0);
     reg_read_32(DdrDevice, DdrReadOp);
 
-    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke);
     write_mode_reg3( 0, false );
     sleep_cycles(12);   // tMOD
     ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke|DdrCtrl_nBypass);
