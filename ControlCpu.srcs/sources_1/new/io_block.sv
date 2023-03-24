@@ -134,7 +134,7 @@ always_comb begin
                     data_out = 32'b0;
                 end
                 8'h1: begin                     // DDR control
-                    rsp_ready = 1'b1;
+                    rsp_ready = passthrough_ddr_ctrl_rsp_ready;
                     data_out = passthrough_ddr_ctrl_data;
                 end
                 8'h2: begin                     // GPIO

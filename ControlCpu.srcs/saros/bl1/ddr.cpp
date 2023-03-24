@@ -26,6 +26,7 @@ enum DdrRegister {
     DdrControl = 0,
     DdrOverrideCommand,
     DdrOverrideAddress,
+    DdrReadOp,
 };
 
 static constexpr uint32_t DdrCtrl_ResetAll    = 0x0000;
@@ -221,9 +222,9 @@ void ddr_init() {
 
     sleep_cycles(1000);
 
-    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke|DdrCtrl_OutDqs|DdrCtrl_Odt);
+    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke);
 
-    // Finished
+    // Disable write leveling
     write_mode_reg1(
             false,      // DLL enabled during init (default)
             1,          // Out drive stength 34Ohm (default)
@@ -233,6 +234,18 @@ void ddr_init() {
             false,      // TDQS disabled (and irrelevant for our x16 chip)
             true        // Output enabled
         );
+    sleep_cycles(4);   // tMRD
+
+    // Enable MPR mode for calibrating the reads
+    write_mode_reg3( 0, true );
+    sleep_cycles(12);   // tMOD
+
+    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke|DdrCtrl_Odt);
+    reg_write_32(DdrDevice, DdrOverrideAddress, 0);
+    reg_read_32(DdrDevice, DdrReadOp);
+
+    ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke);
+    write_mode_reg3( 0, false );
     sleep_cycles(12);   // tMOD
     ddr_control(DdrCtrl_nMemReset|DdrCtrl_nPhyReset|DdrCtrl_Cke|DdrCtrl_nBypass);
 }
