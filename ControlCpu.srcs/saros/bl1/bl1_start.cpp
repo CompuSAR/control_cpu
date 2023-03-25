@@ -8,7 +8,7 @@ extern "C" void bl1_start();
 static constexpr unsigned int FIBONACCI_COEF = 0x9E3779B9;
 static constexpr unsigned int RANDOM_WALK_COEF = 0x26fcb789;
 
-static constexpr unsigned int MEMORY_SIZE=32*1024*1024/4;
+static constexpr unsigned int MEMORY_SIZE=64*1024*1024/4;
 extern volatile unsigned int DDR_MEMORY[MEMORY_SIZE];
 
 void bl1_start() {

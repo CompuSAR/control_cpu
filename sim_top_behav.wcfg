@@ -11,18 +11,22 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="779,383.124 ns"></ZoomStartTime>
-      <ZoomEndTime time="779,613.658 ns"></ZoomEndTime>
-      <Cursor1Time time="779,486.835 ns"></Cursor1Time>
+      <ZoomStartTime time="793,311.186 ns"></ZoomStartTime>
+      <ZoomEndTime time="793,622.752 ns"></ZoomEndTime>
+      <Cursor1Time time="793,478.453 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="200"></NameColumnWidth>
+      <NameColumnWidth column_width="196"></NameColumnWidth>
       <ValueColumnWidth column_width="60"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="52" />
    <wave_markers>
       <marker label="" time="778174536" />
       <marker label="" time="779421546" />
+      <marker label="" time="783502371" />
+      <marker label="" time="783594742" />
+      <marker label="" time="793570824" />
+      <marker label="" time="793478453" />
    </wave_markers>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
       <obj_property name="ElementShortName">clk</obj_property>
