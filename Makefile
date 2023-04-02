@@ -1,4 +1,4 @@
-all: ControlCpu.srcs/saros/bl1/bl1.coe
+all: ControlCpu.srcs/saros/boot_loader.mem
 
 ControlCpu.runs/ControlCpu.mcs:
 
@@ -10,6 +10,11 @@ ControlCpu.gen/saros/bl1/bl1.coe: ControlCpu.gen/saros/config.log
 	$(MAKE) -C "$(@D)" "$(@F)"
 
 .PHONY: ControlCpu.gen/saros/bl1/bl1.coe
+
+ControlCpu.gen/saros/bl1/bl1.mem: ControlCpu.gen/saros/config.log
+	$(MAKE) -C "$(@D)" "$(@F)"
+
+.PHONY: ControlCpu.gen/saros/bl1/bl1.mem
 
 ControlCpu.gen/saros/config.log: ControlCpu.srcs/saros/configure
 	$(RM) -r $(@D)
@@ -31,7 +36,7 @@ ControlCpu.gen/saros/bl1/bl1.mif: ControlCpu.gen/saros/config.log
 	$(MAKE) -C "$(@D)" "$(@F)"
 .PHONY: ControlCpu.gen/saros/bl1/bl1.mif
 
-ControlCpu.srcs/saros/bl1/bl1.coe: ControlCpu.gen/saros/bl1/bl1.coe
+ControlCpu.srcs/saros/boot_loader.mem: ControlCpu.gen/saros/bl1/bl1.mem
 	cp "$<" "$@"
 
 clean:

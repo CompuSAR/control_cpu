@@ -210,29 +210,31 @@ begin
     sram_dBus_rsp_ready <= sram_enable;
 end
 
-/*
 xpm_memory_tdpram#(
     .CLOCKING_MODE("common_clock"),
     .ECC_MODE("no_ecc"),
+//    .CASCADE_HEIGHT(1),
     .MEMORY_INIT_FILE("boot_loader.mem"),
     .MEMORY_PRIMITIVE("block"),
     .MEMORY_SIZE(32*1024*8),
 //    .SIM_ASSERT_CHK(1),
-//    .USE_MEM_INIT(1),
+    .USE_MEM_INIT(1),
 
     .ADDR_WIDTH_A(13),
     .BYTE_WRITE_WIDTH_A(8),
     .READ_DATA_WIDTH_A(32),
     .READ_LATENCY_A(1),
     .WRITE_DATA_WIDTH_A(32),
+    .WRITE_MODE_A("read_first"),
 
     .ADDR_WIDTH_B(13),
     .BYTE_WRITE_WIDTH_B(8),
     .READ_DATA_WIDTH_B(32),
     .READ_LATENCY_B(1),
     .WRITE_DATA_WIDTH_B(32),
+    .WRITE_MODE_B("read_first"),
 
-    .WRITE_PROTECT(0)
+    .WRITE_PROTECT(1)
 ) sram(
     .addra( ctrl_dBus_cmd_payload_address[14:2] ),
     .clka( ctrl_cpu_clock),
@@ -261,27 +263,6 @@ xpm_memory_tdpram#(
     .regcea( 1'b1 ),
     .regceb( 1'b1 ),
     .sleep( 1'b0 )
-);
-*/
-
-blk_mem sram(
-    .addra( ctrl_dBus_cmd_payload_address[14:2] ),
-    .clka( ctrl_cpu_clock),
-    .dina( ctrl_dBus_cmd_payload_data ),
-    .douta( sram_dBus_rsp_data ),
-    .ena( sram_enable ),
-    .wea( convert_byte_write(
-        ctrl_dBus_cmd_payload_wr,
-        ctrl_dBus_cmd_payload_address,
-        ctrl_dBus_cmd_payload_size)
-    ),
-
-    .addrb( ctrl_iBus_cmd_pc[14:2] ),
-    .clkb( ctrl_cpu_clock ),
-    .dinb( 32'hX ),
-    .doutb( ctrl_iBus_rsp_payload_inst ),
-    .enb( ctrl_iBus_cmd_valid ),
-    .web( 4'b0 )
 );
 
 //-----------------------------------------------------------------
