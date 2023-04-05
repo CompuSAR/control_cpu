@@ -66,15 +66,6 @@ function automatic [3:0] convert_byte_write( logic we, logic[1:0] address, logic
         convert_byte_write = 4'b0;
 endfunction
 
-function automatic [15:0] convert_long_write_mask( logic [3:0] base_mask, logic [3:0] address);
-    case( address[3:2] )
-        2'b00: convert_long_write_mask = { 12'b0, base_mask };
-        2'b01: convert_long_write_mask = { 8'b0, base_mask, 4'b0 };
-        2'b10: convert_long_write_mask = { 4'b0, base_mask, 8'b0 };
-        2'b11: convert_long_write_mask = { base_mask, 12'b0 };
-    endcase
-endfunction
-
 //-----------------------------------------------------------------
 // Clocking / Reset
 //-----------------------------------------------------------------
@@ -95,6 +86,19 @@ clk_converter clocks(
     .clkfb_out(clock_feedback),
     .locked(clocks_locked)
 );
+
+localparam CACHE_PORTS_NUM = 2;
+localparam CACHELINE_BITS = 128;
+localparam NUM_CACHELINES = 32*1024*8/CACHELINE_BITS;
+localparam DDR_MEM_SIZE = 256*1024*1024;
+
+logic                                   cache_port_cmd_valid_s[CACHE_PORTS_NUM];
+logic [31:0]                            cache_port_cmd_addr_s[CACHE_PORTS_NUM];
+logic                                   cache_port_cmd_ready_n[CACHE_PORTS_NUM];
+logic [CACHELINE_BITS/8-1:0]            cache_port_cmd_write_mask_s[CACHE_PORTS_NUM];
+logic [CACHELINE_BITS-1:0]              cache_port_cmd_write_data_s[CACHE_PORTS_NUM];
+logic                                   cache_port_rsp_valid_n[CACHE_PORTS_NUM];
+logic [CACHELINE_BITS-1:0]              cache_port_rsp_read_data_n[CACHE_PORTS_NUM];
 
 logic           ctrl_iBus_cmd_ready;
 logic           ctrl_iBus_cmd_valid;
@@ -129,7 +133,7 @@ VexRiscv control_cpu(
     .externalInterrupt(1'b0),
     .softwareInterrupt(1'b0),
 
-    .iBus_cmd_ready(1'b1),
+    .iBus_cmd_ready(ctrl_iBus_cmd_ready),
     .iBus_cmd_valid(ctrl_iBus_cmd_valid),
     .iBus_cmd_payload_pc(ctrl_iBus_cmd_pc),
     .iBus_rsp_valid(ctrl_iBus_rsp_valid),
@@ -147,6 +151,42 @@ VexRiscv control_cpu(
     .dBus_rsp_data(ctrl_dBus_rsp_data)
 );
 
+bus_width_adjust#(.OUT_WIDTH(CACHELINE_BITS)) iBus_width_adjuster(
+        .clock_i(ctrl_cpu_clock),
+        .in_cmd_valid_i(ctrl_iBus_cmd_valid),
+        .in_cmd_addr_i(ctrl_iBus_cmd_pc),
+        .in_cmd_write_mask_i(4'b0000),
+        .in_cmd_write_data_i(32'h0),
+        .in_rsp_read_data_o(ctrl_iBus_rsp_payload_inst),
+
+        .out_cmd_ready_i(ctrl_iBus_cmd_ready),
+        .out_cmd_write_mask_o(),
+        .out_cmd_write_data_o(),
+        .out_rsp_valid_i(ctrl_iBus_rsp_valid),
+        .out_rsp_read_data_i(cache_port_rsp_read_data_n[0])
+    );
+
+bus_width_adjust#(.OUT_WIDTH(CACHELINE_BITS)) dBus_width_adjuster(
+        .clock_i(ctrl_cpu_clock),
+        .in_cmd_valid_i(cache_port_cmd_valid_s[1]),
+        .in_cmd_addr_i(ctrl_dBus_cmd_payload_address),
+        .in_cmd_write_mask_i(
+            convert_byte_write(
+                ctrl_dBus_cmd_payload_wr,
+                ctrl_dBus_cmd_payload_address[1:0],
+                ctrl_dBus_cmd_payload_size
+            )
+        ),
+        .in_cmd_write_data_i(32'h0),
+        .in_rsp_read_data_o(iob_ddr_read_data),
+
+        .out_cmd_ready_i(ctrl_iBus_cmd_ready),
+        .out_cmd_write_mask_o(cache_port_cmd_write_mask_s[1]),
+        .out_cmd_write_data_o(cache_port_cmd_write_data_s[1]),
+        .out_rsp_valid_i(ctrl_iBus_rsp_valid),
+        .out_rsp_read_data_i(cache_port_rsp_read_data_n[1])
+    );
+
 assign ctrl_iBus_rsp_payload_error = 0;
 assign ctrl_dBus_rsp_error = 0;
 
@@ -155,9 +195,11 @@ logic sram_dBus_rsp_ready;
 logic [31:0] sram_dBus_rsp_data;
 logic ddr_ready, ddr_rsp_ready, ddr_write_data_ready;
 logic ddr_ctrl_cmd_valid, ddr_ctrl_cmd_ready, ddr_ctrl_rsp_ready;
+logic [31:0] iob_ddr_read_data;
 logic [31:0] ddr_ctrl_rsp_data;
-logic ddr_data_cmd_valid, ddr_data_cmd_ack, ddr_data_rsp_ready;
-logic [127:0] ddr_data_rsp_data;
+logic ddr_data_cmd_valid, ddr_data_cmd_ack, ddr_cmd_write, ddr_data_rsp_ready;
+logic [31:0] ddr_cmd_address;
+logic [127:0] ddr_cmd_write_data, ddr_data_rsp_read_data;
 logic irq_enable, irq_req_ack, irq_rsp_ready;
 logic [31:0] irq_rsp_data;
 logic gpio_enable, gpio_req_ack, gpio_rsp_ready;
@@ -180,10 +222,10 @@ io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
     .passthrough_sram_rsp_ready(sram_dBus_rsp_ready),
     .passthrough_sram_data(sram_dBus_rsp_data),
 
-    .passthrough_ddr_enable(ddr_data_cmd_valid),
-    .passthrough_ddr_req_ack(ddr_data_cmd_ack),
-    .passthrough_ddr_rsp_ready(ddr_data_rsp_ready),
-    .passthrough_ddr_data(ddr_data_rsp_data[31:0]),
+    .passthrough_ddr_enable(cache_port_cmd_valid_s[1]),
+    .passthrough_ddr_req_ack(cache_port_cmd_ready_n[1]),
+    .passthrough_ddr_rsp_ready(cache_port_rsp_valid_n[1]),
+    .passthrough_ddr_data(iob_ddr_read_data),
 
     .passthrough_ddr_ctrl_enable(ddr_ctrl_cmd_valid),
     .passthrough_ddr_ctrl_req_ack(ddr_ctrl_cmd_ready),
@@ -210,59 +252,30 @@ begin
     sram_dBus_rsp_ready <= sram_enable;
 end
 
-xpm_memory_tdpram#(
-    .CLOCKING_MODE("common_clock"),
-    .ECC_MODE("no_ecc"),
-//    .CASCADE_HEIGHT(1),
-    .MEMORY_INIT_FILE("boot_loader.mem"),
-    .MEMORY_PRIMITIVE("block"),
-    .MEMORY_SIZE(32*1024*8),
-//    .SIM_ASSERT_CHK(1),
-    .USE_MEM_INIT(1),
+cache#(
+    .CACHELINE_BITS(CACHELINE_BITS),
+    .NUM_CACHELINES(NUM_CACHELINES),
+    .BACKEND_SIZE_BYTES(DDR_MEM_SIZE),
+    .INIT_FILE("boot_loader.mem"),
+    .NUM_PORTS(CACHE_PORTS_NUM)
+) cache(
+    .clock_i(ctrl_cpu_clock),
 
-    .ADDR_WIDTH_A(13),
-    .BYTE_WRITE_WIDTH_A(8),
-    .READ_DATA_WIDTH_A(32),
-    .READ_LATENCY_A(1),
-    .WRITE_DATA_WIDTH_A(32),
-    .WRITE_MODE_A("read_first"),
+    .port_cmd_valid_i(cache_port_cmd_valid_s),
+    .port_cmd_addr_i(cache_port_cmd_addr_s),
+    .port_cmd_ready_o(cache_port_cmd_ready_n),
+    .port_cmd_write_mask_i(cache_port_cmd_write_mask_s),
+    .port_cmd_write_data_i(cache_port_cmd_write_data_s),
+    .port_rsp_ready_o(cache_port_rsp_valid_n),
+    .port_rsp_read_data_o(cache_port_rsp_read_data_n),
 
-    .ADDR_WIDTH_B(13),
-    .BYTE_WRITE_WIDTH_B(8),
-    .READ_DATA_WIDTH_B(32),
-    .READ_LATENCY_B(1),
-    .WRITE_DATA_WIDTH_B(32),
-    .WRITE_MODE_B("read_first"),
-
-    .WRITE_PROTECT(1)
-) sram(
-    .addra( ctrl_dBus_cmd_payload_address[14:2] ),
-    .clka( ctrl_cpu_clock),
-    .dina( ctrl_dBus_cmd_payload_data ),
-    .douta( sram_dBus_rsp_data ),
-    .ena( sram_enable ),
-    .wea( convert_byte_write(
-        ctrl_dBus_cmd_payload_wr,
-        ctrl_dBus_cmd_payload_address,
-        ctrl_dBus_cmd_payload_size)
-    ),
-
-    .addrb( ctrl_iBus_cmd_pc[14:2] ),
-    .clkb( ctrl_cpu_clock ),
-    .dinb( 32'hX ),
-    .doutb( ctrl_iBus_rsp_payload_inst ),
-    .enb( ctrl_iBus_cmd_valid ),
-    .web( 4'b0 ),
-
-    .injectsbiterra( 1'b0 ),
-    .injectsbiterrb( 1'b0 ),
-    .injectdbiterra( 1'b0 ),
-    .injectdbiterrb( 1'b0 ),
-    .rsta( 1'b0 ),
-    .rstb( 1'b0 ),
-    .regcea( 1'b1 ),
-    .regceb( 1'b1 ),
-    .sleep( 1'b0 )
+    .backend_cmd_valid_o(ddr_data_cmd_valid),
+    .backend_cmd_addr_o(ddr_data_cmd_address),
+    .backend_cmd_ready_i(ddr_data_cmd_ack),
+    .backend_cmd_write_o(ddr_data_cmd_write),
+    .backend_cmd_write_data_o(ddr_cmd_write_data),
+    .backend_rsp_ready_i(ddr_data_rsp_ready),
+    .backend_rsp_read_data_i(ddr_data_rsp_read_data)
 );
 
 //-----------------------------------------------------------------
@@ -307,11 +320,11 @@ sddr_ctrl#(
 
     .data_cmd_valid(ddr_data_cmd_valid),
     .data_cmd_ack(ddr_data_cmd_ack),
-    .data_cmd_data_i( {96'h0123456789abcdefeca86420, ctrl_dBus_cmd_payload_data} ),
-    .data_cmd_address({ ctrl_dBus_cmd_payload_address, 2'b00 }),
-    .data_cmd_write(ctrl_dBus_cmd_payload_wr),
+    .data_cmd_data_i(ddr_cmd_write_data),
+    .data_cmd_address(ddr_data_cmd_address),
+    .data_cmd_write(ddr_data_cmd_write),
     .data_rsp_ready(ddr_data_rsp_ready),
-    .data_rsp_data_o(ddr_data_rsp_data),
+    .data_rsp_data_o(ddr_data_rsp_read_data),
 
     .ddr3_cs_n_o(ddr_phy_cs_n),
     .ddr3_cke_o(ddr_phy_cke),
