@@ -43,7 +43,7 @@ localparam EMPTY_WRITE_MASK = { CACHELINE_BITS/8{1'b0} };
 
 localparam ADDR_CACHELINE_OFFSET_LOW = 0;
 localparam ADDR_CACHELINE_OFFSET_HIGH = $clog2(CACHELINE_BITS/8) - 1;
-localparam ADDR_CACHELINE_ADDR_LOW = ADDR_CACHELINE_OFFSET_HIGH;
+localparam ADDR_CACHELINE_ADDR_LOW = ADDR_CACHELINE_OFFSET_HIGH + 1;
 localparam ADDR_CACHELINE_ADDR_HIGH = ADDR_CACHELINE_ADDR_LOW + LINES_ADDR_BITS - 1;
 localparam ADDR_COMPLEMENTARY_LOW = ADDR_CACHELINE_ADDR_HIGH + 1;
 localparam ADDR_COMPLEMENTARY_HIGH = $clog2(BACKEND_SIZE_BYTES) - 1;
@@ -179,6 +179,7 @@ generate
         assign pending = port_cmd_valid_i[i];
         assign port_cmd_ready_o[i] = !prev_pending && !command_active;
         assign port_rsp_read_data_o[i] = port_rsp_data;
+        assign port_rsp_ready_o[i] = command_state==RESULT && active_command.active_port==i;
 
         wire [$clog2(NUM_PORTS)-1:0] next_active;
         wire [$clog2(NUM_PORTS)-1:0] active_port = pending && !prev_pending ? i : next_active;
@@ -221,6 +222,13 @@ always_comb begin
     cache_port_enable = 1'b0;
     cache_mem_enable = 1'b0;
 
+    case(command_state)
+        IDLE: begin end
+        RESULT: begin
+            command_state_next=IDLE;
+        end
+    endcase
+
     if( port_cmd_valid_i[active_port] && port_cmd_ready_o[active_port] ) begin
         // We have a pending command
         md_north_addr = extract_cacheline_addr(port_cmd_addr_i[active_port]);
@@ -235,6 +243,10 @@ always_comb begin
                 if( port_cmd_write_mask_i[active_port]==0 ) begin
                     // Read
                     command_state_next = RESULT;
+
+                    cache_port_addr = extract_cacheline_addr(port_cmd_addr_i[active_port]);
+                    cache_port_enable = 1'b1;
+                    cache_port_we = 1'b0;
                 end else begin
                     // Write
                     // Our north port for the metadata doesn't have a write
@@ -273,17 +285,7 @@ always_comb begin
                 default: command_state_next = FETCHING;
             endcase
         end
-
-        if( port_cmd_write_mask_i[active_port] == EMPTY_WRITE_MASK ) begin
-            // Read operation
-            
-            if( md_north_dout.initialized && md_north_dout.source_address==extract_complement_addr(port_cmd_addr_i[active_port]) )
-            begin
-
-            end
-        end
-    end else
-        md_north_enable = 1'b0;
+    end
 end
 
 always_ff@(posedge clock_i) begin

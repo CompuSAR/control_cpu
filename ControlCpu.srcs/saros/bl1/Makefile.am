@@ -24,7 +24,7 @@ TOOLCHAIN_LIB_PATH=/opt/riscv/lib/gcc/$(HOST_TRIPLET)/12.2.0
 	mv "$@".tmp "$@"
 
 bl1.mem: bl1.bin
-	hexdump -v -e '1/4 "%08x" "\n"' "$<" > "$@".tmp
+	hexdump -v -e '4/4 "%08x" "\n"' "$<" | sed -e 's:^\(........\)\(........\)\(........\)\(........\)$$:\4\3\2\1:' > "$@".tmp
 	mv "$@".tmp "$@"
 
 bl1.bin: bl1.elf

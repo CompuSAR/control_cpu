@@ -1,4 +1,4 @@
-all: ControlCpu.srcs/saros/boot_loader.mem
+all: ControlCpu.srcs/saros/boot_loader_state.mem
 
 ControlCpu.runs/ControlCpu.mcs:
 
@@ -38,6 +38,10 @@ ControlCpu.gen/saros/bl1/bl1.mif: ControlCpu.gen/saros/config.log
 
 ControlCpu.srcs/saros/boot_loader.mem: ControlCpu.gen/saros/bl1/bl1.mem
 	cp "$<" "$@"
+
+ControlCpu.srcs/saros/boot_loader_state.mem: ControlCpu.srcs/saros/boot_loader.mem
+	scripts/gen_cache_metadata.py `cat $< | wc -l` 13 0 2048 > $@.tmp
+	mv $@.tmp $@
 
 clean:
 	$(RM) -r ControlCpu.gen/saros

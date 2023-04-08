@@ -34,11 +34,6 @@ module io_block#(
     output logic req_ack,
     output logic rsp_ready,
 
-    output logic passthrough_sram_enable,
-    input passthrough_sram_req_ack,
-    input passthrough_sram_rsp_ready,
-    input [31:0] passthrough_sram_data,
-
     output logic passthrough_ddr_enable,
     input passthrough_ddr_req_ack,
     input passthrough_ddr_rsp_ready,
@@ -98,17 +93,12 @@ task default_state_current();
 
     passthrough_ddr_enable = 1'b0;
     passthrough_ddr_ctrl_enable = 1'b0;
-    passthrough_sram_enable = 1'b0;
     passthrough_gpio_enable = 1'b0;
     passthrough_irq_enable = 1'b0;
 endtask
 
 function logic is_ddr(logic [31:0]address);
-    is_ddr = address[31] == 0;
-endfunction
-
-function logic is_sram(logic [31:0]address);
-    is_sram = address[31:30] == 2'b10;
+    is_ddr = address[31:30] == 2'b10;
 endfunction
 
 function logic is_io(logic [31:0]address);
@@ -124,9 +114,6 @@ always_comb begin
         if( is_ddr(previous_address) ) begin
             data_out = passthrough_ddr_data;
             rsp_ready = passthrough_ddr_rsp_ready;
-        end else if( is_sram(previous_address) ) begin
-            data_out = passthrough_sram_data;
-            rsp_ready = passthrough_sram_rsp_ready;
         end else begin
             case( previous_address[23:16] )
                 8'h0: begin                     // UART
@@ -162,9 +149,6 @@ always_comb begin
         if( is_ddr(address) ) begin
             passthrough_ddr_enable = address_valid;
             req_ack = passthrough_ddr_req_ack;
-        end else if( is_sram(address) ) begin
-            passthrough_sram_enable = address_valid;
-            req_ack = passthrough_sram_req_ack;
         end else if(address_valid) begin
             case( address[23:16] )
                 8'h0: begin                // UART

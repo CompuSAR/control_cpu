@@ -162,6 +162,7 @@ bus_width_adjust#(.OUT_WIDTH(CACHELINE_BITS)) iBus_width_adjuster(
         .out_rsp_valid_i(cache_port_rsp_valid_n[0]),
         .out_rsp_read_data_i(cache_port_rsp_read_data_n[0])
     );
+assign cache_port_cmd_write_mask_s[0] = 0;
 
 assign cache_port_cmd_addr_s[1] = ctrl_dBus_cmd_payload_address;
 bus_width_adjust#(.OUT_WIDTH(CACHELINE_BITS)) dBus_width_adjuster(
@@ -188,9 +189,6 @@ bus_width_adjust#(.OUT_WIDTH(CACHELINE_BITS)) dBus_width_adjuster(
 assign ctrl_iBus_rsp_payload_error = 0;
 assign ctrl_dBus_rsp_error = 0;
 
-logic sram_enable;
-logic sram_dBus_rsp_ready;
-logic [31:0] sram_dBus_rsp_data;
 logic ddr_ready, ddr_rsp_ready, ddr_write_data_ready;
 logic ddr_ctrl_cmd_valid, ddr_ctrl_cmd_ready, ddr_ctrl_rsp_ready;
 logic [31:0] ddr_ctrl_rsp_data;
@@ -213,11 +211,6 @@ io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
 
     .req_ack(ctrl_dBus_cmd_ready),
     .rsp_ready(ctrl_dBus_rsp_ready),
-
-    .passthrough_sram_enable(sram_enable),
-    .passthrough_sram_req_ack(1'b1),
-    .passthrough_sram_rsp_ready(sram_dBus_rsp_ready),
-    .passthrough_sram_data(sram_dBus_rsp_data),
 
     .passthrough_ddr_enable(cache_port_cmd_valid_s[1]),
     .passthrough_ddr_req_ack(cache_port_cmd_ready_n[1]),
@@ -243,16 +236,12 @@ io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
     .uart_rx(uart_rx)
 );
 
-always_ff@(posedge ctrl_cpu_clock)
-begin
-    sram_dBus_rsp_ready <= sram_enable;
-end
-
 cache#(
     .CACHELINE_BITS(CACHELINE_BITS),
     .NUM_CACHELINES(NUM_CACHELINES),
     .BACKEND_SIZE_BYTES(DDR_MEM_SIZE),
     .INIT_FILE("boot_loader.mem"),
+    .STATE_INIT("boot_loader_state.mem"),
     .NUM_PORTS(CACHE_PORTS_NUM)
 ) cache(
     .clock_i(ctrl_cpu_clock),
