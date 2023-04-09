@@ -48,11 +48,11 @@ localparam ADDR_CACHELINE_ADDR_HIGH = ADDR_CACHELINE_ADDR_LOW + LINES_ADDR_BITS 
 localparam ADDR_COMPLEMENTARY_LOW = ADDR_CACHELINE_ADDR_HIGH + 1;
 localparam ADDR_COMPLEMENTARY_HIGH = $clog2(BACKEND_SIZE_BYTES) - 1;
 
-function extract_cacheline_addr(input [ADDR_BITS-1:0] address);
+function logic[ADDR_CACHELINE_ADDR_HIGH:ADDR_CACHELINE_ADDR_LOW] extract_cacheline_addr(input [ADDR_BITS-1:0] address);
     extract_cacheline_addr = address[ADDR_CACHELINE_ADDR_HIGH:ADDR_CACHELINE_ADDR_LOW];
 endfunction
 
-function extract_complement_addr(input [ADDR_BITS-1:0] address);
+function logic[ADDR_COMPLEMENTARY_HIGH:ADDR_COMPLEMENTARY_LOW] extract_complement_addr(input [ADDR_BITS-1:0] address);
     extract_complement_addr = address[ADDR_COMPLEMENTARY_HIGH:ADDR_COMPLEMENTARY_LOW];
 endfunction
 
@@ -70,9 +70,9 @@ logic                                   md_south_we;
 
 logic [LINES_ADDR_BITS-1:0]             cache_port_addr, cache_mem_addr;
 logic [CACHELINE_BITS-1:0]              cache_port_din, cache_mem_din;
-logic [CACHELINE_BITS/8-1:0]            cache_port_enable;
+logic                                   cache_port_enable;
 logic                                   cache_mem_enable;
-logic                                   cache_port_we, cache_mem_we;
+logic [CACHELINE_BITS/8-1:0]            cache_port_we, cache_mem_we;
 
 logic [CACHELINE_BITS-1:0]              port_rsp_data;
 
@@ -289,8 +289,9 @@ always_comb begin
 end
 
 always_ff@(posedge clock_i) begin
+    command_state <= command_state_next;
+
     if( set_command_active ) begin
-        command_state <= command_state_next;
         active_command.active_port <= active_port;
         active_command.address <= port_cmd_addr_i[active_port][ADDR_COMPLEMENTARY_HIGH:ADDR_CACHELINE_ADDR_LOW];
         active_command.write_mask <= port_cmd_write_mask_i[active_port];
