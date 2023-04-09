@@ -32,26 +32,26 @@ module io_block#(
     input [31:0] data_in,
     output logic [31:0] data_out,
     output logic req_ack,
-    output logic rsp_ready,
+    output logic rsp_valid,
 
     output logic passthrough_ddr_enable,
     input passthrough_ddr_req_ack,
-    input passthrough_ddr_rsp_ready,
+    input passthrough_ddr_rsp_valid,
     input [31:0] passthrough_ddr_data,
 
     output logic passthrough_ddr_ctrl_enable,
     input passthrough_ddr_ctrl_req_ack,
-    input passthrough_ddr_ctrl_rsp_ready,
+    input passthrough_ddr_ctrl_rsp_valid,
     input [31:0] passthrough_ddr_ctrl_data,
 
     output logic passthrough_gpio_enable,
     input passthrough_gpio_req_ack,
-    input passthrough_gpio_rsp_ready,
+    input passthrough_gpio_rsp_valid,
     input [31:0] passthrough_gpio_rsp_data,
 
     output logic passthrough_irq_enable,
     input passthrough_irq_req_ack,
-    input passthrough_irq_rsp_ready,
+    input passthrough_irq_rsp_valid,
     input [31:0] passthrough_irq_rsp_data,
 
     output uart_tx,
@@ -64,7 +64,7 @@ logic previous_valid=1'b0;
 always_ff@(posedge clock) begin
     previous_address <= previous_address_next;
 
-    if( previous_valid && !rsp_ready )
+    if( previous_valid && !rsp_valid )
         // Previous cycle still waiting for response. Don't advance.
         previous_valid <= 1'b1;
     else if( address_valid && req_ack )
@@ -107,29 +107,29 @@ endfunction
 
 always_comb begin
     // Previous cycle analysis
-    rsp_ready = 1'bX;
+    rsp_valid = 1'bX;
     data_out = 32'bX;
 
     if( previous_valid ) begin
         if( is_ddr(previous_address) ) begin
             data_out = passthrough_ddr_data;
-            rsp_ready = passthrough_ddr_rsp_ready;
+            rsp_valid = passthrough_ddr_rsp_valid;
         end else begin
             case( previous_address[23:16] )
                 8'h0: begin                     // UART
-                    rsp_ready = 1'b1;
+                    rsp_valid = 1'b1;
                     data_out = 32'b0;
                 end
                 8'h1: begin                     // DDR control
-                    rsp_ready = passthrough_ddr_ctrl_rsp_ready;
+                    rsp_valid = passthrough_ddr_ctrl_rsp_valid;
                     data_out = passthrough_ddr_ctrl_data;
                 end
                 8'h2: begin                     // GPIO
-                    rsp_ready = passthrough_gpio_rsp_ready;
+                    rsp_valid = passthrough_gpio_rsp_valid;
                     data_out = passthrough_gpio_rsp_data;
                 end
                 8'h3: begin                     // Interrupt controller
-                    rsp_ready = passthrough_irq_rsp_ready;
+                    rsp_valid = passthrough_irq_rsp_valid;
                     data_out = passthrough_irq_rsp_data;
                 end
             endcase
@@ -141,7 +141,7 @@ always_comb begin
     default_state_current();
 
     // Current cycle analysis
-    if( previous_valid && !rsp_ready ) begin
+    if( previous_valid && !rsp_valid ) begin
         // Previous cycle still waiting for response. Don't advance.
         previous_address_next = previous_address;
         req_ack = 1'b0;

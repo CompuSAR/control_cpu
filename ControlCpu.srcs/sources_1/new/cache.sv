@@ -24,7 +24,7 @@ module cache#(
         output                                                          port_cmd_ready_o[NUM_PORTS],
         input [CACHELINE_BITS/8-1:0]                                    port_cmd_write_mask_i[NUM_PORTS],
         input [CACHELINE_BITS-1:0]                                      port_cmd_write_data_i[NUM_PORTS],
-        output                                                          port_rsp_ready_o[NUM_PORTS],
+        output                                                          port_rsp_valid_o[NUM_PORTS],
         output [CACHELINE_BITS-1:0]                                     port_rsp_read_data_o[NUM_PORTS],
 
         output logic                                                    backend_cmd_valid_o,
@@ -32,7 +32,7 @@ module cache#(
         input                                                           backend_cmd_ready_i,
         output                                                          backend_cmd_write_o,
         output [CACHELINE_BITS-1:0]                                     backend_cmd_write_data_o,
-        input                                                           backend_rsp_ready_i,
+        input                                                           backend_rsp_valid_i,
         input                                                           backend_rsp_read_data_i
     );
 
@@ -179,7 +179,7 @@ generate
         assign pending = port_cmd_valid_i[i];
         assign port_cmd_ready_o[i] = !prev_pending && !command_active;
         assign port_rsp_read_data_o[i] = port_rsp_data;
-        assign port_rsp_ready_o[i] = command_state==RESULT && active_command.active_port==i;
+        assign port_rsp_valid_o[i] = command_state==RESULT && active_command.active_port==i;
 
         wire [$clog2(NUM_PORTS)-1:0] next_active;
         wire [$clog2(NUM_PORTS)-1:0] active_port = pending && !prev_pending ? i : next_active;

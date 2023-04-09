@@ -111,7 +111,7 @@ logic [1:0]     ctrl_dBus_cmd_payload_size;
 
 
 logic           ctrl_dBus_cmd_ready;
-logic           ctrl_dBus_rsp_ready;
+logic           ctrl_dBus_rsp_valid;
 logic           ctrl_dBus_rsp_error;
 logic [31:0]    ctrl_dBus_rsp_data;
 
@@ -143,7 +143,7 @@ VexRiscv control_cpu(
     .dBus_cmd_payload_data(ctrl_dBus_cmd_payload_data),
     .dBus_cmd_payload_size(ctrl_dBus_cmd_payload_size),
     .dBus_cmd_ready(ctrl_dBus_cmd_ready),
-    .dBus_rsp_ready(ctrl_dBus_rsp_ready),
+    .dBus_rsp_ready(ctrl_dBus_rsp_valid),
     .dBus_rsp_error(ctrl_dBus_rsp_error),
     .dBus_rsp_data(ctrl_dBus_rsp_data)
 );
@@ -189,15 +189,15 @@ bus_width_adjust#(.OUT_WIDTH(CACHELINE_BITS)) dBus_width_adjuster(
 assign ctrl_iBus_rsp_payload_error = 0;
 assign ctrl_dBus_rsp_error = 0;
 
-logic ddr_ready, ddr_rsp_ready, ddr_write_data_ready;
-logic ddr_ctrl_cmd_valid, ddr_ctrl_cmd_ready, ddr_ctrl_rsp_ready;
+logic ddr_ready, ddr_rsp_valid, ddr_write_data_ready;
+logic ddr_ctrl_cmd_valid, ddr_ctrl_cmd_ready, ddr_ctrl_rsp_valid;
 logic [31:0] ddr_ctrl_rsp_data;
-logic ddr_data_cmd_valid, ddr_data_cmd_ack, ddr_cmd_write, ddr_data_rsp_ready;
+logic ddr_data_cmd_valid, ddr_data_cmd_ack, ddr_cmd_write, ddr_data_rsp_valid;
 logic [31:0] ddr_cmd_address;
 logic [127:0] ddr_cmd_write_data, ddr_data_rsp_read_data;
-logic irq_enable, irq_req_ack, irq_rsp_ready;
+logic irq_enable, irq_req_ack, irq_rsp_valid;
 logic [31:0] irq_rsp_data;
-logic gpio_enable, gpio_req_ack, gpio_rsp_ready;
+logic gpio_enable, gpio_req_ack, gpio_rsp_valid;
 logic [31:0] gpio_rsp_data;
 
 io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
@@ -210,27 +210,27 @@ io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
     .data_out(ctrl_dBus_rsp_data),
 
     .req_ack(ctrl_dBus_cmd_ready),
-    .rsp_ready(ctrl_dBus_rsp_ready),
+    .rsp_valid(ctrl_dBus_rsp_valid),
 
     .passthrough_ddr_enable(cache_port_cmd_valid_s[1]),
     .passthrough_ddr_req_ack(cache_port_cmd_ready_n[1]),
-    .passthrough_ddr_rsp_ready(cache_port_rsp_valid_n[1]),
+    .passthrough_ddr_rsp_valid(cache_port_rsp_valid_n[1]),
     .passthrough_ddr_data(iob_ddr_read_data),
 
     .passthrough_ddr_ctrl_enable(ddr_ctrl_cmd_valid),
     .passthrough_ddr_ctrl_req_ack(ddr_ctrl_cmd_ready),
-    .passthrough_ddr_ctrl_rsp_ready(ddr_ctrl_rsp_ready),
+    .passthrough_ddr_ctrl_rsp_valid(ddr_ctrl_rsp_valid),
     .passthrough_ddr_ctrl_data(ddr_ctrl_rsp_data),
 
     .passthrough_irq_enable(irq_enable),
     .passthrough_irq_req_ack(irq_req_ack),
     .passthrough_irq_rsp_data(irq_rsp_data),
-    .passthrough_irq_rsp_ready(irq_rsp_ready),
+    .passthrough_irq_rsp_valid(irq_rsp_valid),
 
     .passthrough_gpio_enable(gpio_enable),
     .passthrough_gpio_req_ack(gpio_req_ack),
     .passthrough_gpio_rsp_data(gpio_rsp_data),
-    .passthrough_gpio_rsp_ready(gpio_rsp_ready),
+    .passthrough_gpio_rsp_valid(gpio_rsp_valid),
 
     .uart_tx(uart_tx),
     .uart_rx(uart_rx)
@@ -251,7 +251,7 @@ cache#(
     .port_cmd_ready_o(cache_port_cmd_ready_n),
     .port_cmd_write_mask_i(cache_port_cmd_write_mask_s),
     .port_cmd_write_data_i(cache_port_cmd_write_data_s),
-    .port_rsp_ready_o(cache_port_rsp_valid_n),
+    .port_rsp_valid_o(cache_port_rsp_valid_n),
     .port_rsp_read_data_o(cache_port_rsp_read_data_n),
 
     .backend_cmd_valid_o(ddr_data_cmd_valid),
@@ -259,7 +259,7 @@ cache#(
     .backend_cmd_ready_i(ddr_data_cmd_ack),
     .backend_cmd_write_o(ddr_data_cmd_write),
     .backend_cmd_write_data_o(ddr_cmd_write_data),
-    .backend_rsp_ready_i(ddr_data_rsp_ready),
+    .backend_rsp_valid_i(ddr_data_rsp_valid),
     .backend_rsp_read_data_i(ddr_data_rsp_read_data)
 );
 
@@ -300,7 +300,7 @@ sddr_ctrl#(
     .ctrl_cmd_data(ctrl_dBus_cmd_payload_data),
     .ctrl_cmd_write(ctrl_dBus_cmd_payload_wr),
     .ctrl_cmd_ack(ddr_ctrl_cmd_ready),
-    .ctrl_rsp_ready(ddr_ctrl_rsp_ready),
+    .ctrl_rsp_valid(ddr_ctrl_rsp_valid),
     .ctrl_rsp_data(ddr_ctrl_rsp_data),
 
     .data_cmd_valid(ddr_data_cmd_valid),
@@ -308,7 +308,7 @@ sddr_ctrl#(
     .data_cmd_data_i(ddr_cmd_write_data),
     .data_cmd_address(ddr_data_cmd_address),
     .data_cmd_write(ddr_data_cmd_write),
-    .data_rsp_ready(ddr_data_rsp_ready),
+    .data_rsp_valid(ddr_data_rsp_valid),
     .data_rsp_data_o(ddr_data_rsp_read_data),
 
     .ddr3_cs_n_o(ddr_phy_cs_n),
@@ -380,7 +380,7 @@ timer_int_ctrl#(.CLOCK_HZ(CTRL_CLOCK_HZ)) timer_interrupt(
     .req_ready_o(irq_req_ack),
 
     .rsp_data_o(irq_rsp_data),
-    .rsp_valid_o(irq_rsp_ready)
+    .rsp_valid_o(irq_rsp_valid)
 );
 
 gpio#(.NUM_IN_PORTS(1)) gpio(
@@ -392,7 +392,7 @@ gpio#(.NUM_IN_PORTS(1)) gpio(
     .req_ready_o(gpio_req_ack),
 
     .rsp_data_o(gpio_rsp_data),
-    .rsp_valid_o(gpio_rsp_ready),
+    .rsp_valid_o(gpio_rsp_valid),
 
     .gp_in( '{ { 31'b0, uart_output } } ),
     .gp_out()
