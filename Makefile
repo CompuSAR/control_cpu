@@ -46,4 +46,7 @@ ControlCpu.srcs/saros/boot_loader_state.mem: ControlCpu.srcs/saros/boot_loader.m
 clean:
 	$(RM) -r ControlCpu.gen/saros
 
-.PHONY: clean
+distclean: clean
+	$(RM) ControlCpu.gen/saros/config.log
+
+.PHONY: clean distclean
