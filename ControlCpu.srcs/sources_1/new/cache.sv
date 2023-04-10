@@ -33,7 +33,7 @@ module cache#(
         output                                                          backend_cmd_write_o,
         output [CACHELINE_BITS-1:0]                                     backend_cmd_write_data_o,
         input                                                           backend_rsp_valid_i,
-        input                                                           backend_rsp_read_data_i
+        input  [CACHELINE_BITS-1:0]                                     backend_rsp_read_data_i
     );
 
 localparam LINES_ADDR_BITS = $clog2(NUM_CACHELINES);
@@ -72,10 +72,12 @@ logic [LINES_ADDR_BITS-1:0]             cache_port_addr, cache_mem_addr;
 logic [CACHELINE_BITS-1:0]              cache_port_din, cache_mem_din;
 logic                                   cache_port_enable;
 logic                                   cache_mem_enable;
-logic [CACHELINE_BITS/8-1:0]            cache_port_we, cache_mem_we;
+logic [CACHELINE_BITS/8-1:0]            cache_port_we;
+logic                                   cache_mem_we;
 
 logic [CACHELINE_BITS-1:0]              port_rsp_data;
 
+/*
 xpm_memory_dpdistram#(
     .CLOCKING_MODE("common_clock"),
     .MEMORY_INIT_FILE(STATE_INIT),
@@ -109,6 +111,13 @@ xpm_memory_dpdistram#(
     .regceb( 1'b1 ),
     .rstb( 1'b0 )
 );
+*/
+logic [$bits(CachelineMetadata)-1:0] cache_metadata[NUM_CACHELINES-1:0];
+
+initial begin
+    if( STATE_INIT!="none" )
+        $readmemh(STATE_INIT, cache_metadata, 0, NUM_CACHELINES-1);
+end
 
 xpm_memory_tdpram#(
     .CLOCKING_MODE("common_clock"),
@@ -201,11 +210,11 @@ wire [$clog2(NUM_PORTS)-1:0] active_port = port_state[0].active_port;
 task cache_write(input [ADDR_BITS-1:0] address, input [CACHELINE_BITS-1:0]data, input [CACHELINE_BITS/8-1:0] mask);
     command_state_next = IDLE;
 
-    md_south_addr = extract_cacheline_addr(address);
+//    md_south_addr = extract_cacheline_addr(address);
     md_south_din.initialized = 1'b1;
     md_south_din.dirty = 1'b1;
     md_south_din.source_address = extract_complement_addr(address);
-    md_south_enable = 1'b1;
+//    md_north_enable = 1'b1;
     md_south_we = 1'b1;
 
     cache_port_addr = extract_cacheline_addr(address);
@@ -217,10 +226,16 @@ endtask
 always_comb begin
     md_north_enable = 1'b0;
     md_south_enable = 1'b0;
+    md_south_we = 1'b0;
+    md_south_addr = extract_cacheline_addr(port_cmd_addr_i[active_port]);
+    md_south_dout = cache_metadata[md_south_addr];
+    md_south_din = md_south_dout;
     set_command_active = 1'b0;
     backend_cmd_valid_o = 1'b0;
     cache_port_enable = 1'b0;
     cache_mem_enable = 1'b0;
+
+    command_state_next = command_state;
 
     case(command_state)
         IDLE: begin end
@@ -231,14 +246,13 @@ always_comb begin
 
     if( port_cmd_valid_i[active_port] && port_cmd_ready_o[active_port] ) begin
         // We have a pending command
-        md_north_addr = extract_cacheline_addr(port_cmd_addr_i[active_port]);
-        md_north_enable = 1'b1;
+        md_south_enable = 1'b1;
 
         set_command_active = 1'b1;
 
-        if( md_north_dout.initialized ) begin
+        if( md_south_dout.initialized ) begin
             // Cacheline has data
-            if( md_north_dout.source_address == extract_complement_addr(port_cmd_addr_i[active_port]) ) begin
+            if( md_south_dout.source_address == extract_complement_addr(port_cmd_addr_i[active_port]) ) begin
                 // Cache hit
                 if( port_cmd_write_mask_i[active_port]==0 ) begin
                     // Read
@@ -260,7 +274,7 @@ always_comb begin
             end else begin
                 // Cache miss
 
-                if( md_north_dout.dirty )
+                if( md_south_dout.dirty )
                     command_state_next = EVICTING;
                 else begin
                     // Current cacheline is not dirty
@@ -289,6 +303,9 @@ always_comb begin
 end
 
 always_ff@(posedge clock_i) begin
+    if( md_south_we )
+        cache_metadata[md_south_addr] <= md_south_din;
+
     command_state <= command_state_next;
 
     if( set_command_active ) begin

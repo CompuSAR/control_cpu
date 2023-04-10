@@ -40,7 +40,7 @@ ddr3_model ddr(
     .ck         (top_module.ddr3_ck_p),
     .ck_n       (top_module.ddr3_ck_n),
     .cke        (top_module.ddr3_cke),
-    .cs_n       (0),
+    .cs_n       (1'b0),
     .ras_n      (top_module.ddr3_ras_n),
     .cas_n      (top_module.ddr3_cas_n),
     .we_n       (top_module.ddr3_we_n),

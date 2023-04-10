@@ -6,9 +6,7 @@ module clk_converter(
 
     output clk_ctrl_cpu,
     output clk_ddr,
-    output clk_ddr_90deg,
     output clk_ddr_180deg,
-    output clk_ddr_270deg,
 
     output clkfb_out,
     input clkfb_in,
@@ -20,11 +18,10 @@ MMCME2_BASE#(
     .DIVCLK_DIVIDE(4),
     .CLKFBOUT_MULT_F(48.5),
     .CLKIN1_PERIOD(20.000),     // 50MHz input clock
-    .CLKOUT1_DIVIDE(6),         // 101.041666667MHz output
-//    .CLKOUT1_DIVIDE(7),         // 86.6071428571MHz output
-    .CLKOUT2_DIVIDE(2),         // 303.125MHz output
-    .CLKOUT3_DIVIDE(2),         // 303.125MHz output
-    .CLKOUT3_PHASE(135)
+    //.CLKOUT1_DIVIDE(6),         // 101.041666667MHz output
+    //.CLKOUT1_DIVIDE(7),         // 86.6071428571MHz output
+    .CLKOUT1_DIVIDE(8),         // 75.78125MHz output
+    .CLKOUT2_DIVIDE(2)          // 303.125MHz output
 ) mmcm(
     .CLKIN1(clk_in1),
 
@@ -34,8 +31,6 @@ MMCME2_BASE#(
     .CLKOUT1(clk_ctrl_cpu),
     .CLKOUT2(clk_ddr),
     .CLKOUT2B(clk_ddr_180deg),
-    .CLKOUT3(clk_ddr_90deg),
-    .CLKOUT3B(clk_ddr_270deg),
 
     .PWRDWN(1'b0),
     .RST(reset),

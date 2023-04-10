@@ -48,8 +48,9 @@ module top
     inout   wire    [1:0]   ddr3_dqs_n,
     inout   wire    [15:0]  ddr3_dq
 );
-localparam CTRL_CLOCK_HZ = 101041667;
-//localparam CTRL_CLOCK_HZ =86607143;
+//localparam CTRL_CLOCK_HZ = 101041667;
+//localparam CTRL_CLOCK_HZ = 86607143;
+localparam CTRL_CLOCK_HZ = 75781250;
 
 function automatic [3:0] convert_byte_write( logic we, logic[1:0] address, logic[1:0] size );
     if( we ) begin
@@ -71,7 +72,7 @@ endfunction
 //-----------------------------------------------------------------
 logic ctrl_cpu_clock, clocks_locked;
 wire clk_w = ctrl_cpu_clock;
-wire ddr_clock, ddr_clock_90deg;
+wire ddr_clock;
 wire rst_w = !clocks_locked;
 wire clk_ddr_dqs_w;
 wire clk_ref_w;
@@ -81,7 +82,6 @@ clk_converter clocks(
     .clk_in1(board_clock), .reset(1'b0),
     .clk_ctrl_cpu(ctrl_cpu_clock),
     .clk_ddr(ddr_clock),
-    .clk_ddr_90deg(ddr_clock_90deg),
     .clkfb_in(clock_feedback),
     .clkfb_out(clock_feedback),
     .locked(clocks_locked)
@@ -193,7 +193,7 @@ logic ddr_ready, ddr_rsp_valid, ddr_write_data_ready;
 logic ddr_ctrl_cmd_valid, ddr_ctrl_cmd_ready, ddr_ctrl_rsp_valid;
 logic [31:0] ddr_ctrl_rsp_data;
 logic ddr_data_cmd_valid, ddr_data_cmd_ack, ddr_cmd_write, ddr_data_rsp_valid;
-logic [31:0] ddr_cmd_address;
+logic [31:0] ddr_data_cmd_address;
 logic [127:0] ddr_cmd_write_data, ddr_data_rsp_read_data;
 logic irq_enable, irq_req_ack, irq_rsp_valid;
 logic [31:0] irq_rsp_data;
@@ -245,6 +245,14 @@ cache#(
     .NUM_PORTS(CACHE_PORTS_NUM)
 ) cache(
     .clock_i(ctrl_cpu_clock),
+
+    .ctrl_cmd_addr_i(),
+    .ctrl_cmd_valid_i(),
+    .ctrl_cmd_ready_o(),
+    .ctrl_cmd_write_i(),
+    .ctrl_cmd_data_i(),
+    .ctrl_rsp_valid_o(),
+    .ctrl_rsp_data_o(),
 
     .port_cmd_valid_i(cache_port_cmd_valid_s),
     .port_cmd_addr_i(cache_port_cmd_addr_s),
@@ -306,7 +314,7 @@ sddr_ctrl#(
     .data_cmd_valid(ddr_data_cmd_valid),
     .data_cmd_ack(ddr_data_cmd_ack),
     .data_cmd_data_i(ddr_cmd_write_data),
-    .data_cmd_address(ddr_data_cmd_address),
+    .data_cmd_address(ddr_data_cmd_address[27:0]),
     .data_cmd_write(ddr_data_cmd_write),
     .data_rsp_valid(ddr_data_rsp_valid),
     .data_rsp_data_o(ddr_data_rsp_read_data),
@@ -333,7 +341,6 @@ sddr_phy_xilinx ddr_phy(
      .in_cpu_clock_i(ctrl_cpu_clock)
     ,.in_ddr_clock_i(ddr_clock)
 //     .in_ddr_clock_i(ctrl_cpu_clock)
-    ,.in_ddr_clock_90deg_i(ddr_clock_90deg)
     ,.in_ddr_reset_n_i(ddr_reset_n)
     ,.in_phy_reset_n_i(ddr_phy_reset_n)
 
