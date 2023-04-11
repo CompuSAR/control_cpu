@@ -48,9 +48,9 @@ module top
     inout   wire    [1:0]   ddr3_dqs_n,
     inout   wire    [15:0]  ddr3_dq
 );
-//localparam CTRL_CLOCK_HZ = 101041667;
+localparam CTRL_CLOCK_HZ = 101041667;
 //localparam CTRL_CLOCK_HZ = 86607143;
-localparam CTRL_CLOCK_HZ = 75781250;
+//localparam CTRL_CLOCK_HZ = 75781250;
 
 function automatic [3:0] convert_byte_write( logic we, logic[1:0] address, logic[1:0] size );
     if( we ) begin

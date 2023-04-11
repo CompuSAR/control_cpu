@@ -40,6 +40,7 @@ localparam LINES_ADDR_BITS = $clog2(NUM_CACHELINES);
 localparam BACKEND_COMPLEMENTARY_ADDRESS = $clog2(BACKEND_SIZE_BYTES) - LINES_ADDR_BITS - $clog2(CACHELINE_BITS/8);
 
 localparam EMPTY_WRITE_MASK = { CACHELINE_BITS/8{1'b0} };
+localparam FULL_WRITE_MASK = { CACHELINE_BITS/8{1'b1} };
 
 localparam ADDR_CACHELINE_OFFSET_LOW = 0;
 localparam ADDR_CACHELINE_OFFSET_HIGH = $clog2(CACHELINE_BITS/8) - 1;
@@ -134,9 +135,9 @@ xpm_memory_tdpram#(
     .sleep( 1'b0 )
 );
 
-enum { IDLE, EVICTING, FETCHING, RESULT } command_state = IDLE, command_state_next;
+enum { IDLE, LOOKUP, EVICTING, FETCHING, RESULT } command_state = IDLE, command_state_next;
 wire command_active = command_state!=IDLE && command_state!=RESULT;
-logic set_command_active;
+logic set_command_active, rsp_valid;
 struct {
     logic [ADDR_COMPLEMENTARY_HIGH-ADDR_CACHELINE_ADDR_HIGH:0]  address;
     logic [CACHELINE_BITS/8-1:0]                                write_mask;
@@ -153,7 +154,7 @@ generate
         assign pending = port_cmd_valid_i[i];
         assign port_cmd_ready_o[i] = !prev_pending && !command_active;
         assign port_rsp_read_data_o[i] = port_rsp_data;
-        assign port_rsp_valid_o[i] = command_state==RESULT && active_command.active_port==i;
+        assign port_rsp_valid_o[i] = rsp_valid && active_command.active_port==i;
 
         wire [$clog2(NUM_PORTS)-1:0] next_active;
         wire [$clog2(NUM_PORTS)-1:0] active_port = pending && !prev_pending ? i : next_active;
@@ -172,101 +173,117 @@ endgenerate
 
 wire [$clog2(NUM_PORTS)-1:0] active_port = port_state[0].active_port;
 
-task cache_write(input [ADDR_BITS-1:0] address, input [CACHELINE_BITS-1:0]data, input [CACHELINE_BITS/8-1:0] mask);
+task do_cache_write();
     command_state_next = IDLE;
 
-//    md_addr = extract_cacheline_addr(address);
-    md_din.initialized = 1'b1;
     md_din.dirty = 1'b1;
-    md_din.source_address = extract_complement_addr(address);
     md_we = 1'b1;
 
-    cache_port_addr = extract_cacheline_addr(address);
-    cache_port_din = data;
-    cache_port_we = mask;
     cache_port_enable = 1'b1;
+endtask
+
+task do_evict();
+    // TODO implement
+endtask
+
+task do_fetch();
+    // TODO implement
+endtask
+
+task handle_lookup();
+    if( active_command.write_mask==EMPTY_WRITE_MASK ) begin
+        // Read
+        if( md_dout.initialized ) begin
+            // Cacheline has data
+            if( md_dout.source_address == extract_complement_addr(active_command.address) ) begin
+                // Cache hit
+                command_state_next = IDLE;
+                rsp_valid = 1'b1;
+            end else begin
+                // Cache miss
+                if( md_dout.dirty ) begin
+                    do_evict();
+                end else begin
+                    do_fetch();
+                end
+            end
+        end else begin
+            // Cacheline is uninitialized
+            do_fetch();
+        end
+    end else begin
+        // Write
+        if( md_dout.initialized ) begin
+            // Cacheline contains data
+            if( md_dout.source_address == extract_complement_addr(active_command.address) ) begin
+                // Cache hit
+                do_cache_write();
+            end else begin
+                // Cache miss
+                if( md_dout.dirty ) begin
+                    do_evict();
+                end else begin
+                    if( active_command.write_mask == FULL_WRITE_MASK ) begin
+                        // Writing complete cacheline in one go
+                        do_cache_write();
+                    end else begin
+                        do_fetch();
+                    end
+                end
+            end
+        end else begin
+            // Cacheline empty
+            if( active_command.write_mask == FULL_WRITE_MASK ) begin
+                // Writing complete cacheline in one go
+                do_cache_write();
+            end else begin
+                do_fetch();
+            end
+        end
+    end
 endtask
 
 always_comb begin
     md_enable = 1'b0;
-    md_we = 1'b0;
-    md_addr = extract_cacheline_addr(port_cmd_addr_i[active_port]);
+    md_addr = extract_cacheline_addr(active_command.address);
     md_dout = cache_metadata[md_addr];
 
     // Default values (to avoid latches) for metadata din
     md_din.initialized = 1'b1;
-    md_din.dirty = 1'b0;
-    md_din.source_address = extract_complement_addr(port_cmd_addr_i[active_port]);
+    md_din.dirty = 1'b1;
+    md_din.source_address = extract_complement_addr(active_command.address);
+    md_we = 1'b0;
+
+    cache_port_addr = extract_cacheline_addr(command_state==IDLE ? port_cmd_addr_i[active_port] : active_command.address );
+    cache_port_din = active_command.write_data;
+    cache_port_we = active_command.write_mask;
+    cache_port_enable = 1'b0;
 
     set_command_active = 1'b0;
     backend_cmd_valid_o = 1'b0;
-    cache_port_enable = 1'b0;
     cache_mem_enable = 1'b0;
+    rsp_valid = 1'b0;
 
     command_state_next = command_state;
 
+    // Handle active commands
     case(command_state)
         IDLE: begin end
+        LOOKUP: handle_lookup();
         RESULT: begin
             command_state_next=IDLE;
         end
     endcase
 
+    // Handle new commands
     if( port_cmd_valid_i[active_port] && port_cmd_ready_o[active_port] ) begin
         // We have a pending command
         md_enable = 1'b1;
 
         set_command_active = 1'b1;
+        command_state_next = LOOKUP;
 
-        if( md_dout.initialized ) begin
-            // Cacheline has data
-            if( md_dout.source_address == extract_complement_addr(port_cmd_addr_i[active_port]) ) begin
-                // Cache hit
-                if( port_cmd_write_mask_i[active_port]==0 ) begin
-                    // Read
-                    command_state_next = RESULT;
-
-                    cache_port_addr = extract_cacheline_addr(port_cmd_addr_i[active_port]);
-                    cache_port_enable = 1'b1;
-                    cache_port_we = 1'b0;
-                end else begin
-                    // Write
-                    // Our north port for the metadata doesn't have a write
-                    // port, so we're routing the dirtying through the
-                    // otherwise idle stored command
-                    cache_write(
-                        port_cmd_addr_i[active_port],
-                        port_cmd_write_data_i[active_port],
-                        port_cmd_write_mask_i[active_port]);
-                end
-            end else begin
-                // Cache miss
-
-                if( md_dout.dirty )
-                    command_state_next = EVICTING;
-                else begin
-                    // Current cacheline is not dirty
-                    case( port_cmd_write_mask_i[active_port] )
-                        {CACHELINE_BITS/8{1'b0}}: command_state_next = FETCHING; // Read
-                        {CACHELINE_BITS/8{1'b1}}: cache_write( // Write to all bits
-                                                        port_cmd_addr_i[active_port],
-                                                        port_cmd_write_data_i[active_port],
-                                                        port_cmd_write_mask_i[active_port]);
-                        default: command_state_next = FETCHING;
-                    endcase
-                end
-            end
-        end else begin
-            // Cacheline empty
-            case( port_cmd_write_mask_i[active_port] )
-                {CACHELINE_BITS/8{1'b0}}: command_state_next = FETCHING; // Read
-                {CACHELINE_BITS/8{1'b1}}: cache_write( // Write to all bits
-                                                port_cmd_addr_i[active_port],
-                                                port_cmd_write_data_i[active_port],
-                                                port_cmd_write_mask_i[active_port]);
-                default: command_state_next = FETCHING;
-            endcase
-        end
+        cache_port_enable = 1'b1;
     end
 end
 
