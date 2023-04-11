@@ -62,11 +62,11 @@ typedef struct packed {
     logic [BACKEND_COMPLEMENTARY_ADDRESS-1:0]           source_address;
 } CachelineMetadata;
 
-logic [LINES_ADDR_BITS-1:0]             md_north_addr, md_south_addr;
-CachelineMetadata                       md_south_din;
-CachelineMetadata                       md_north_dout, md_south_dout;
-logic                                   md_north_enable, md_south_enable;
-logic                                   md_south_we;
+logic [LINES_ADDR_BITS-1:0]             md_addr;
+CachelineMetadata                       md_din;
+CachelineMetadata                       md_dout;
+logic                                   md_enable;
+logic                                   md_we;
 
 logic [LINES_ADDR_BITS-1:0]             cache_port_addr, cache_mem_addr;
 logic [CACHELINE_BITS-1:0]              cache_port_din, cache_mem_din;
@@ -77,41 +77,6 @@ logic                                   cache_mem_we;
 
 logic [CACHELINE_BITS-1:0]              port_rsp_data;
 
-/*
-xpm_memory_dpdistram#(
-    .CLOCKING_MODE("common_clock"),
-    .MEMORY_INIT_FILE(STATE_INIT),
-    .MEMORY_SIZE($bits(CachelineMetadata) * NUM_CACHELINES),
-//    .SIM_ASSERT_CHK(1),
-    .USE_MEM_INIT(STATE_INIT != "none"),
-
-    .ADDR_WIDTH_A($clog2(NUM_CACHELINES)),
-    .READ_DATA_WIDTH_A($bits(CachelineMetadata)),
-    .READ_LATENCY_A(0),
-    .WRITE_DATA_WIDTH_A($bits(CachelineMetadata)),
-    .BYTE_WRITE_WIDTH_A($bits(CachelineMetadata)),
-
-    .ADDR_WIDTH_B($clog2(NUM_CACHELINES)),
-    .READ_DATA_WIDTH_B($bits(CachelineMetadata)),
-    .READ_LATENCY_B(0)
-) cache_metadata(
-    .clka( clock_i ),
-    .addra( md_south_addr ),
-    .dina( md_south_din ),
-    .douta( md_south_dout ),
-    .ena( md_south_enable ),
-    .regcea( 1'b1 ),
-    .rsta( 1'b0 ),
-    .wea( md_south_we ),
-
-    .clkb( clock_i ),
-    .addrb( md_north_addr ),
-    .doutb( md_north_dout ),
-    .enb( md_north_enable ),
-    .regceb( 1'b1 ),
-    .rstb( 1'b0 )
-);
-*/
 logic [$bits(CachelineMetadata)-1:0] cache_metadata[NUM_CACHELINES-1:0];
 
 initial begin
@@ -210,12 +175,11 @@ wire [$clog2(NUM_PORTS)-1:0] active_port = port_state[0].active_port;
 task cache_write(input [ADDR_BITS-1:0] address, input [CACHELINE_BITS-1:0]data, input [CACHELINE_BITS/8-1:0] mask);
     command_state_next = IDLE;
 
-//    md_south_addr = extract_cacheline_addr(address);
-    md_south_din.initialized = 1'b1;
-    md_south_din.dirty = 1'b1;
-    md_south_din.source_address = extract_complement_addr(address);
-//    md_north_enable = 1'b1;
-    md_south_we = 1'b1;
+//    md_addr = extract_cacheline_addr(address);
+    md_din.initialized = 1'b1;
+    md_din.dirty = 1'b1;
+    md_din.source_address = extract_complement_addr(address);
+    md_we = 1'b1;
 
     cache_port_addr = extract_cacheline_addr(address);
     cache_port_din = data;
@@ -224,12 +188,16 @@ task cache_write(input [ADDR_BITS-1:0] address, input [CACHELINE_BITS-1:0]data, 
 endtask
 
 always_comb begin
-    md_north_enable = 1'b0;
-    md_south_enable = 1'b0;
-    md_south_we = 1'b0;
-    md_south_addr = extract_cacheline_addr(port_cmd_addr_i[active_port]);
-    md_south_dout = cache_metadata[md_south_addr];
-    md_south_din = md_south_dout;
+    md_enable = 1'b0;
+    md_we = 1'b0;
+    md_addr = extract_cacheline_addr(port_cmd_addr_i[active_port]);
+    md_dout = cache_metadata[md_addr];
+
+    // Default values (to avoid latches) for metadata din
+    md_din.initialized = 1'b1;
+    md_din.dirty = 1'b0;
+    md_din.source_address = extract_complement_addr(port_cmd_addr_i[active_port]);
+
     set_command_active = 1'b0;
     backend_cmd_valid_o = 1'b0;
     cache_port_enable = 1'b0;
@@ -246,13 +214,13 @@ always_comb begin
 
     if( port_cmd_valid_i[active_port] && port_cmd_ready_o[active_port] ) begin
         // We have a pending command
-        md_south_enable = 1'b1;
+        md_enable = 1'b1;
 
         set_command_active = 1'b1;
 
-        if( md_south_dout.initialized ) begin
+        if( md_dout.initialized ) begin
             // Cacheline has data
-            if( md_south_dout.source_address == extract_complement_addr(port_cmd_addr_i[active_port]) ) begin
+            if( md_dout.source_address == extract_complement_addr(port_cmd_addr_i[active_port]) ) begin
                 // Cache hit
                 if( port_cmd_write_mask_i[active_port]==0 ) begin
                     // Read
@@ -274,7 +242,7 @@ always_comb begin
             end else begin
                 // Cache miss
 
-                if( md_south_dout.dirty )
+                if( md_dout.dirty )
                     command_state_next = EVICTING;
                 else begin
                     // Current cacheline is not dirty
@@ -303,8 +271,8 @@ always_comb begin
 end
 
 always_ff@(posedge clock_i) begin
-    if( md_south_we )
-        cache_metadata[md_south_addr] <= md_south_din;
+    if( md_we )
+        cache_metadata[md_addr] <= md_din;
 
     command_state <= command_state_next;
 
