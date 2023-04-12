@@ -135,11 +135,10 @@ xpm_memory_tdpram#(
     .sleep( 1'b0 )
 );
 
-enum { IDLE, LOOKUP, EVICTING, FETCHING, RESULT } command_state = IDLE, command_state_next;
-wire command_active = command_state!=IDLE && command_state!=RESULT;
+enum { IDLE, LOOKUP, EVICTING, FETCHING, RESULT } command_state = IDLE, command_state_next, proposed_command_state_next;
 logic set_command_active, rsp_valid;
 struct {
-    logic [ADDR_COMPLEMENTARY_HIGH-ADDR_CACHELINE_ADDR_HIGH:0]  address;
+    logic [ADDR_BITS-1:0]  address;
     logic [CACHELINE_BITS/8-1:0]                                write_mask;
     logic [CACHELINE_BITS-1:0]                                  write_data;
 
@@ -152,7 +151,7 @@ generate
         wire pending, prev_pending;
 
         assign pending = port_cmd_valid_i[i];
-        assign port_cmd_ready_o[i] = !prev_pending && !command_active;
+        assign port_cmd_ready_o[i] = !prev_pending && proposed_command_state_next==IDLE;
         assign port_rsp_read_data_o[i] = port_rsp_data;
         assign port_rsp_valid_o[i] = rsp_valid && active_command.active_port==i;
 
@@ -174,7 +173,7 @@ endgenerate
 wire [$clog2(NUM_PORTS)-1:0] active_port = port_state[0].active_port;
 
 task do_cache_write();
-    command_state_next = IDLE;
+    proposed_command_state_next = IDLE;
 
     md_din.dirty = 1'b1;
     md_we = 1'b1;
@@ -197,7 +196,7 @@ task handle_lookup();
             // Cacheline has data
             if( md_dout.source_address == extract_complement_addr(active_command.address) ) begin
                 // Cache hit
-                command_state_next = IDLE;
+                proposed_command_state_next = IDLE;
                 rsp_valid = 1'b1;
             end else begin
                 // Cache miss
@@ -254,7 +253,7 @@ always_comb begin
     md_din.source_address = extract_complement_addr(active_command.address);
     md_we = 1'b0;
 
-    cache_port_addr = extract_cacheline_addr(command_state==IDLE ? port_cmd_addr_i[active_port] : active_command.address );
+    cache_port_addr = extract_cacheline_addr( active_command.address );
     cache_port_din = active_command.write_data;
     cache_port_we = active_command.write_mask;
     cache_port_enable = 1'b0;
@@ -264,14 +263,14 @@ always_comb begin
     cache_mem_enable = 1'b0;
     rsp_valid = 1'b0;
 
-    command_state_next = command_state;
+    proposed_command_state_next = command_state;
 
     // Handle active commands
     case(command_state)
         IDLE: begin end
         LOOKUP: handle_lookup();
         RESULT: begin
-            command_state_next=IDLE;
+            proposed_command_state_next = IDLE;
         end
     endcase
 
@@ -283,7 +282,10 @@ always_comb begin
         set_command_active = 1'b1;
         command_state_next = LOOKUP;
 
+        cache_port_addr = extract_cacheline_addr( port_cmd_addr_i[active_port] );
         cache_port_enable = 1'b1;
+    end else begin
+        command_state_next = proposed_command_state_next;
     end
 end
 
@@ -295,7 +297,7 @@ always_ff@(posedge clock_i) begin
 
     if( set_command_active ) begin
         active_command.active_port <= active_port;
-        active_command.address <= port_cmd_addr_i[active_port][ADDR_COMPLEMENTARY_HIGH:ADDR_CACHELINE_ADDR_LOW];
+        active_command.address <= port_cmd_addr_i[active_port];
         active_command.write_mask <= port_cmd_write_mask_i[active_port];
         active_command.write_data <= port_cmd_write_data_i[active_port];
     end else begin
