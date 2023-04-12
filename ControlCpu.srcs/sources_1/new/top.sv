@@ -130,10 +130,10 @@ VexRiscv control_cpu(
     .externalInterrupt(1'b0),
     .softwareInterrupt(1'b0),
 
-    .iBus_cmd_ready(cache_port_cmd_ready_n[0]),
-    .iBus_cmd_valid(cache_port_cmd_valid_s[0]),
-    .iBus_cmd_payload_pc(cache_port_cmd_addr_s[0]),
-    .iBus_rsp_valid(cache_port_rsp_valid_n[0]),
+    .iBus_cmd_ready(cache_port_cmd_ready_n[1]),
+    .iBus_cmd_valid(cache_port_cmd_valid_s[1]),
+    .iBus_cmd_payload_pc(cache_port_cmd_addr_s[1]),
+    .iBus_rsp_valid(cache_port_rsp_valid_n[1]),
     .iBus_rsp_payload_error(ctrl_iBus_rsp_payload_error),
     .iBus_rsp_payload_inst(ctrl_iBus_rsp_payload_inst),
 
@@ -150,24 +150,24 @@ VexRiscv control_cpu(
 
 bus_width_adjust#(.OUT_WIDTH(CACHELINE_BITS)) iBus_width_adjuster(
         .clock_i(ctrl_cpu_clock),
-        .in_cmd_valid_i(cache_port_cmd_valid_s[0]),
-        .in_cmd_addr_i(cache_port_cmd_addr_s[0]),
+        .in_cmd_valid_i(cache_port_cmd_valid_s[1]),
+        .in_cmd_addr_i(cache_port_cmd_addr_s[1]),
         .in_cmd_write_mask_i(4'b0000),
         .in_cmd_write_data_i(32'h0),
         .in_rsp_read_data_o(ctrl_iBus_rsp_payload_inst),
 
-        .out_cmd_ready_i(cache_port_cmd_ready_n[0]),
+        .out_cmd_ready_i(cache_port_cmd_ready_n[1]),
         .out_cmd_write_mask_o(),
         .out_cmd_write_data_o(),
-        .out_rsp_valid_i(cache_port_rsp_valid_n[0]),
-        .out_rsp_read_data_i(cache_port_rsp_read_data_n[0])
+        .out_rsp_valid_i(cache_port_rsp_valid_n[1]),
+        .out_rsp_read_data_i(cache_port_rsp_read_data_n[1])
     );
-assign cache_port_cmd_write_mask_s[0] = 0;
+assign cache_port_cmd_write_mask_s[1] = 0;
 
-assign cache_port_cmd_addr_s[1] = ctrl_dBus_cmd_payload_address;
+assign cache_port_cmd_addr_s[0] = ctrl_dBus_cmd_payload_address;
 bus_width_adjust#(.OUT_WIDTH(CACHELINE_BITS)) dBus_width_adjuster(
         .clock_i(ctrl_cpu_clock),
-        .in_cmd_valid_i(cache_port_cmd_valid_s[1]),
+        .in_cmd_valid_i(cache_port_cmd_valid_s[0]),
         .in_cmd_addr_i(ctrl_dBus_cmd_payload_address),
         .in_cmd_write_mask_i(
             convert_byte_write(
@@ -180,10 +180,10 @@ bus_width_adjust#(.OUT_WIDTH(CACHELINE_BITS)) dBus_width_adjuster(
         .in_rsp_read_data_o(iob_ddr_read_data),
 
         .out_cmd_ready_i(ctrl_dBus_cmd_ready),
-        .out_cmd_write_mask_o(cache_port_cmd_write_mask_s[1]),
-        .out_cmd_write_data_o(cache_port_cmd_write_data_s[1]),
+        .out_cmd_write_mask_o(cache_port_cmd_write_mask_s[0]),
+        .out_cmd_write_data_o(cache_port_cmd_write_data_s[0]),
         .out_rsp_valid_i(ctrl_dBus_rsp_valid),
-        .out_rsp_read_data_i(cache_port_rsp_read_data_n[1])
+        .out_rsp_read_data_i(cache_port_rsp_read_data_n[0])
     );
 
 assign ctrl_iBus_rsp_payload_error = 0;
@@ -212,9 +212,9 @@ io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
     .req_ack(ctrl_dBus_cmd_ready),
     .rsp_valid(ctrl_dBus_rsp_valid),
 
-    .passthrough_ddr_enable(cache_port_cmd_valid_s[1]),
-    .passthrough_ddr_req_ack(cache_port_cmd_ready_n[1]),
-    .passthrough_ddr_rsp_valid(cache_port_rsp_valid_n[1]),
+    .passthrough_ddr_enable(cache_port_cmd_valid_s[0]),
+    .passthrough_ddr_req_ack(cache_port_cmd_ready_n[0]),
+    .passthrough_ddr_rsp_valid(cache_port_rsp_valid_n[0]),
     .passthrough_ddr_data(iob_ddr_read_data),
 
     .passthrough_ddr_ctrl_enable(ddr_ctrl_cmd_valid),
