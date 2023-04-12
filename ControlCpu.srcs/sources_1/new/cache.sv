@@ -28,9 +28,9 @@ module cache#(
         output [CACHELINE_BITS-1:0]                                     port_rsp_read_data_o[NUM_PORTS],
 
         output logic                                                    backend_cmd_valid_o,
-        output [ADDR_BITS-1:0]                                          backend_cmd_addr_o,
+        output logic [ADDR_BITS-1:0]                                    backend_cmd_addr_o,
         input                                                           backend_cmd_ready_i,
-        output                                                          backend_cmd_write_o,
+        output logic                                                    backend_cmd_write_o,
         output [CACHELINE_BITS-1:0]                                     backend_cmd_write_data_o,
         input                                                           backend_rsp_valid_i,
         input  [CACHELINE_BITS-1:0]                                     backend_rsp_read_data_i
@@ -57,6 +57,12 @@ function logic[ADDR_COMPLEMENTARY_HIGH:ADDR_COMPLEMENTARY_LOW] extract_complemen
     extract_complement_addr = address[ADDR_COMPLEMENTARY_HIGH:ADDR_COMPLEMENTARY_LOW];
 endfunction
 
+function logic[ADDR_BITS-1:0] compose_address(
+        input [ADDR_COMPLEMENTARY_HIGH-ADDR_COMPLEMENTARY_LOW:0] complementary,
+        input [ADDR_CACHELINE_ADDR_HIGH-ADDR_CACHELINE_ADDR_LOW:0] cacheline);
+    compose_address = { complementary, cacheline, {$clog2(CACHELINE_BITS){1'b0}} };
+endfunction
+
 typedef struct packed {
     logic                                               initialized;
     logic                                               dirty;
@@ -71,6 +77,7 @@ logic                                   md_we;
 
 logic [LINES_ADDR_BITS-1:0]             cache_port_addr, cache_mem_addr;
 logic [CACHELINE_BITS-1:0]              cache_port_din, cache_mem_din;
+logic [CACHELINE_BITS-1:0]              cache_port_dout;
 logic                                   cache_port_enable;
 logic                                   cache_mem_enable;
 logic [CACHELINE_BITS/8-1:0]            cache_port_we;
@@ -114,7 +121,7 @@ xpm_memory_tdpram#(
     .clka( clock_i ),
     .addra( cache_port_addr ),
     .dina( cache_port_din ),
-    .douta( port_rsp_data ),
+    .douta( cache_port_dout ),
     .ena( cache_port_enable ),
     .injectdbiterra( 1'b0 ),
     .injectsbiterra( 1'b0 ),
@@ -138,12 +145,16 @@ xpm_memory_tdpram#(
 enum { IDLE, LOOKUP, EVICTING, FETCHING, RESULT } command_state = IDLE, command_state_next, proposed_command_state_next;
 logic set_command_active, rsp_valid;
 struct {
-    logic [ADDR_BITS-1:0]  address;
+    logic [ADDR_BITS-1:0]                                       address;
     logic [CACHELINE_BITS/8-1:0]                                write_mask;
     logic [CACHELINE_BITS-1:0]                                  write_data;
 
     logic [$clog2(NUM_PORTS)-1:0]                               active_port;
 } active_command;
+
+assign backend_cmd_addr_o = extract_complement_addr(active_command.address);
+assign backend_cmd_write_data_o = cache_port_dout;
+assign port_rsp_data = cache_port_dout;
 
 genvar i;
 generate
@@ -182,11 +193,21 @@ task do_cache_write();
 endtask
 
 task do_evict();
-    // TODO implement
+    backend_cmd_valid_o = 1'b1;
+    backend_cmd_write_o = 1'b1;
+
+    if( backend_cmd_ready_i )
+        proposed_command_state_next = EVICTING;
 endtask
 
 task do_fetch();
-    // TODO implement
+    backend_cmd_valid_o = 1'b1;
+    backend_cmd_write_o = 1'b0;
+    backend_cmd_addr_o =
+        { active_command.address[ADDR_COMPLEMENTARY_HIGH:ADDR_CACHELINE_ADDR_LOW], {$clog2(CACHELINE_BITS/8){1'b0}} };
+
+    if( backend_cmd_ready_i )
+        proposed_command_state_next = FETCHING;
 endtask
 
 task handle_lookup();
@@ -260,6 +281,7 @@ always_comb begin
 
     set_command_active = 1'b0;
     backend_cmd_valid_o = 1'b0;
+    backend_cmd_write_o = 1'b0;
     cache_mem_enable = 1'b0;
     rsp_valid = 1'b0;
 
