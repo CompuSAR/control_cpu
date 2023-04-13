@@ -75,13 +75,12 @@ CachelineMetadata                       md_dout;
 logic                                   md_enable;
 logic                                   md_we;
 
-logic [LINES_ADDR_BITS-1:0]             cache_port_addr, cache_mem_addr;
-logic [CACHELINE_BITS-1:0]              cache_port_din, cache_mem_din;
-logic [CACHELINE_BITS-1:0]              cache_port_dout;
-logic                                   cache_port_enable;
-logic                                   cache_mem_enable;
-logic [CACHELINE_BITS/8-1:0]            cache_port_we;
-logic                                   cache_mem_we;
+logic [LINES_ADDR_BITS-1:0]             cm_rd_addr, cm_wr_addr;
+logic [CACHELINE_BITS-1:0]              cm_wr_din;
+logic [CACHELINE_BITS-1:0]              cm_rd_dout;
+logic                                   cm_rd_enable;
+logic                                   cm_wr_enable;
+logic [CACHELINE_BITS/8-1:0]            cm_wr_we;
 
 logic [CACHELINE_BITS-1:0]              port_rsp_data;
 
@@ -92,7 +91,7 @@ initial begin
         $readmemh(STATE_INIT, cache_metadata, 0, NUM_CACHELINES-1);
 end
 
-xpm_memory_tdpram#(
+xpm_memory_sdpram#(
     .CLOCKING_MODE("common_clock"),
     .ECC_MODE("no_ecc"),
 //    .CASCADE_HEIGHT(1),
@@ -103,41 +102,30 @@ xpm_memory_tdpram#(
     .USE_MEM_INIT(INIT_FILE != "none"),
 
     .ADDR_WIDTH_A($clog2(NUM_CACHELINES)),
-    .READ_DATA_WIDTH_A(CACHELINE_BITS),
-    .READ_LATENCY_A(1),
     .WRITE_DATA_WIDTH_A(CACHELINE_BITS),
     .BYTE_WRITE_WIDTH_A(8),
-    .WRITE_MODE_A("read_first"),
 
     .ADDR_WIDTH_B($clog2(NUM_CACHELINES)),
     .READ_DATA_WIDTH_B(CACHELINE_BITS),
     .READ_LATENCY_B(1),
-    .WRITE_DATA_WIDTH_B(CACHELINE_BITS),
-    .BYTE_WRITE_WIDTH_B(CACHELINE_BITS),
     .WRITE_MODE_B("read_first"),
 
     .WRITE_PROTECT(1)
 ) cache_mem(
     .clka( clock_i ),
-    .addra( cache_port_addr ),
-    .dina( cache_port_din ),
-    .douta( cache_port_dout ),
-    .ena( cache_port_enable ),
+    .addra( cm_wr_addr ),
+    .dina( cm_wr_din ),
+    .ena( cm_wr_enable ),
     .injectdbiterra( 1'b0 ),
     .injectsbiterra( 1'b0 ),
-    .regcea( 1'b1 ),
-    .rsta( 1'b0 ),
-    .wea( cache_port_we ),
+    .wea( cm_wr_we ),
 
     .clkb( clock_i ),
-    .addrb( cache_mem_addr ),
-    .dinb( cache_mem_din ),
-    .enb( cache_mem_enable ),
-    .injectdbiterrb( 1'b0 ),
-    .injectsbiterrb( 1'b0 ),
+    .addrb( cm_rd_addr ),
+    .doutb( cm_rd_dout ),
+    .enb( cm_rd_enable ),
     .regceb( 1'b1 ),
     .rstb( 1'b0 ),
-    .web( cache_mem_we ),
 
     .sleep( 1'b0 )
 );
@@ -153,8 +141,8 @@ struct {
 } active_command;
 
 assign backend_cmd_addr_o = extract_complement_addr(active_command.address);
-assign backend_cmd_write_data_o = cache_port_dout;
-assign port_rsp_data = cache_port_dout;
+assign backend_cmd_write_data_o = cm_rd_dout;
+assign port_rsp_data = cm_rd_dout;
 
 genvar i;
 generate
@@ -189,7 +177,10 @@ task do_cache_write();
     md_din.dirty = 1'b1;
     md_we = 1'b1;
 
-    cache_port_enable = 1'b1;
+    cm_wr_we = active_command.write_mask;
+    cm_wr_enable = 1'b1;
+    cm_wr_addr = extract_cacheline_addr( active_command.address );
+    cm_wr_din = active_command.write_data;
 endtask
 
 task do_evict();
@@ -274,15 +265,14 @@ always_comb begin
     md_din.source_address = extract_complement_addr(active_command.address);
     md_we = 1'b0;
 
-    cache_port_addr = extract_cacheline_addr( active_command.address );
-    cache_port_din = active_command.write_data;
-    cache_port_we = active_command.write_mask;
-    cache_port_enable = 1'b0;
+    cm_rd_addr = extract_cacheline_addr( active_command.address );
+    cm_rd_enable = 1'b0;
+    cm_wr_we = active_command.write_mask;
 
     set_command_active = 1'b0;
     backend_cmd_valid_o = 1'b0;
     backend_cmd_write_o = 1'b0;
-    cache_mem_enable = 1'b0;
+    cm_wr_enable = 1'b0;
     rsp_valid = 1'b0;
 
     proposed_command_state_next = command_state;
@@ -304,8 +294,8 @@ always_comb begin
         set_command_active = 1'b1;
         command_state_next = LOOKUP;
 
-        cache_port_addr = extract_cacheline_addr( port_cmd_addr_i[active_port] );
-        cache_port_enable = 1'b1;
+        cm_rd_addr = extract_cacheline_addr( port_cmd_addr_i[active_port] );
+        cm_rd_enable = 1'b1;
     end else begin
         command_state_next = proposed_command_state_next;
     end

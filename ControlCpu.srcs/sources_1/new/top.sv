@@ -176,7 +176,7 @@ bus_width_adjust#(.OUT_WIDTH(CACHELINE_BITS)) dBus_width_adjuster(
                 ctrl_dBus_cmd_payload_size
             )
         ),
-        .in_cmd_write_data_i(32'h0),
+        .in_cmd_write_data_i(ctrl_dBus_cmd_payload_data),
         .in_rsp_read_data_o(iob_ddr_read_data),
 
         .out_cmd_ready_i(ctrl_dBus_cmd_ready),
