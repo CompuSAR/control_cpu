@@ -69,11 +69,11 @@ typedef struct packed {
     logic [BACKEND_COMPLEMENTARY_ADDRESS-1:0]           source_address;
 } CachelineMetadata;
 
-logic [LINES_ADDR_BITS-1:0]             md_addr;
-CachelineMetadata                       md_din;
-CachelineMetadata                       md_dout;
-logic                                   md_enable;
-logic                                   md_we;
+logic [LINES_ADDR_BITS-1:0]             md_rd_addr, md_wr_addr;
+CachelineMetadata                       md_wr_din;
+CachelineMetadata                       md_rd_dout;
+logic                                   md_rd_enable, md_wr_enable;
+logic                                   md_wr_we;
 
 logic [LINES_ADDR_BITS-1:0]             cm_rd_addr, cm_wr_addr;
 logic [CACHELINE_BITS-1:0]              cm_wr_din;
@@ -84,12 +84,39 @@ logic [CACHELINE_BITS/8-1:0]            cm_wr_we;
 
 logic [CACHELINE_BITS-1:0]              port_rsp_data;
 
-logic [$bits(CachelineMetadata)-1:0] cache_metadata[NUM_CACHELINES-1:0];
+xpm_memory_sdpram#(
+    .CLOCKING_MODE("common_clock"),
+    .MEMORY_INIT_FILE(STATE_INIT),
+    .MEMORY_PRIMITIVE("distributed"),
+    .MEMORY_SIZE($bits(CachelineMetadata)*NUM_CACHELINES),
+    .USE_MEM_INIT(STATE_INIT != "none"),
 
-initial begin
-    if( STATE_INIT!="none" )
-        $readmemh(STATE_INIT, cache_metadata, 0, NUM_CACHELINES-1);
-end
+    .ADDR_WIDTH_A($clog2(NUM_CACHELINES)),
+    .BYTE_WRITE_WIDTH_A($bits(CachelineMetadata)),
+    .WRITE_DATA_WIDTH_A($bits(CachelineMetadata)),
+
+    .ADDR_WIDTH_B($clog2(NUM_CACHELINES)),
+    .READ_DATA_WIDTH_B($bits(CachelineMetadata)),
+    .READ_LATENCY_B(1),
+    .WRITE_MODE_B("read_first")
+) cache_metadata(
+    .clka( clock_i ),
+    .addra( md_wr_addr ),
+    .dina( md_wr_din ),
+    .ena( md_wr_enable ),
+    .injectdbiterra( 1'b0 ),
+    .injectsbiterra( 1'b0 ),
+    .wea( md_wr_we ),
+
+    .clkb( clock_i ),
+    .addrb( md_rd_addr ),
+    .doutb( md_rd_dout ),
+    .enb( md_rd_enable ),
+    .regceb( 1'b1 ),
+    .rstb( 1'b0 ),
+
+    .sleep( 1'b0 )
+);
 
 xpm_memory_sdpram#(
     .CLOCKING_MODE("common_clock"),
@@ -140,9 +167,9 @@ struct {
     logic [$clog2(NUM_PORTS)-1:0]                               active_port;
 } active_command;
 
-assign backend_cmd_addr_o = extract_complement_addr(active_command.address);
 assign backend_cmd_write_data_o = cm_rd_dout;
 assign port_rsp_data = cm_rd_dout;
+
 
 genvar i;
 generate
@@ -174,8 +201,9 @@ wire [$clog2(NUM_PORTS)-1:0] active_port = port_state[0].active_port;
 task do_cache_write();
     proposed_command_state_next = IDLE;
 
-    md_din.dirty = 1'b1;
-    md_we = 1'b1;
+    md_wr_din.dirty = 1'b1;
+    md_wr_we = 1'b1;
+    md_wr_enable = 1'b1;
 
     cm_wr_we = active_command.write_mask;
     cm_wr_enable = 1'b1;
@@ -204,15 +232,15 @@ endtask
 task handle_lookup();
     if( active_command.write_mask==EMPTY_WRITE_MASK ) begin
         // Read
-        if( md_dout.initialized ) begin
+        if( md_rd_dout.initialized ) begin
             // Cacheline has data
-            if( md_dout.source_address == extract_complement_addr(active_command.address) ) begin
+            if( md_rd_dout.source_address == extract_complement_addr(active_command.address) ) begin
                 // Cache hit
                 proposed_command_state_next = IDLE;
                 rsp_valid = 1'b1;
             end else begin
                 // Cache miss
-                if( md_dout.dirty ) begin
+                if( md_rd_dout.dirty ) begin
                     do_evict();
                 end else begin
                     do_fetch();
@@ -224,14 +252,14 @@ task handle_lookup();
         end
     end else begin
         // Write
-        if( md_dout.initialized ) begin
+        if( md_rd_dout.initialized ) begin
             // Cacheline contains data
-            if( md_dout.source_address == extract_complement_addr(active_command.address) ) begin
+            if( md_rd_dout.source_address == extract_complement_addr(active_command.address) ) begin
                 // Cache hit
                 do_cache_write();
             end else begin
                 // Cache miss
-                if( md_dout.dirty ) begin
+                if( md_rd_dout.dirty ) begin
                     do_evict();
                 end else begin
                     if( active_command.write_mask == FULL_WRITE_MASK ) begin
@@ -255,25 +283,29 @@ task handle_lookup();
 endtask
 
 always_comb begin
-    md_enable = 1'b0;
-    md_addr = extract_cacheline_addr(active_command.address);
-    md_dout = cache_metadata[md_addr];
+    md_wr_enable = 1'b0;
+    md_wr_addr = extract_cacheline_addr(active_command.address);
 
     // Default values (to avoid latches) for metadata din
-    md_din.initialized = 1'b1;
-    md_din.dirty = 1'b1;
-    md_din.source_address = extract_complement_addr(active_command.address);
-    md_we = 1'b0;
+    md_wr_din.initialized = 1'b1;
+    md_wr_din.dirty = 1'b1;
+    md_wr_din.source_address = extract_complement_addr(active_command.address);
+    md_wr_we = 1'b1;
+
+    md_rd_addr = extract_cacheline_addr( port_cmd_addr_i[active_port] );
+    md_rd_enable = 1'b1;
 
     cm_rd_addr = extract_cacheline_addr( active_command.address );
     cm_rd_enable = 1'b0;
     cm_wr_we = active_command.write_mask;
 
     set_command_active = 1'b0;
-    backend_cmd_valid_o = 1'b0;
-    backend_cmd_write_o = 1'b0;
     cm_wr_enable = 1'b0;
     rsp_valid = 1'b0;
+
+    backend_cmd_valid_o = 1'b0;
+    backend_cmd_write_o = 1'bX;
+    backend_cmd_addr_o = { ADDR_BITS{1'bX} };
 
     proposed_command_state_next = command_state;
 
@@ -289,7 +321,7 @@ always_comb begin
     // Handle new commands
     if( port_cmd_valid_i[active_port] && port_cmd_ready_o[active_port] ) begin
         // We have a pending command
-        md_enable = 1'b1;
+        md_rd_enable = 1'b1;
 
         set_command_active = 1'b1;
         command_state_next = LOOKUP;
@@ -302,9 +334,6 @@ always_comb begin
 end
 
 always_ff@(posedge clock_i) begin
-    if( md_we )
-        cache_metadata[md_addr] <= md_din;
-
     command_state <= command_state_next;
 
     if( set_command_active ) begin
@@ -312,7 +341,6 @@ always_ff@(posedge clock_i) begin
         active_command.address <= port_cmd_addr_i[active_port];
         active_command.write_mask <= port_cmd_write_mask_i[active_port];
         active_command.write_data <= port_cmd_write_data_i[active_port];
-    end else begin
     end
 end
 
