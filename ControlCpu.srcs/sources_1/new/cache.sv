@@ -60,7 +60,7 @@ endfunction
 function logic[ADDR_BITS-1:0] compose_address(
         input [ADDR_COMPLEMENTARY_HIGH-ADDR_COMPLEMENTARY_LOW:0] complementary,
         input [ADDR_CACHELINE_ADDR_HIGH-ADDR_CACHELINE_ADDR_LOW:0] cacheline);
-    compose_address = { complementary, cacheline, {$clog2(CACHELINE_BITS){1'b0}} };
+    compose_address = { complementary, cacheline, {$clog2(CACHELINE_BITS/8){1'b0}} };
 endfunction
 
 typedef struct packed {
@@ -82,12 +82,14 @@ logic                                   cm_rd_enable;
 logic                                   cm_wr_enable;
 logic [CACHELINE_BITS/8-1:0]            cm_wr_we;
 
+logic [CACHELINE_BITS-1:0]              prev_backend_read_data;
 logic [CACHELINE_BITS-1:0]              port_rsp_data;
 
 xpm_memory_sdpram#(
     .CLOCKING_MODE("common_clock"),
     .MEMORY_INIT_FILE(STATE_INIT),
-    .MEMORY_PRIMITIVE("distributed"),
+    //.MEMORY_PRIMITIVE("distributed"),
+    .MEMORY_PRIMITIVE("block"),
     .MEMORY_SIZE($bits(CachelineMetadata)*NUM_CACHELINES),
     .USE_MEM_INIT(STATE_INIT != "none"),
 
@@ -168,7 +170,14 @@ struct {
 } active_command;
 
 assign backend_cmd_write_data_o = cm_rd_dout;
-assign port_rsp_data = cm_rd_dout;
+
+logic [CACHELINE_BITS-1:0] combined_result;
+byte_selector#(CACHELINE_BITS/8) result_selector(
+    .mask(active_command.write_mask),
+    .included(active_command.write_data),
+    .complement(backend_rsp_read_data_i),
+    .result(combined_result)
+);
 
 
 genvar i;
@@ -198,7 +207,7 @@ endgenerate
 
 wire [$clog2(NUM_PORTS)-1:0] active_port = port_state[0].active_port;
 
-task do_cache_write();
+function void do_cache_write();
     proposed_command_state_next = IDLE;
 
     md_wr_din.dirty = 1'b1;
@@ -209,17 +218,38 @@ task do_cache_write();
     cm_wr_enable = 1'b1;
     cm_wr_addr = extract_cacheline_addr( active_command.address );
     cm_wr_din = active_command.write_data;
-endtask
+endfunction
 
-task do_evict();
+function void do_evict();
     backend_cmd_valid_o = 1'b1;
     backend_cmd_write_o = 1'b1;
+    backend_cmd_addr_o = compose_address( md_rd_dout.source_address, extract_cacheline_addr(active_command.address) );
 
-    if( backend_cmd_ready_i )
+    if( backend_cmd_ready_i ) begin
         proposed_command_state_next = EVICTING;
-endtask
 
-task do_fetch();
+        /* If this is a write command to all bits, the cycle after the next
+         * will be the next command. Our metadata memory has "read before
+         * write" semantics, which means that that cycle still won't see any
+         * update that the next cycle will do. We need to set the cacheline
+         * state to the correct one in this cycle or implement forwarding
+         * logic.
+         */
+        md_wr_din.source_address = extract_complement_addr(active_command.address);
+        md_wr_din.initialized = 1'b1;
+        md_wr_din.dirty = active_command.write_mask!=EMPTY_WRITE_MASK;
+        md_wr_enable = 1'b1;
+    end
+endfunction
+
+function void handle_evict();
+    if( active_command.write_mask == FULL_WRITE_MASK )
+        do_cache_write();
+    else
+        do_fetch();
+endfunction
+
+function void do_fetch();
     backend_cmd_valid_o = 1'b1;
     backend_cmd_write_o = 1'b0;
     backend_cmd_addr_o =
@@ -227,9 +257,39 @@ task do_fetch();
 
     if( backend_cmd_ready_i )
         proposed_command_state_next = FETCHING;
-endtask
+endfunction
 
-task handle_lookup();
+function void handle_fetch();
+    if( backend_rsp_valid_i ) begin
+        md_wr_enable = 1'b1;
+        md_wr_addr = extract_cacheline_addr(active_command.address);
+        md_wr_din.source_address = extract_complement_addr(active_command.address);
+        md_wr_din.dirty = active_command.write_mask != EMPTY_WRITE_MASK;
+        md_wr_din.initialized = 1'b1;
+        md_wr_we = 1'b1;
+
+        cm_wr_enable = 1'b1;
+        cm_wr_addr = extract_cacheline_addr(active_command.address);
+        cm_wr_din = combined_result;
+        cm_wr_we = 1'b1;
+
+        proposed_command_state_next = RESULT;
+    end
+endfunction
+
+function void handle_result();
+    if( active_command.write_mask==EMPTY_WRITE_MASK ) begin
+        // Read request
+        rsp_valid = 1'b1;
+        // Due to "read before write" semantics the actual data does not yet
+        // exist in cm_rd_dout
+        port_rsp_data = prev_backend_read_data;
+    end
+
+    proposed_command_state_next = IDLE;
+endfunction
+
+function void handle_lookup();
     if( active_command.write_mask==EMPTY_WRITE_MASK ) begin
         // Read
         if( md_rd_dout.initialized ) begin
@@ -280,9 +340,11 @@ task handle_lookup();
             end
         end
     end
-endtask
+endfunction
 
 always_comb begin
+    port_rsp_data = cm_rd_dout;
+
     md_wr_enable = 1'b0;
     md_wr_addr = extract_cacheline_addr(active_command.address);
 
@@ -313,9 +375,9 @@ always_comb begin
     case(command_state)
         IDLE: begin end
         LOOKUP: handle_lookup();
-        RESULT: begin
-            proposed_command_state_next = IDLE;
-        end
+        EVICTING: handle_evict();
+        FETCHING: handle_fetch();
+        RESULT: handle_result();
     endcase
 
     // Handle new commands
@@ -342,6 +404,9 @@ always_ff@(posedge clock_i) begin
         active_command.write_mask <= port_cmd_write_mask_i[active_port];
         active_command.write_data <= port_cmd_write_data_i[active_port];
     end
+
+    if( backend_rsp_valid_i )
+        prev_backend_read_data <= backend_rsp_read_data_i;
 end
 
 endmodule

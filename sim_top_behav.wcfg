@@ -11,15 +11,20 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="15,844.181 ns"></ZoomStartTime>
-      <ZoomEndTime time="16,151.782 ns"></ZoomEndTime>
-      <Cursor1Time time="16,013.711 ns"></Cursor1Time>
+      <ZoomStartTime time="813,971.809 ns"></ZoomStartTime>
+      <ZoomEndTime time="814,126.010 ns"></ZoomEndTime>
+      <Cursor1Time time="814,100.309 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="231"></NameColumnWidth>
-      <ValueColumnWidth column_width="107"></ValueColumnWidth>
+      <ValueColumnWidth column_width="103"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="71" />
+   <wave_markers>
+      <marker label="" time="813849587" />
+      <marker label="" time="813941958" />
+      <marker label="" time="814100309" />
+   </wave_markers>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -187,10 +192,7 @@
    <wvobject type="array" fp_name="/sim_top/top_module/cache/md_rd_dout">
       <obj_property name="ElementShortName">md_rd_dout</obj_property>
       <obj_property name="ObjectShortName">md_rd_dout</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/cache/md_wr_addr">
-      <obj_property name="ElementShortName">md_wr_addr[10:0]</obj_property>
-      <obj_property name="ObjectShortName">md_wr_addr[10:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/cache/md_wr_enable">
       <obj_property name="ElementShortName">md_wr_enable</obj_property>
@@ -198,23 +200,29 @@
       <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/cache/md_wr_din">
-      <obj_property name="ElementShortName">md_wr_din</obj_property>
-      <obj_property name="ObjectShortName">md_wr_din</obj_property>
-   </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/cache/md_wr_we">
       <obj_property name="ElementShortName">md_wr_we</obj_property>
       <obj_property name="ObjectShortName">md_wr_we</obj_property>
       <obj_property name="CustomSignalColor">#800080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/cache/cm_wr_we">
-      <obj_property name="ElementShortName">cm_wr_we[15:0]</obj_property>
-      <obj_property name="ObjectShortName">cm_wr_we[15:0]</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/cache/md_wr_addr">
+      <obj_property name="ElementShortName">md_wr_addr[10:0]</obj_property>
+      <obj_property name="ObjectShortName">md_wr_addr[10:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/cache/md_wr_din">
+      <obj_property name="ElementShortName">md_wr_din</obj_property>
+      <obj_property name="ObjectShortName">md_wr_din</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/cache/cm_wr_enable">
       <obj_property name="ElementShortName">cm_wr_enable</obj_property>
       <obj_property name="ObjectShortName">cm_wr_enable</obj_property>
+      <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/cache/cm_wr_we">
+      <obj_property name="ElementShortName">cm_wr_we[15:0]</obj_property>
+      <obj_property name="ObjectShortName">cm_wr_we[15:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/cache/cm_wr_din">
       <obj_property name="ElementShortName">cm_wr_din[127:0]</obj_property>
@@ -227,6 +235,8 @@
    <wvobject type="logic" fp_name="/sim_top/top_module/cache/cm_rd_enable">
       <obj_property name="ElementShortName">cm_rd_enable</obj_property>
       <obj_property name="ObjectShortName">cm_rd_enable</obj_property>
+      <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/cache/cm_rd_dout">
       <obj_property name="ElementShortName">cm_rd_dout[127:0]</obj_property>

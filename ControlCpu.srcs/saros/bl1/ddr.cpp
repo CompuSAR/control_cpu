@@ -1,6 +1,7 @@
 #include "ddr.h"
 
 #include "format.h"
+#include "gpio.h"
 #include "irq.h"
 #include "memory.h"
 #include "reg.h"
@@ -243,7 +244,8 @@ void ddr_init() {
 
     reg_write_32(DdrDevice, DdrOverrideAddress, 0);
 
-    for( int i=0; i<1000; ++i ) {
+    int limit = (read_gpio(0)&1) ? 1000 : 2; // Shorter iteration if in simulation
+    for( int i=0; i<limit; ++i ) {
         if( reg_read_32(DdrDevice, DdrReadOp)!=0xffff0000 ) {
             uart_send("Increase read delay\n");
             reg_write_32(DdrDevice, DdrIncDelay, 0x2);
