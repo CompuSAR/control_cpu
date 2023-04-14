@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="813,971.809 ns"></ZoomStartTime>
-      <ZoomEndTime time="814,126.010 ns"></ZoomEndTime>
-      <Cursor1Time time="814,100.309 ns"></Cursor1Time>
+      <ZoomStartTime time="15,898.307 ns"></ZoomStartTime>
+      <ZoomEndTime time="16,052.708 ns"></ZoomEndTime>
+      <Cursor1Time time="16,026.907 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="231"></NameColumnWidth>
-      <ValueColumnWidth column_width="103"></ValueColumnWidth>
+      <ValueColumnWidth column_width="99"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="71" />
+   <WVObjectSize size="62" />
    <wave_markers>
       <marker label="" time="813849587" />
       <marker label="" time="813941958" />
@@ -103,54 +103,6 @@
       <obj_property name="ElementShortName">passthrough_ddr_enable</obj_property>
       <obj_property name="ObjectShortName">passthrough_ddr_enable</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/dBus_width_adjuster/out_rsp_valid_i">
-      <obj_property name="ElementShortName">out_rsp_valid_i</obj_property>
-      <obj_property name="ObjectShortName">out_rsp_valid_i</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/dBus_width_adjuster/out_rsp_read_data_i">
-      <obj_property name="ElementShortName">out_rsp_read_data_i[127:0]</obj_property>
-      <obj_property name="ObjectShortName">out_rsp_read_data_i[127:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/dBus_width_adjuster/out_cmd_write_mask_o">
-      <obj_property name="ElementShortName">out_cmd_write_mask_o[15:0]</obj_property>
-      <obj_property name="ObjectShortName">out_cmd_write_mask_o[15:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/dBus_width_adjuster/out_cmd_write_data_o">
-      <obj_property name="ElementShortName">out_cmd_write_data_o[127:0]</obj_property>
-      <obj_property name="ObjectShortName">out_cmd_write_data_o[127:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/dBus_width_adjuster/out_cmd_ready_i">
-      <obj_property name="ElementShortName">out_cmd_ready_i</obj_property>
-      <obj_property name="ObjectShortName">out_cmd_ready_i</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/dBus_width_adjuster/in_rsp_read_data_o">
-      <obj_property name="ElementShortName">in_rsp_read_data_o[31:0]</obj_property>
-      <obj_property name="ObjectShortName">in_rsp_read_data_o[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/dBus_width_adjuster/in_cmd_write_mask_i">
-      <obj_property name="ElementShortName">in_cmd_write_mask_i[3:0]</obj_property>
-      <obj_property name="ObjectShortName">in_cmd_write_mask_i[3:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/dBus_width_adjuster/in_cmd_write_data_i">
-      <obj_property name="ElementShortName">in_cmd_write_data_i[31:0]</obj_property>
-      <obj_property name="ObjectShortName">in_cmd_write_data_i[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/dBus_width_adjuster/in_cmd_valid_i">
-      <obj_property name="ElementShortName">in_cmd_valid_i</obj_property>
-      <obj_property name="ObjectShortName">in_cmd_valid_i</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/dBus_width_adjuster/in_cmd_addr_i">
-      <obj_property name="ElementShortName">in_cmd_addr_i[31:0]</obj_property>
-      <obj_property name="ObjectShortName">in_cmd_addr_i[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/dBus_width_adjuster/cmd_segment_next">
-      <obj_property name="ElementShortName">cmd_segment_next[1:0]</obj_property>
-      <obj_property name="ObjectShortName">cmd_segment_next[1:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/dBus_width_adjuster/cmd_segment">
-      <obj_property name="ElementShortName">cmd_segment[1:0]</obj_property>
-      <obj_property name="ObjectShortName">cmd_segment[1:0]</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/cache/port_cmd_valid_i">
       <obj_property name="ElementShortName">port_cmd_valid_i[0:1]</obj_property>
       <obj_property name="ObjectShortName">port_cmd_valid_i[0:1]</obj_property>
@@ -179,20 +131,39 @@
       <obj_property name="ElementShortName">port_rsp_read_data_o[0:1][127:0]</obj_property>
       <obj_property name="ObjectShortName">port_rsp_read_data_o[0:1][127:0]</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/cache/md_rd_enable">
-      <obj_property name="ElementShortName">md_rd_enable</obj_property>
-      <obj_property name="ObjectShortName">md_rd_enable</obj_property>
-      <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
+   <wvobject type="logic" fp_name="/sim_top/top_module/cache/rsp_valid">
+      <obj_property name="ElementShortName">rsp_valid</obj_property>
+      <obj_property name="ObjectShortName">rsp_valid</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/cache/md_rd_addr">
-      <obj_property name="ElementShortName">md_rd_addr[10:0]</obj_property>
-      <obj_property name="ObjectShortName">md_rd_addr[10:0]</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/cache/rd_addr">
+      <obj_property name="ElementShortName">rd_addr[10:0]</obj_property>
+      <obj_property name="ObjectShortName">rd_addr[10:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/cache/prev_wr_addr">
+      <obj_property name="ElementShortName">prev_wr_addr[10:0]</obj_property>
+      <obj_property name="ObjectShortName">prev_wr_addr[10:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/cache/md_rd_dout">
       <obj_property name="ElementShortName">md_rd_dout</obj_property>
       <obj_property name="ObjectShortName">md_rd_dout</obj_property>
-      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/cache/md_rd_dout_readback">
+      <obj_property name="ElementShortName">md_rd_dout_readback</obj_property>
+      <obj_property name="ObjectShortName">md_rd_dout_readback</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/cache/cm_rd_enable">
+      <obj_property name="ElementShortName">cm_rd_enable</obj_property>
+      <obj_property name="ObjectShortName">cm_rd_enable</obj_property>
+      <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/cache/cm_rd_dout">
+      <obj_property name="ElementShortName">cm_rd_dout[127:0]</obj_property>
+      <obj_property name="ObjectShortName">cm_rd_dout[127:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/cache/wr_addr">
+      <obj_property name="ElementShortName">wr_addr[10:0]</obj_property>
+      <obj_property name="ObjectShortName">wr_addr[10:0]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/cache/md_wr_enable">
       <obj_property name="ElementShortName">md_wr_enable</obj_property>
@@ -206,10 +177,6 @@
       <obj_property name="CustomSignalColor">#800080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/cache/md_wr_addr">
-      <obj_property name="ElementShortName">md_wr_addr[10:0]</obj_property>
-      <obj_property name="ObjectShortName">md_wr_addr[10:0]</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/cache/md_wr_din">
       <obj_property name="ElementShortName">md_wr_din</obj_property>
       <obj_property name="ObjectShortName">md_wr_din</obj_property>
@@ -220,31 +187,25 @@
       <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/cache/cm_wr_we">
-      <obj_property name="ElementShortName">cm_wr_we[15:0]</obj_property>
-      <obj_property name="ObjectShortName">cm_wr_we[15:0]</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/cache/prev_md_wr_din">
+      <obj_property name="ElementShortName">prev_md_wr_din</obj_property>
+      <obj_property name="ObjectShortName">prev_md_wr_din</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/cache/cm_wr_din">
-      <obj_property name="ElementShortName">cm_wr_din[127:0]</obj_property>
-      <obj_property name="ObjectShortName">cm_wr_din[127:0]</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/cache/prev_cm_wr_din">
+      <obj_property name="ElementShortName">prev_cm_wr_din[127:0]</obj_property>
+      <obj_property name="ObjectShortName">prev_cm_wr_din[127:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/cache/cm_wr_addr">
-      <obj_property name="ElementShortName">cm_wr_addr[10:0]</obj_property>
-      <obj_property name="ObjectShortName">cm_wr_addr[10:0]</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/cache/prev_backend_read_data">
+      <obj_property name="ElementShortName">prev_backend_read_data[127:0]</obj_property>
+      <obj_property name="ObjectShortName">prev_backend_read_data[127:0]</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/cache/cm_rd_enable">
-      <obj_property name="ElementShortName">cm_rd_enable</obj_property>
-      <obj_property name="ObjectShortName">cm_rd_enable</obj_property>
-      <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/dBus_width_adjuster/cmd_segment_next">
+      <obj_property name="ElementShortName">cmd_segment_next[1:0]</obj_property>
+      <obj_property name="ObjectShortName">cmd_segment_next[1:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/cache/cm_rd_dout">
-      <obj_property name="ElementShortName">cm_rd_dout[127:0]</obj_property>
-      <obj_property name="ObjectShortName">cm_rd_dout[127:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/cache/cm_rd_addr">
-      <obj_property name="ElementShortName">cm_rd_addr[10:0]</obj_property>
-      <obj_property name="ObjectShortName">cm_rd_addr[10:0]</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/dBus_width_adjuster/cmd_segment">
+      <obj_property name="ElementShortName">cmd_segment[1:0]</obj_property>
+      <obj_property name="ObjectShortName">cmd_segment[1:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/cache/command_state">
       <obj_property name="ElementShortName">command_state[31:0]</obj_property>
