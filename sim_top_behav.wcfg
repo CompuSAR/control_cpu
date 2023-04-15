@@ -11,19 +11,19 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="15,898.307 ns"></ZoomStartTime>
-      <ZoomEndTime time="16,052.708 ns"></ZoomEndTime>
-      <Cursor1Time time="16,026.907 ns"></Cursor1Time>
+      <ZoomStartTime time="846,695.441 ns"></ZoomStartTime>
+      <ZoomEndTime time="847,004.242 ns"></ZoomEndTime>
+      <Cursor1Time time="846,746.907 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="231"></NameColumnWidth>
-      <ValueColumnWidth column_width="99"></ValueColumnWidth>
+      <ValueColumnWidth column_width="95"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="62" />
    <wave_markers>
-      <marker label="" time="813849587" />
-      <marker label="" time="813941958" />
-      <marker label="" time="814100309" />
+      <marker label="" time="846073917" />
+      <marker label="" time="846746907" />
+      <marker label="" time="846997628" />
    </wave_markers>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
       <obj_property name="ElementShortName">clk</obj_property>
@@ -139,6 +139,10 @@
       <obj_property name="ElementShortName">rd_addr[10:0]</obj_property>
       <obj_property name="ObjectShortName">rd_addr[10:0]</obj_property>
    </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/cache/prev_rd_addr">
+      <obj_property name="ElementShortName">prev_rd_addr[10:0]</obj_property>
+      <obj_property name="ObjectShortName">prev_rd_addr[10:0]</obj_property>
+   </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/cache/prev_wr_addr">
       <obj_property name="ElementShortName">prev_wr_addr[10:0]</obj_property>
       <obj_property name="ObjectShortName">prev_wr_addr[10:0]</obj_property>
@@ -194,10 +198,6 @@
    <wvobject type="array" fp_name="/sim_top/top_module/cache/prev_cm_wr_din">
       <obj_property name="ElementShortName">prev_cm_wr_din[127:0]</obj_property>
       <obj_property name="ObjectShortName">prev_cm_wr_din[127:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/cache/prev_backend_read_data">
-      <obj_property name="ElementShortName">prev_backend_read_data[127:0]</obj_property>
-      <obj_property name="ObjectShortName">prev_backend_read_data[127:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/dBus_width_adjuster/cmd_segment_next">
       <obj_property name="ElementShortName">cmd_segment_next[1:0]</obj_property>

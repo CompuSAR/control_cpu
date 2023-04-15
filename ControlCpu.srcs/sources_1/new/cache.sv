@@ -403,9 +403,9 @@ always_ff@(posedge clock_i) begin
         active_command.address <= port_cmd_addr_i[active_port];
         active_command.write_mask <= port_cmd_write_mask_i[active_port];
         active_command.write_data <= port_cmd_write_data_i[active_port];
-    end
 
-    prev_rd_addr <= rd_addr;
+        prev_rd_addr <= rd_addr;
+    end
 
     if( md_wr_enable ) begin
         prev_wr_addr <= wr_addr;
