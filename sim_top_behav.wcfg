@@ -11,19 +11,22 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="846,695.441 ns"></ZoomStartTime>
-      <ZoomEndTime time="847,004.242 ns"></ZoomEndTime>
-      <Cursor1Time time="846,746.907 ns"></Cursor1Time>
+      <ZoomStartTime time="891,257.123 ns"></ZoomStartTime>
+      <ZoomEndTime time="891,412.324 ns"></ZoomEndTime>
+      <Cursor1Time time="891,282.989 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="231"></NameColumnWidth>
-      <ValueColumnWidth column_width="95"></ValueColumnWidth>
+      <ValueColumnWidth column_width="91"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="62" />
+   <WVObjectSize size="60" />
    <wave_markers>
-      <marker label="" time="846073917" />
-      <marker label="" time="846746907" />
-      <marker label="" time="846997628" />
+      <marker label="" time="889290412" />
+      <marker label="" time="891282989" />
+      <marker label="" time="889461958" />
+      <marker label="" time="889712680" />
+      <marker label="" time="890148144" />
+      <marker label="" time="890398865" />
    </wave_markers>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/clk">
       <obj_property name="ElementShortName">clk</obj_property>
@@ -50,14 +53,16 @@
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/iBus_rsp_valid">
       <obj_property name="ElementShortName">iBus_rsp_valid</obj_property>
       <obj_property name="ObjectShortName">iBus_rsp_valid</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/iBus_rsp_payload_error">
-      <obj_property name="ElementShortName">iBus_rsp_payload_error</obj_property>
-      <obj_property name="ObjectShortName">iBus_rsp_payload_error</obj_property>
+      <obj_property name="CustomSignalColor">#FF0080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/control_cpu/iBus_rsp_payload_inst">
       <obj_property name="ElementShortName">iBus_rsp_payload_inst[31:0]</obj_property>
       <obj_property name="ObjectShortName">iBus_rsp_payload_inst[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/iBus_rsp_payload_error">
+      <obj_property name="ElementShortName">iBus_rsp_payload_error</obj_property>
+      <obj_property name="ObjectShortName">iBus_rsp_payload_error</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/control_cpu/dBus_cmd_valid">
       <obj_property name="ElementShortName">dBus_cmd_valid</obj_property>
@@ -155,12 +160,6 @@
       <obj_property name="ElementShortName">md_rd_dout_readback</obj_property>
       <obj_property name="ObjectShortName">md_rd_dout_readback</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/cache/cm_rd_enable">
-      <obj_property name="ElementShortName">cm_rd_enable</obj_property>
-      <obj_property name="ObjectShortName">cm_rd_enable</obj_property>
-      <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/cache/cm_rd_dout">
       <obj_property name="ElementShortName">cm_rd_dout[127:0]</obj_property>
       <obj_property name="ObjectShortName">cm_rd_dout[127:0]</obj_property>
@@ -175,12 +174,6 @@
       <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/cache/md_wr_we">
-      <obj_property name="ElementShortName">md_wr_we</obj_property>
-      <obj_property name="ObjectShortName">md_wr_we</obj_property>
-      <obj_property name="CustomSignalColor">#800080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/cache/md_wr_din">
       <obj_property name="ElementShortName">md_wr_din</obj_property>
       <obj_property name="ObjectShortName">md_wr_din</obj_property>
@@ -191,6 +184,14 @@
       <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/cache/cm_wr_existing_data">
+      <obj_property name="ElementShortName">cm_wr_existing_data[127:0]</obj_property>
+      <obj_property name="ObjectShortName">cm_wr_existing_data[127:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/cache/cm_wr_din_actual">
+      <obj_property name="ElementShortName">cm_wr_din_actual[127:0]</obj_property>
+      <obj_property name="ObjectShortName">cm_wr_din_actual[127:0]</obj_property>
+   </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/cache/prev_md_wr_din">
       <obj_property name="ElementShortName">prev_md_wr_din</obj_property>
       <obj_property name="ObjectShortName">prev_md_wr_din</obj_property>
@@ -198,14 +199,6 @@
    <wvobject type="array" fp_name="/sim_top/top_module/cache/prev_cm_wr_din">
       <obj_property name="ElementShortName">prev_cm_wr_din[127:0]</obj_property>
       <obj_property name="ObjectShortName">prev_cm_wr_din[127:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/dBus_width_adjuster/cmd_segment_next">
-      <obj_property name="ElementShortName">cmd_segment_next[1:0]</obj_property>
-      <obj_property name="ObjectShortName">cmd_segment_next[1:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/dBus_width_adjuster/cmd_segment">
-      <obj_property name="ElementShortName">cmd_segment[1:0]</obj_property>
-      <obj_property name="ObjectShortName">cmd_segment[1:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/cache/command_state">
       <obj_property name="ElementShortName">command_state[31:0]</obj_property>

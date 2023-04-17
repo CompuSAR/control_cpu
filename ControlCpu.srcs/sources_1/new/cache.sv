@@ -73,14 +73,13 @@ logic [LINES_ADDR_BITS-1:0]             rd_addr, wr_addr, prev_rd_addr,
                                         prev_wr_addr = {{LINES_ADDR_BITS-1{1'b1}}, 1'b0}; // Any address that is not the first one.
 
 CachelineMetadata                       md_wr_din, prev_md_wr_din;
-logic                                   md_wr_we;
 CachelineMetadata                       md_rd_dout, md_rd_dout_readback;
 logic                                   md_wr_enable;
 
 logic [CACHELINE_BITS-1:0]              cm_wr_existing_data, cm_wr_din_actual, prev_cm_wr_din;
 logic                                   cm_wr_enable;
 logic [CACHELINE_BITS-1:0]              cm_rd_dout, cm_rd_dout_readback;
-logic                                   cm_rd_enable;
+logic                                   rd_enable;
 
 logic [CACHELINE_BITS-1:0]              port_rsp_data;
 
@@ -119,12 +118,12 @@ xpm_memory_sdpram#(
     .ena( md_wr_enable ),
     .injectdbiterra( 1'b0 ),
     .injectsbiterra( 1'b0 ),
-    .wea( md_wr_we ),
+    .wea( 1'b1 ),
 
     .clkb( clock_i ),
     .addrb( rd_addr ),
     .doutb( md_rd_dout_readback ),
-    .enb( 1'b1 ),
+    .enb( rd_enable ),
     .regceb( 1'b1 ),
     .rstb( 1'b0 ),
 
@@ -158,12 +157,12 @@ xpm_memory_sdpram#(
     .ena( cm_wr_enable ),
     .injectdbiterra( 1'b0 ),
     .injectsbiterra( 1'b0 ),
-    .wea( active_command.write_mask!=EMPTY_WRITE_MASK ),
+    .wea( 1'b1 ),
 
     .clkb( clock_i ),
     .addrb( rd_addr ),
     .doutb( cm_rd_dout_readback ),
-    .enb( cm_rd_enable ),
+    .enb( rd_enable ),
     .regceb( 1'b1 ),
     .rstb( 1'b0 ),
 
@@ -223,7 +222,6 @@ function void do_cache_write();
     wr_addr = extract_cacheline_addr( active_command.address );
 
     md_wr_din.dirty = 1'b1;
-    md_wr_we = 1'b1;
     md_wr_enable = 1'b1;
 
     cm_wr_enable = 1'b1;
@@ -277,7 +275,6 @@ function void handle_fetch();
         md_wr_din.source_address = extract_complement_addr(active_command.address);
         md_wr_din.dirty = active_command.write_mask != EMPTY_WRITE_MASK;
         md_wr_din.initialized = 1'b1;
-        md_wr_we = 1'b1;
 
         cm_wr_enable = 1'b1;
         cm_wr_existing_data = backend_rsp_read_data_i;
@@ -356,11 +353,10 @@ always_comb begin
     md_wr_din.initialized = 1'b1;
     md_wr_din.dirty = 1'b1;
     md_wr_din.source_address = extract_complement_addr(active_command.address);
-    md_wr_we = 1'b1;
 
-    rd_addr = extract_cacheline_addr( port_cmd_addr_i[active_port] );
-
-    cm_rd_enable = 1'b0;
+    //rd_addr = extract_cacheline_addr( port_cmd_addr_i[active_port] );
+    rd_addr = prev_rd_addr;
+    rd_enable = 1'b0;
 
     set_command_active = 1'b0;
     cm_wr_enable = 1'b0;
@@ -386,7 +382,7 @@ always_comb begin
         // We have a pending command
         rd_addr = extract_cacheline_addr( port_cmd_addr_i[active_port] );
 
-        cm_rd_enable = 1'b1;
+        rd_enable = 1'b1;
 
         set_command_active = 1'b1;
         command_state_next = LOOKUP;
@@ -403,7 +399,9 @@ always_ff@(posedge clock_i) begin
         active_command.address <= port_cmd_addr_i[active_port];
         active_command.write_mask <= port_cmd_write_mask_i[active_port];
         active_command.write_data <= port_cmd_write_data_i[active_port];
+    end
 
+    if( rd_enable ) begin
         prev_rd_addr <= rd_addr;
     end
 
