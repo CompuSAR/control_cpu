@@ -1,5 +1,10 @@
 #!/usr/bin/python3
 
+# Arguments
+# 1 - number of initialized cachelines. This need to be marked "dirty"
+# 2 - number of complementing address bits.
+# 3 - initial complementing address bits in cachelines
+# 4 - Number of cachelines
 import sys
 
 address_bits = int(sys.argv[2])

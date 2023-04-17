@@ -69,7 +69,8 @@ typedef struct packed {
     logic [BACKEND_COMPLEMENTARY_ADDRESS-1:0]           source_address;
 } CachelineMetadata;
 
-logic [LINES_ADDR_BITS-1:0]             rd_addr, wr_addr, prev_rd_addr,
+logic [LINES_ADDR_BITS-1:0]             rd_addr, wr_addr,
+                                        prev_rd_addr = {{LINES_ADDR_BITS-1{1'b1}}, 1'b0}, // Any address that is not the first one.
                                         prev_wr_addr = {{LINES_ADDR_BITS-1{1'b1}}, 1'b0}; // Any address that is not the first one.
 
 CachelineMetadata                       md_wr_din, prev_md_wr_din;
