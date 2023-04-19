@@ -103,6 +103,7 @@ xpm_memory_sdpram#(
     .MEMORY_PRIMITIVE("block"),
     .MEMORY_SIZE($bits(CachelineMetadata)*NUM_CACHELINES),
     .USE_MEM_INIT(STATE_INIT != "none"),
+    .SIM_ASSERT_CHK(1),
 
     .ADDR_WIDTH_A($clog2(NUM_CACHELINES)),
     .BYTE_WRITE_WIDTH_A($bits(CachelineMetadata)),
@@ -140,6 +141,7 @@ xpm_memory_sdpram#(
     .MEMORY_SIZE(CACHELINE_BITS * NUM_CACHELINES),
 //    .SIM_ASSERT_CHK(1),
     .USE_MEM_INIT(INIT_FILE != "none"),
+    .SIM_ASSERT_CHK(1),
 
     .ADDR_WIDTH_A($clog2(NUM_CACHELINES)),
     .WRITE_DATA_WIDTH_A(CACHELINE_BITS),

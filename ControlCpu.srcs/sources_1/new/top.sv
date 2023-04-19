@@ -292,11 +292,11 @@ wire [15:0] ddr_phy_dq_i[7:0], ddr_phy_dq_o[1:0];
 wire [31:0] ddr_phy_delay_inc;
 
 sddr_ctrl#(
-    .tRCD(5),           // 13.75ns
-    .tRC(15),           // 48.75ns
-    .tRP(5),            // 13.75ns
-    .tRFC(49),          // 160ns minimum
-    .tREFI(674)         // 7.8us at CPU clock
+    .tRCD(5),                           // 13.75ns
+    .tRC(15),                           // 48.75ns
+    .tRP(5),                            // 13.75ns
+    .tRFC(49),                          // 160ns minimum
+    .tREFI(78*CTRL_CLOCK_HZ/10000000)   // 7.8us at CPU clock
 ) ddr_ctrl(
     .cpu_clock_i(ctrl_cpu_clock),
     .ddr_clock_i(ddr_clock),
