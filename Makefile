@@ -41,6 +41,8 @@ ControlCpu.srcs/saros/boot_loader.mem: ControlCpu.gen/saros/bl1/bl1.mem
 
 ControlCpu.srcs/saros/boot_loader_state.mem: ControlCpu.srcs/saros/boot_loader.mem
 	scripts/gen_cache_metadata.py `cat $< | wc -l` 13 0 2048 > $@.tmp
+	#scripts/gen_cache_metadata.py `cat $< | wc -l` 14 0 1024 > $@.tmp
+	#scripts/gen_cache_metadata.py `cat $< | wc -l` 15 0 512 > $@.tmp
 	mv $@.tmp $@
 
 clean:

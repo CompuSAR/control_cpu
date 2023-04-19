@@ -26,9 +26,7 @@ void bl1_start() {
 
         for( unsigned int i=0; i<MEMORY_SIZE; ++i ) {
             if( i%(1024*1024/4)==0 ) {
-                uart_send("Filled ");
-                print_hex(i/(1024*1024/4));
-                uart_send(" MB\n");
+                uart_send("W");
             }
 
             unsigned int j = i; //(i*RANDOM_WALK_COEF) % MEMORY_SIZE;
@@ -36,7 +34,7 @@ void bl1_start() {
             DDR_MEMORY[ j ] = val;
             unsigned int readback = DDR_MEMORY[ j ];
             if( val!=readback ) {
-                uart_send("Verify after read failed at ");
+                uart_send("\nVerify after read failed at ");
                 print_hex(j*4);
                 uart_send(": wrote ");
                 print_hex(val);
@@ -50,24 +48,24 @@ void bl1_start() {
             }
         }
 
-        uart_send("Filled all memory. Beginning verify.\n");
+        uart_send("\nFilled all memory. Beginning verify.\n");
 
         unsigned int num = offset*FIBONACCI_COEF;
         for( unsigned int i=0; i<MEMORY_SIZE; ++i ) {
             if( i%(1024*1024/4)==0 ) {
-                uart_send("Verified ");
-                print_hex(i/(1024*1024/4));
-                uart_send(" MB\n");
+                uart_send("V");
             }
 
             unsigned int val=DDR_MEMORY[ i ];
             if( val != num ) {
-                uart_send("Verification failed: Memory location ");
+                uart_send("\nVerification failed: Memory location ");
                 print_hex(i*4);
                 uart_send(" should have been ");
                 print_hex(num);
                 uart_send(". Instead it's ");
                 print_hex(val);
+                uart_send(". Reread returns ");
+                print_hex(DDR_MEMORY[i]);
                 uart_send("\n");
 
                 num_failures++;
@@ -78,7 +76,7 @@ void bl1_start() {
 
         total_failures += num_failures;
 
-        uart_send("Verification cycle ");
+        uart_send("\nVerification cycle ");
         print_hex(++cycle);
         uart_send(" complete with ");
         print_hex(num_failures);
