@@ -58,13 +58,23 @@ void bl1_start() {
 
             unsigned int val=DDR_MEMORY[ i ];
             if( val != num ) {
+                unsigned int cacheline[4];
+                for( int j=0; j<4; ++j )
+                    cacheline[j] = DDR_MEMORY[ (i&0xfffffffc) + j ];
                 uart_send("\nVerification failed: Memory location ");
                 print_hex(i*4);
                 uart_send(" should have been ");
                 print_hex(num);
                 uart_send(". Instead it's ");
                 print_hex(val);
+                uart_send(". Whole cacheline: ");
+                print_hex(cacheline[0]);
+                for( int j=1; j<4; ++j ) {
+                    uart_send(" ");
+                    print_hex(cacheline[j]);
+                }
                 uart_send(". Reread returns ");
+                val = DDR_MEMORY[ (i+1024*1024) % MEMORY_SIZE ]; // Clear cache
                 print_hex(DDR_MEMORY[i]);
                 uart_send("\n");
 

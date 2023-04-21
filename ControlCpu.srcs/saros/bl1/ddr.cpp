@@ -237,6 +237,7 @@ void ddr_init() {
             true        // Output enabled
         );
     sleep_cycles(4);   // tMRD
+    //reg_write_32(DdrDevice, DdrIncDelay, 0x1); // Increase the write delay by once more
 
     // Enable MPR mode for calibrating the reads
     write_mode_reg3( 0, true );
