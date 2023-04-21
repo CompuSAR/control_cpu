@@ -239,16 +239,9 @@ function void do_evict();
     if( backend_cmd_ready_i ) begin
         proposed_command_state_next = EVICTING;
 
-        /* If this is a write command to all bits, the cycle after the next
-         * will be the next command. Our metadata memory has "read before
-         * write" semantics, which means that that cycle still won't see any
-         * update that the next cycle will do. We need to set the cacheline
-         * state to the correct one in this cycle or implement forwarding
-         * logic.
-         */
         md_wr_din.source_address = extract_complement_addr(active_command.address);
         md_wr_din.initialized = 1'b1;
-        md_wr_din.dirty = active_command.write_mask!=EMPTY_WRITE_MASK;
+        md_wr_din.dirty = 1'b0;
         md_wr_enable = 1'b1;
     end
 endfunction
@@ -276,13 +269,18 @@ function void handle_fetch();
 
         md_wr_enable = 1'b1;
         md_wr_din.source_address = extract_complement_addr(active_command.address);
-        md_wr_din.dirty = active_command.write_mask != EMPTY_WRITE_MASK;
         md_wr_din.initialized = 1'b1;
 
         cm_wr_enable = 1'b1;
         cm_wr_existing_data = backend_rsp_read_data_i;
 
-        proposed_command_state_next = RESULT;
+        if( active_command.write_mask != EMPTY_WRITE_MASK ) begin
+            md_wr_din.dirty = 1'b1;
+            proposed_command_state_next = IDLE;
+        end else begin
+            md_wr_din.dirty = 1'b0;
+            proposed_command_state_next = RESULT;
+        end
     end
 endfunction
 
