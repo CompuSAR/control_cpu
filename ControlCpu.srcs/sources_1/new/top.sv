@@ -89,8 +89,10 @@ clk_converter clocks(
 
 localparam CACHE_PORTS_NUM = 2;
 localparam CACHELINE_BITS = 128;
-localparam NUM_CACHELINES = 32*1024*8/CACHELINE_BITS;
+localparam NUM_CACHELINES = 16*1024*8/CACHELINE_BITS;
 localparam DDR_MEM_SIZE = 256*1024*1024;
+
+localparam INST_CACHE_NUM_CACHELINES = 1024*8/CACHELINE_BITS;
 
 logic                                   cache_port_cmd_valid_s[CACHE_PORTS_NUM];
 logic [31:0]                            cache_port_cmd_addr_s[CACHE_PORTS_NUM];
@@ -99,6 +101,14 @@ logic [CACHELINE_BITS/8-1:0]            cache_port_cmd_write_mask_s[CACHE_PORTS_
 logic [CACHELINE_BITS-1:0]              cache_port_cmd_write_data_s[CACHE_PORTS_NUM];
 logic                                   cache_port_rsp_valid_n[CACHE_PORTS_NUM];
 logic [CACHELINE_BITS-1:0]              cache_port_rsp_read_data_n[CACHE_PORTS_NUM];
+
+logic                                   inst_cache_port_cmd_valid_s[0:0];
+logic [31:0]                            inst_cache_port_cmd_addr_s[0:0];
+logic                                   inst_cache_port_cmd_ready_n[0:0];
+logic [CACHELINE_BITS/8-1:0]            inst_cache_port_cmd_write_mask_s[0:0];
+logic [CACHELINE_BITS-1:0]              inst_cache_port_cmd_write_data_s[0:0];
+logic                                   inst_cache_port_rsp_valid_n[0:0];
+logic [CACHELINE_BITS-1:0]              inst_cache_port_rsp_read_data_n[0:0];
 
 logic           ctrl_iBus_rsp_payload_error;
 logic [31:0]    ctrl_iBus_rsp_payload_inst;
@@ -130,10 +140,10 @@ VexRiscv control_cpu(
     .externalInterrupt(1'b0),
     .softwareInterrupt(1'b0),
 
-    .iBus_cmd_ready(cache_port_cmd_ready_n[1]),
-    .iBus_cmd_valid(cache_port_cmd_valid_s[1]),
-    .iBus_cmd_payload_pc(cache_port_cmd_addr_s[1]),
-    .iBus_rsp_valid(cache_port_rsp_valid_n[1]),
+    .iBus_cmd_ready(inst_cache_port_cmd_ready_n[0]),
+    .iBus_cmd_valid(inst_cache_port_cmd_valid_s[0]),
+    .iBus_cmd_payload_pc(inst_cache_port_cmd_addr_s[0]),
+    .iBus_rsp_valid(inst_cache_port_rsp_valid_n[0]),
     .iBus_rsp_payload_error(ctrl_iBus_rsp_payload_error),
     .iBus_rsp_payload_inst(ctrl_iBus_rsp_payload_inst),
 
@@ -150,19 +160,19 @@ VexRiscv control_cpu(
 
 bus_width_adjust#(.OUT_WIDTH(CACHELINE_BITS)) iBus_width_adjuster(
         .clock_i(ctrl_cpu_clock),
-        .in_cmd_valid_i(cache_port_cmd_valid_s[1]),
-        .in_cmd_addr_i(cache_port_cmd_addr_s[1]),
+        .in_cmd_valid_i(inst_cache_port_cmd_valid_s[0]),
+        .in_cmd_addr_i(inst_cache_port_cmd_addr_s[0]),
         .in_cmd_write_mask_i(4'b0000),
         .in_cmd_write_data_i(32'h0),
         .in_rsp_read_data_o(ctrl_iBus_rsp_payload_inst),
 
-        .out_cmd_ready_i(cache_port_cmd_ready_n[1]),
+        .out_cmd_ready_i(inst_cache_port_cmd_ready_n[0]),
         .out_cmd_write_mask_o(),
         .out_cmd_write_data_o(),
-        .out_rsp_valid_i(cache_port_rsp_valid_n[1]),
-        .out_rsp_read_data_i(cache_port_rsp_read_data_n[1])
+        .out_rsp_valid_i(inst_cache_port_rsp_valid_n[0]),
+        .out_rsp_read_data_i(inst_cache_port_rsp_read_data_n[0])
     );
-assign cache_port_cmd_write_mask_s[1] = 0;
+assign inst_cache_port_cmd_write_mask_s[0] = 0;
 
 assign cache_port_cmd_addr_s[0] = ctrl_dBus_cmd_payload_address;
 bus_width_adjust#(.OUT_WIDTH(CACHELINE_BITS)) dBus_width_adjuster(
@@ -235,6 +245,41 @@ io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
     .uart_tx(uart_tx),
     .uart_rx(uart_rx)
 );
+
+cache#(
+    .CACHELINE_BITS(CACHELINE_BITS),
+    .NUM_CACHELINES(INST_CACHE_NUM_CACHELINES),
+    .BACKEND_SIZE_BYTES(DDR_MEM_SIZE),
+    .NUM_PORTS(1)
+) inst_cache(
+    .clock_i(ctrl_cpu_clock),
+
+    .ctrl_cmd_addr_i(),
+    .ctrl_cmd_valid_i(),
+    .ctrl_cmd_ready_o(),
+    .ctrl_cmd_write_i(),
+    .ctrl_cmd_data_i(),
+    .ctrl_rsp_valid_o(),
+    .ctrl_rsp_data_o(),
+
+    .port_cmd_valid_i(inst_cache_port_cmd_valid_s),
+    .port_cmd_addr_i(inst_cache_port_cmd_addr_s),
+    .port_cmd_ready_o(inst_cache_port_cmd_ready_n),
+    .port_cmd_write_mask_i(inst_cache_port_cmd_write_mask_s),
+    .port_cmd_write_data_i(inst_cache_port_cmd_write_data_s),
+    .port_rsp_valid_o(inst_cache_port_rsp_valid_n),
+    .port_rsp_read_data_o(inst_cache_port_rsp_read_data_n),
+
+    .backend_cmd_valid_o(cache_port_cmd_valid_s[1]),
+    .backend_cmd_addr_o(cache_port_cmd_addr_s[1]),
+    .backend_cmd_ready_i(cache_port_cmd_ready_n[1]),
+    .backend_cmd_write_o(),
+    .backend_cmd_write_data_o(),
+    .backend_rsp_valid_i(cache_port_rsp_valid_n[1]),
+    .backend_rsp_read_data_i(cache_port_rsp_read_data_n[1])
+);
+
+assign cache_port_cmd_write_mask_s[1] = { CACHELINE_BITS/8{1'b0} };
 
 cache#(
     .CACHELINE_BITS(CACHELINE_BITS),
