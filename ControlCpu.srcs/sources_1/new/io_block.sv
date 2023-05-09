@@ -54,6 +54,11 @@ module io_block#(
     input passthrough_irq_rsp_valid,
     input [31:0] passthrough_irq_rsp_data,
 
+    output logic passthrough_spi_enable,
+    input passthrough_spi_req_ack,
+    input passthrough_spi_rsp_valid,
+    input [31:0] passthrough_spi_rsp_data,
+
     output uart_tx,
     input uart_rx
     );
@@ -95,6 +100,7 @@ task default_state_current();
     passthrough_ddr_ctrl_enable = 1'b0;
     passthrough_gpio_enable = 1'b0;
     passthrough_irq_enable = 1'b0;
+    passthrough_spi_enable = 1'b0;
 endtask
 
 function logic is_ddr(logic [31:0]address);
@@ -131,6 +137,10 @@ always_comb begin
                 8'h3: begin                     // Interrupt controller
                     rsp_valid = passthrough_irq_rsp_valid;
                     data_out = passthrough_irq_rsp_data;
+                end
+                8'h4: begin                     // SPI controller
+                    rsp_valid = passthrough_spi_rsp_valid;
+                    data_out = passthrough_spi_rsp_data;
                 end
             endcase
         end
@@ -170,6 +180,10 @@ always_comb begin
                 8'h3: begin                 // Interrupt/timer controller
                     passthrough_irq_enable = 1'b1;
                     req_ack = passthrough_irq_req_ack;
+                end
+                8'h4: begin                 // SPI controller
+                    passthrough_spi_enable = 1'b1;
+                    req_ack = passthrough_spi_req_ack;
                 end
             endcase
         end

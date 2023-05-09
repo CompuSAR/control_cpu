@@ -29,11 +29,19 @@ logic debug;
 
 assign nReset = 1;
 
+wire            spi_flash_cs;
+wire            spi_flash_clock;
+wire    [3:0]   spi_flash_dq;
+
 wire    [1:0]   ddr3_dqs_p;
 wire    [1:0]   ddr3_dqs_n;
 wire    [15:0]  ddr3_dq;
 
-top top_module(.board_clock(clock), .nReset(nReset), .uart_output(1'b0), .debug(debug), .ddr3_dqs_p(ddr3_dqs_p), .ddr3_dqs_n(ddr3_dqs_n), .ddr3_dq(ddr3_dq));
+top top_module(
+    .board_clock(clock), .nReset(nReset),
+    .uart_output(1'b0), .debug(debug),
+    .spi_cs_n(spi_flash_clock), .spi_dq(spi_flash_dq), .spi_clk(spi_flash_clock),
+    .ddr3_dqs_p(ddr3_dqs_p), .ddr3_dqs_n(ddr3_dqs_n), .ddr3_dq(ddr3_dq));
 
 ddr3_model ddr(
     .rst_n      (top_module.ddr3_reset_n),
@@ -88,6 +96,8 @@ ddr3 ddr(
     .odt        (top_module.ddr3_odt)
 );
 */
+
+N25Qxxx cfgFlash( spi_flash_cs, spi_flash_clock, spi_flash_dq[3], spi_flash_dq[0], spi_flash_dq[1], 'd3300, spi_flash_dq[2]);
 
 initial begin
     clock = 0;
