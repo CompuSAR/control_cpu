@@ -34,4 +34,9 @@ module spi_ctrl#(
     input [MEM_DATA_WIDTH-1:0]  dma_rsp_data_i
 );
 
+assign ctrl_cmd_ack_o = 1'b0;
+assign ctrl_rsp_valid_o = 1'b0;
+
+assign dma_cmd_valid_o = 1'b0;
+
 endmodule

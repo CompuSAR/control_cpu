@@ -34,7 +34,9 @@ module top
     // SPI flash
     output                  spi_cs_n,
     inout [3:0]             spi_dq,
+`ifndef SYNTHESIS
     output                  spi_clk,
+`endif
 
     // DDR3 SDRAM
     output  wire            ddr3_reset_n,
@@ -56,6 +58,10 @@ module top
 //localparam CTRL_CLOCK_HZ = 101041667;
 //localparam CTRL_CLOCK_HZ = 86607143;
 localparam CTRL_CLOCK_HZ = 75781250;
+
+`ifdef SYNTHESIS
+wire spi_clk;
+`endif
 
 function automatic [3:0] convert_byte_write( logic we, logic[1:0] address, logic[1:0] size );
     if( we ) begin

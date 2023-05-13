@@ -18,6 +18,14 @@ set_property IOSTANDARD LVCMOS33 [get_ports uart_rx]
 set_property PACKAGE_PIN N10 [get_ports uart_tx]
 set_property IOSTANDARD LVCMOS33 [get_ports uart_tx]
 
+set_property PACKAGE_PIN C11 [get_ports spi_cs_n]
+# set_property PACKAGE_PIN A8 [get_ports spi_clk]
+set_property PACKAGE_PIN B11 [get_ports spi_dq[0]]
+set_property PACKAGE_PIN B12 [get_ports spi_dq[1]]
+set_property PACKAGE_PIN D10 [get_ports spi_dq[2]]
+set_property PACKAGE_PIN C10 [get_ports spi_dq[3]]
+set_property IOSTANDARD LVCMOS33 [get_ports spi_*]
+
 ############## NET - IOSTANDARD ##################
 set_property CFGBVS VCCO [current_design]
 set_property CONFIG_VOLTAGE 3.3 [current_design]
