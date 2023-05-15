@@ -24,10 +24,10 @@ module spi_ctrl#(
     output                      spi_clk_o,
 
     // DMA interface
-    output                      dma_cmd_valid_o,
-    output [31:0]               dma_cmd_address_o,
-    output [MEM_DATA_WIDTH-1:0] dma_cmd_data_o,
-    output                      dma_cmd_write_o,
+    output logic                dma_cmd_valid_o,
+    output logic[31:0]          dma_cmd_address_o,
+    output logic[MEM_DATA_WIDTH-1:0] dma_cmd_data_o,
+    output logic                dma_cmd_write_o,
     input                       dma_cmd_ack_i,
 
     input                       dma_rsp_valid_i,
@@ -45,7 +45,7 @@ BUFGCE spi_clock_buf(
 assign dma_cmd_valid_o = 1'b0;
 
 reg [31:0] cpu_dma_addr_send, cpu_dma_addr_recv, cpu_num_send_bits, cpu_num_recv_bits, cpu_transfer_mode;
-reg [31:0] /*spi_dma_addr_send, spi_dma_addr_recv,*/ spi_num_send_bits, spi_num_recv_bits, spi_transfer_mode;
+reg [31:0] spi_num_send_bits, spi_num_recv_bits, spi_transfer_mode;
 reg cpu_transaction_active = 1'b0, spi_transaction_active = 1'b0;
 
 xpm_cdc_array_single#(
@@ -107,8 +107,12 @@ xpm_cdc_handshake#(
 task set_invalid_state();
 endtask
 
+wire[31:0] rounded_send_bits = cpu_num_send_bits + MEM_DATA_WIDTH - 1;
 task start_transaction();
     cpu_transaction_active <= 1'b1;
+
+    cpu_send_counter <= rounded_send_bits[31:$clog2(MEM_DATA_WIDTH)];
+    cpu_recv_counter <= cpu_num_recv_bits;
 endtask
 
 task wait_transaction();
@@ -116,6 +120,16 @@ task wait_transaction();
 endtask
 
 assign ctrl_cmd_ack_o = !cpu_transaction_active;
+
+logic [15:0] spi_dummy_counter = 0;
+logic [31:0] cpu_send_counter = 0, spi_send_counter = 0, cpu_recv_counter = 0, spi_recv_counter = 0;
+logic [$clog2(MEM_DATA_WIDTH)-1:0] spi_shift_fill;
+
+logic dma_read_in_progress = 1'b0, dma_read_in_progress_next;
+logic [MEM_DATA_WIDTH-1:0] data_buffer;
+logic data_buffer_full = 1'b0;
+
+assign cpu_dma_read_data = data_buffer;
 
 always_ff@(posedge cpu_clock_i) begin
     ctrl_rsp_valid_o <= 1'b0;
@@ -147,9 +161,48 @@ always_ff@(posedge cpu_clock_i) begin
         end
     end
 
-    if( cpu_transaction_active ) begin
-        if( cpu_num_send_bits > 0 ) begin
+    if( cpu_dma_read_valid && cpu_dma_read_ack )
+        cpu_dma_read_valid <= 1'b0;
 
+    if( cpu_dma_write_ack && !cpu_dma_write_valid )
+        cpu_dma_write_ack <= 1'b0;
+
+    dma_read_in_progress <= dma_read_in_progress_next;
+
+    if( dma_read_in_progress && dma_rsp_valid_i ) begin
+        data_buffer <= dma_rsp_data_i;
+        data_buffer_full <= 1'b1;
+        cpu_send_counter <= cpu_send_counter-1;
+        cpu_dma_addr_send <= cpu_dma_addr_send + MEM_DATA_WIDTH/8;
+        dma_read_in_progress <= 1'b0;
+    end
+
+    if( data_buffer_full && !cpu_dma_read_valid && !cpu_dma_read_ack )
+        cpu_dma_read_valid <= 1'b1;
+
+    if( data_buffer_full && cpu_dma_read_valid && cpu_dma_read_ack )
+        data_buffer_full <= 1'b0;
+end
+
+always_comb begin
+    dma_read_in_progress_next = dma_read_in_progress;
+    dma_cmd_valid_o = 1'b0;
+    dma_cmd_valid_o = 32'bX;
+    dma_cmd_data_o = 32'bX;
+    dma_cmd_write_o = 1'bX;
+
+    if( cpu_transaction_active ) begin
+        if( cpu_send_counter>0 ) begin
+            if( !data_buffer_full ) begin
+                if( !dma_read_in_progress ) begin
+                    dma_cmd_valid_o = 1'b1;
+                    dma_cmd_address_o = cpu_dma_addr_recv;
+                    dma_cmd_write_o = 1'b0;
+
+                    if( dma_cmd_ack_i )
+                        dma_read_in_progress_next = 1'b1;
+                end
+            end
         end
     end
 end
@@ -160,9 +213,6 @@ wire qspi_state = spi_transfer_mode[16];
 
 logic [3:0] spi_dq_o, spi_dq_i;
 logic spi_dq_dir = 1'b1;
-logic [15:0] spi_dummy_counter = 0;
-logic [31:0] spi_send_counter = 0, spi_recv_counter = 0;
-logic [$clog2(MEM_DATA_WIDTH)-1:0] spi_shift_fill;
 
 wire spi_read_ready = spi_transaction_active && spi_send_counter>0;
 
