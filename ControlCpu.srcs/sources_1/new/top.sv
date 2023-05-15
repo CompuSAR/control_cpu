@@ -502,6 +502,18 @@ spi_ctrl#(.MEM_DATA_WIDTH(CACHELINE_BITS)) spi_flash(
     .dma_rsp_data_i(cache_port_rsp_read_data_n[CACHE_PORT_IDX_SPI_FLASH])
 );
 
+STARTUPE2 startup_cfg(
+    .GSR(1'b0),
+    .GTS(1'b0),
+    .KEYCLEARB(1'b0),
+    .PACK(1'b0),
+    .PREQ(),
+    .USRCCLKO(spi_clk),
+    .USRCCLKTS(1'b0),
+    .USRDONEO(1'b1),
+    .USRDONETS(1'b1)
+);
+
 genvar i;
 generate
     for(i=0; i<CACHELINE_BYTES; ++i)

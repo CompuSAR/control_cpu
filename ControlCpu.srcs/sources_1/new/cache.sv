@@ -367,6 +367,8 @@ always_comb begin
     backend_cmd_write_o = 1'bX;
     backend_cmd_addr_o = { ADDR_BITS{1'bX} };
 
+    cm_wr_existing_data = cm_rd_dout;
+
     proposed_command_state_next = command_state;
 
     // Handle active commands
