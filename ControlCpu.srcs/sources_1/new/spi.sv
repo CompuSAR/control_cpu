@@ -42,8 +42,6 @@ BUFGCE spi_clock_buf(
     .CE(spi_clk_enable)
 );
 
-assign dma_cmd_valid_o = 1'b0;
-
 reg [31:0] cpu_dma_addr_send, cpu_dma_addr_recv, cpu_num_send_cycles, cpu_num_recv_cycles, cpu_transfer_mode;
 reg [31:0] spi_num_send_cycles, spi_num_recv_cycles, spi_transfer_mode;
 reg cpu_transaction_active = 1'b0, spi_transaction_active = 1'b0;
