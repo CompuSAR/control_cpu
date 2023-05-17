@@ -1,7 +1,8 @@
-#include "uart.h"
-#include "format.h"
 #include "ddr.h"
+#include "format.h"
 #include "irq.h"
+#include "spi.h"
+#include "uart.h"
 
 extern "C" void bl1_start();
 
@@ -15,8 +16,10 @@ void bl1_start() {
     uart_send("Initializing memory\n");
     ddr_init();
 
-    uart_send("Memory initialized\n");
+    uart_send("Memory initialized. Initializing SPI flash\n");
 
+    SPI::interface_rescue();
+#if 0
     uint32_t offset = 0;
 
     uint32_t total_failures = 0;
@@ -96,6 +99,7 @@ void bl1_start() {
 
         offset += 0x54d52cb9;
     }
+#endif
 
     halt();
 

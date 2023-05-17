@@ -44,24 +44,24 @@ BUFGCE spi_clock_buf(
 
 assign dma_cmd_valid_o = 1'b0;
 
-reg [31:0] cpu_dma_addr_send, cpu_dma_addr_recv, cpu_num_send_bits, cpu_num_recv_bits, cpu_transfer_mode;
-reg [31:0] spi_num_send_bits, spi_num_recv_bits, spi_transfer_mode;
+reg [31:0] cpu_dma_addr_send, cpu_dma_addr_recv, cpu_num_send_cycles, cpu_num_recv_cycles, cpu_transfer_mode;
+reg [31:0] spi_num_send_cycles, spi_num_recv_cycles, spi_transfer_mode;
 reg cpu_transaction_active = 1'b0, spi_transaction_active = 1'b0;
 
 xpm_cdc_array_single#(
     .WIDTH(32)
-) cdc_num_send_bits(
+) cdc_num_send_cycles(
     .src_clk(cpu_clock_i),
-    .src_in(cpu_num_send_bits),
+    .src_in(cpu_num_send_cycles),
 
     .dest_clk(spi_ref_clock_i),
-    .dest_out(spi_num_send_bits)
-), cdc_num_recv_bits(
+    .dest_out(spi_num_send_cycles)
+), cdc_num_recv_cycles(
     .src_clk(cpu_clock_i),
-    .src_in(cpu_num_recv_bits),
+    .src_in(cpu_num_recv_cycles),
 
     .dest_clk(spi_ref_clock_i),
-    .dest_out(spi_num_recv_bits)
+    .dest_out(spi_num_recv_cycles)
 ), cdc_transfer_mode(
     .src_clk(cpu_clock_i),
     .src_in(cpu_transfer_mode),
@@ -77,6 +77,10 @@ logic                           cpu_dma_read_ack, spi_dma_read_ack = 1'b0;
 logic [MEM_DATA_WIDTH-1:0]      cpu_dma_write_data, spi_dma_write_data;
 logic                           cpu_dma_write_valid, spi_dma_write_valid = 1'b0;
 logic                           cpu_dma_write_ack = 1'b0, spi_dma_write_ack;
+
+logic [15:0]                    spi_dummy_counter = 0;
+logic [31:0]                    cpu_send_counter = 0, spi_send_counter = 0, cpu_recv_counter = 0, spi_recv_counter = 0;
+logic [$clog2(MEM_DATA_WIDTH)-1:0] spi_shift_fill = 0;
 
 xpm_cdc_handshake#(
     .DEST_EXT_HSK(1),
@@ -107,12 +111,13 @@ xpm_cdc_handshake#(
 task set_invalid_state();
 endtask
 
-wire[31:0] rounded_send_bits = cpu_num_send_bits + MEM_DATA_WIDTH - 1;
+wire[31:0] num_send_bits = qspi_state ? cpu_num_send_cycles * 4 : cpu_num_send_cycles;
+wire[31:0] rounded_send_bits = num_send_bits + MEM_DATA_WIDTH - 1;
 task start_transaction();
     cpu_transaction_active <= 1'b1;
 
     cpu_send_counter <= rounded_send_bits[31:$clog2(MEM_DATA_WIDTH)];
-    cpu_recv_counter <= cpu_num_recv_bits;
+    cpu_recv_counter <= cpu_num_recv_cycles;
 endtask
 
 task wait_transaction();
@@ -120,10 +125,6 @@ task wait_transaction();
 endtask
 
 assign ctrl_cmd_ack_o = !cpu_transaction_active;
-
-logic [15:0] spi_dummy_counter = 0;
-logic [31:0] cpu_send_counter = 0, spi_send_counter = 0, cpu_recv_counter = 0, spi_recv_counter = 0;
-logic [$clog2(MEM_DATA_WIDTH)-1:0] spi_shift_fill;
 
 logic dma_read_in_progress = 1'b0, dma_read_in_progress_next;
 logic [MEM_DATA_WIDTH-1:0] data_buffer;
@@ -140,9 +141,9 @@ always_ff@(posedge cpu_clock_i) begin
             case( ctrl_cmd_address_i )
                 16'h0000: start_transaction();
                 16'h0004: cpu_dma_addr_send <= ctrl_cmd_data_i;
-                16'h0008: cpu_num_send_bits <= ctrl_cmd_data_i;
+                16'h0008: cpu_num_send_cycles <= ctrl_cmd_data_i;
                 16'h000c: cpu_dma_addr_recv <= ctrl_cmd_data_i;
-                16'h0010: cpu_num_recv_bits <= ctrl_cmd_data_i;
+                16'h0010: cpu_num_recv_cycles <= ctrl_cmd_data_i;
                 16'h0014: cpu_transfer_mode <= ctrl_cmd_data_i;
                 default: set_invalid_state();
             endcase
@@ -152,9 +153,9 @@ always_ff@(posedge cpu_clock_i) begin
             case( ctrl_cmd_address_i )
                 16'h0000: wait_transaction();
                 16'h0004: ctrl_rsp_data_o <= cpu_dma_addr_send;
-                16'h0008: ctrl_rsp_data_o <= cpu_num_send_bits;
+                16'h0008: ctrl_rsp_data_o <= cpu_num_send_cycles;
                 16'h000c: ctrl_rsp_data_o <= cpu_dma_addr_recv;
-                16'h0010: ctrl_rsp_data_o <= cpu_num_recv_bits;
+                16'h0010: ctrl_rsp_data_o <= cpu_num_recv_cycles;
                 16'h0014: ctrl_rsp_data_o <= cpu_transfer_mode;
                 default: set_invalid_state();
             endcase
@@ -187,8 +188,7 @@ end
 always_comb begin
     dma_read_in_progress_next = dma_read_in_progress;
     dma_cmd_valid_o = 1'b0;
-    dma_cmd_valid_o = 32'bX;
-    dma_cmd_data_o = 32'bX;
+    dma_cmd_data_o = { MEM_DATA_WIDTH{1'bX} };
     dma_cmd_write_o = 1'bX;
 
     if( cpu_transaction_active ) begin
@@ -196,7 +196,7 @@ always_comb begin
             if( !data_buffer_full ) begin
                 if( !dma_read_in_progress ) begin
                     dma_cmd_valid_o = 1'b1;
-                    dma_cmd_address_o = cpu_dma_addr_recv;
+                    dma_cmd_address_o = cpu_dma_addr_send;
                     dma_cmd_write_o = 1'b0;
 
                     if( dma_cmd_ack_i )
@@ -214,20 +214,13 @@ wire qspi_state = spi_transfer_mode[16];
 logic [3:0] spi_dq_o, spi_dq_i;
 logic spi_dq_dir = 1'b1;
 
-wire spi_read_ready = spi_transaction_active && spi_send_counter>0;
+assign spi_dq_o = spi_shift_buffer[3:0];
+IOBUF dq0_buffer(.T(qspi_state ? spi_dq_dir : 1'b0), .I(spi_dq_o[0]), .O(spi_dq_i[0]), .IO(spi_dq_io[0]));
+IOBUF dq1_buffer(.T(qspi_state ? spi_dq_dir : 1'b1), .I(spi_dq_o[1]), .O(spi_dq_i[1]), .IO(spi_dq_io[1]));
+IOBUF dq2_buffer(.T(qspi_state ? spi_dq_dir : 1'b0), .I(qspi_state ? spi_dq_o[2] : 1'b1), .O(spi_dq_i[2]), .IO(spi_dq_io[2]));
+IOBUF dq3_buffer(.T(qspi_state ? spi_dq_dir : 1'b0), .I(qspi_state ? spi_dq_o[3] : 1'b1), .O(spi_dq_i[3]), .IO(spi_dq_io[3]));
 
 always_ff@(negedge spi_ref_clock_i) begin
-    spi_dq_o[0] <= spi_shift_buffer[0];
-    spi_dq_o[1] <= spi_shift_buffer[1];
-
-    if( qspi_state ) begin
-        spi_dq_o[2] <= spi_shift_buffer[2];
-        spi_dq_o[3] <= spi_shift_buffer[3];
-    end else begin
-        spi_dq_o[2] <= 1'b1;    // Not write protected
-        spi_dq_o[3] <= 1'b1;    // Not held/reset
-    end
-
     spi_cs_n_o <= !spi_transaction_active;
     spi_dq_dir <= spi_send_counter>0 ? 1'b0 : 1'b1;
 end
@@ -235,13 +228,8 @@ end
 genvar i;
 generate
 
-IOBUF dq0_buffer(.T(qspi_state ? spi_dq_dir : 1'b0), .I(spi_dq_o[0]), .O(spi_dq_i[0]), .IO(spi_dq_io[0]));
-IOBUF dq1_buffer(.T(qspi_state ? spi_dq_dir : 1'b1), .I(spi_dq_o[1]), .O(spi_dq_i[1]), .IO(spi_dq_io[1]));
-IOBUF dq2_buffer(.T(qspi_state ? spi_dq_dir : 1'b0), .I(spi_dq_o[2]), .O(spi_dq_i[2]), .IO(spi_dq_io[2]));
-IOBUF dq3_buffer(.T(qspi_state ? spi_dq_dir : 1'b0), .I(spi_dq_o[3]), .O(spi_dq_i[3]), .IO(spi_dq_io[3]));
-
 for( i=0; i<MEM_DATA_WIDTH-5; i++ ) begin : read_shift_gen
-    always_ff@(posedge spi_ref_clock_i) begin
+    always_ff@(negedge spi_ref_clock_i) begin
         if( spi_clk_enable ) begin
             if( qspi_state )
                 spi_shift_buffer[i] <= spi_shift_buffer[i+4];
@@ -249,13 +237,13 @@ for( i=0; i<MEM_DATA_WIDTH-5; i++ ) begin : read_shift_gen
                 spi_shift_buffer[i] <= spi_shift_buffer[i+1];
         end
 
-        if( spi_dma_read_valid && !spi_dma_read_ack && spi_read_ready )
+        if( spi_dma_read_valid && !spi_dma_read_ack && spi_shift_fill==0 )
             spi_shift_buffer[i] <= spi_dma_read_data[i];
     end
 end : read_shift_gen
 
 for( i=MEM_DATA_WIDTH-5; i<MEM_DATA_WIDTH-1; i++ ) begin : read_shift_gen_h
-    always_ff@(posedge spi_ref_clock_i) begin
+    always_ff@(negedge spi_ref_clock_i) begin
         if( spi_clk_enable ) begin
             if( qspi_state )
                 spi_shift_buffer[i] <= 1'b0;
@@ -263,23 +251,26 @@ for( i=MEM_DATA_WIDTH-5; i<MEM_DATA_WIDTH-1; i++ ) begin : read_shift_gen_h
                 spi_shift_buffer[i] <= spi_shift_buffer[i+1];
         end
 
-        if( spi_dma_read_valid && !spi_dma_read_ack && spi_read_ready )
+        if( spi_dma_read_valid && !spi_dma_read_ack && spi_shift_fill==0 )
             spi_shift_buffer[i] <= spi_dma_read_data[i];
     end
 end : read_shift_gen_h
 
-always_ff@(posedge spi_ref_clock_i) begin
+always_ff@(negedge spi_ref_clock_i) begin
     if( spi_clk_enable )
         spi_shift_buffer[MEM_DATA_WIDTH-1] <= 1'b0;
 
-    if( spi_dma_read_valid && !spi_dma_read_ack && spi_read_ready )
+    if( spi_dma_read_valid && !spi_dma_read_ack && spi_shift_fill==0 )
         spi_shift_buffer[MEM_DATA_WIDTH-1] <= spi_dma_read_data[MEM_DATA_WIDTH-1];
 end
 
 endgenerate
 
-task send_buffer_from_cpu();
-    spi_shift_fill <= spi_send_counter<MEM_DATA_WIDTH ? spi_send_counter : MEM_DATA_WIDTH;
+task send_buffer_from_cpu(input new_transaction);
+    if( new_transaction )
+        spi_shift_fill <= spi_num_send_cycles<MEM_DATA_WIDTH ? spi_num_send_cycles : MEM_DATA_WIDTH;
+    else
+        spi_shift_fill <= spi_send_counter<MEM_DATA_WIDTH ? spi_send_counter : MEM_DATA_WIDTH;
     spi_dma_read_ack <= 1'b1;
     spi_clk_enable <= 1'b1;
 endtask
@@ -306,20 +297,20 @@ always_ff@(posedge spi_ref_clock_i) begin
             recv_buffer_to_cpu();
         end else if( spi_dma_read_valid && !spi_dma_read_ack ) begin
             // New transaction started
-            spi_send_counter <= spi_num_send_bits - 1; // Must send at least one bit
-            spi_recv_counter <= spi_num_recv_bits;
+            spi_send_counter <= spi_num_send_cycles - 1; // Must send at least one bit
+            spi_recv_counter <= spi_num_recv_cycles;
             spi_dummy_counter <= spi_transfer_mode[15:0];
 
             spi_transaction_active <= 1'b1;
 
-            send_buffer_from_cpu();
+            send_buffer_from_cpu(1'b1);
         end
     end else begin
         if( spi_send_counter>0 ) begin
             // Send stage of request
             if( spi_shift_fill==0 ) begin
                 if( spi_dma_read_valid && !spi_dma_read_ack )
-                    send_buffer_from_cpu();
+                    send_buffer_from_cpu(1'b0);
                 else
                     // Buffer underrun. Stop the clock
                     spi_clk_enable <= 1'b0;

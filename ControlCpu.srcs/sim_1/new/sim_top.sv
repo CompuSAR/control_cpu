@@ -40,7 +40,7 @@ wire    [15:0]  ddr3_dq;
 top top_module(
     .board_clock(clock), .nReset(nReset),
     .uart_output(1'b0), .debug(debug),
-    .spi_cs_n(spi_flash_clock), .spi_dq(spi_flash_dq), .spi_clk(spi_flash_clock),
+    .spi_cs_n(spi_flash_cs), .spi_dq(spi_flash_dq), .spi_clk(spi_flash_clock),
     .ddr3_dqs_p(ddr3_dqs_p), .ddr3_dqs_n(ddr3_dqs_n), .ddr3_dq(ddr3_dq));
 
 ddr3_model ddr(
