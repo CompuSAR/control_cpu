@@ -46,6 +46,8 @@ reg [31:0] cpu_dma_addr_send, cpu_dma_addr_recv, cpu_num_send_cycles, cpu_num_re
 reg [31:0] spi_num_send_cycles, spi_num_recv_cycles, spi_transfer_mode;
 reg cpu_transaction_active = 1'b0, spi_transaction_active = 1'b0;
 
+wire cpu_qspi_state = cpu_transfer_mode[16], spi_qspi_state = spi_transfer_mode[16];
+
 xpm_cdc_array_single#(
     .WIDTH(32)
 ) cdc_num_send_cycles(
@@ -109,8 +111,10 @@ xpm_cdc_handshake#(
 task set_invalid_state();
 endtask
 
-wire[31:0] num_send_bits = qspi_state ? cpu_num_send_cycles * 4 : cpu_num_send_cycles;
-wire[31:0] rounded_send_bits = num_send_bits + MEM_DATA_WIDTH - 1;
+wire[31:0] num_send_bits = cpu_qspi_state ? cpu_num_send_cycles * 4 : cpu_num_send_cycles;
+logic[31:0] rounded_send_bits;
+assign rounded_send_bits = num_send_bits + (MEM_DATA_WIDTH - 1);
+
 task start_transaction();
     cpu_transaction_active <= 1'b1;
 
@@ -207,16 +211,14 @@ end
 
 logic[MEM_DATA_WIDTH-1:0] spi_shift_buffer;
 
-wire qspi_state = spi_transfer_mode[16];
-
 logic [3:0] spi_dq_o, spi_dq_i;
 logic spi_dq_dir = 1'b1;
 
 assign spi_dq_o = spi_shift_buffer[3:0];
-IOBUF dq0_buffer(.T(qspi_state ? spi_dq_dir : 1'b0), .I(spi_dq_o[0]), .O(spi_dq_i[0]), .IO(spi_dq_io[0]));
-IOBUF dq1_buffer(.T(qspi_state ? spi_dq_dir : 1'b1), .I(spi_dq_o[1]), .O(spi_dq_i[1]), .IO(spi_dq_io[1]));
-IOBUF dq2_buffer(.T(qspi_state ? spi_dq_dir : 1'b0), .I(qspi_state ? spi_dq_o[2] : 1'b1), .O(spi_dq_i[2]), .IO(spi_dq_io[2]));
-IOBUF dq3_buffer(.T(qspi_state ? spi_dq_dir : 1'b0), .I(qspi_state ? spi_dq_o[3] : 1'b1), .O(spi_dq_i[3]), .IO(spi_dq_io[3]));
+IOBUF dq0_buffer(.T(spi_qspi_state ? spi_dq_dir : 1'b0), .I(spi_dq_o[0]), .O(spi_dq_i[0]), .IO(spi_dq_io[0]));
+IOBUF dq1_buffer(.T(spi_qspi_state ? spi_dq_dir : 1'b1), .I(spi_dq_o[1]), .O(spi_dq_i[1]), .IO(spi_dq_io[1]));
+IOBUF dq2_buffer(.T(spi_qspi_state ? spi_dq_dir : 1'b0), .I(spi_qspi_state ? spi_dq_o[2] : 1'b1), .O(spi_dq_i[2]), .IO(spi_dq_io[2]));
+IOBUF dq3_buffer(.T(spi_qspi_state ? spi_dq_dir : 1'b0), .I(spi_qspi_state ? spi_dq_o[3] : 1'b1), .O(spi_dq_i[3]), .IO(spi_dq_io[3]));
 
 always_ff@(negedge spi_ref_clock_i) begin
     spi_cs_n_o <= !spi_transaction_active;
@@ -229,7 +231,7 @@ generate
 for( i=0; i<MEM_DATA_WIDTH-5; i++ ) begin : read_shift_gen
     always_ff@(negedge spi_ref_clock_i) begin
         if( spi_clk_enable ) begin
-            if( qspi_state )
+            if( spi_qspi_state )
                 spi_shift_buffer[i] <= spi_shift_buffer[i+4];
             else
                 spi_shift_buffer[i] <= spi_shift_buffer[i+1];
@@ -243,7 +245,7 @@ end : read_shift_gen
 for( i=MEM_DATA_WIDTH-5; i<MEM_DATA_WIDTH-1; i++ ) begin : read_shift_gen_h
     always_ff@(negedge spi_ref_clock_i) begin
         if( spi_clk_enable ) begin
-            if( qspi_state )
+            if( spi_qspi_state )
                 spi_shift_buffer[i] <= 1'b0;
             else
                 spi_shift_buffer[i] <= spi_shift_buffer[i+1];
