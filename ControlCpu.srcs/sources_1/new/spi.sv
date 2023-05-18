@@ -49,7 +49,8 @@ reg cpu_transaction_active = 1'b0, spi_transaction_active = 1'b0;
 wire cpu_qspi_state = cpu_transfer_mode[16], spi_qspi_state = spi_transfer_mode[16];
 
 xpm_cdc_array_single#(
-    .WIDTH(32)
+    .WIDTH(32),
+    .SIM_ASSERT_CHK(1)
 ) cdc_num_send_cycles(
     .src_clk(cpu_clock_i),
     .src_in(cpu_num_send_cycles),
@@ -84,8 +85,8 @@ logic [$clog2(MEM_DATA_WIDTH)-1:0] spi_shift_fill = 0;
 
 xpm_cdc_handshake#(
     .DEST_EXT_HSK(1),
-    .SIM_ASSERT_CHK(1),
-    .WIDTH(MEM_DATA_WIDTH)
+    .WIDTH(MEM_DATA_WIDTH),
+    .SIM_ASSERT_CHK(1)
 ) cdc_dma_read_info(
     .src_clk(cpu_clock_i),
     .src_in(cpu_dma_read_data),
@@ -192,6 +193,7 @@ always_comb begin
     dma_cmd_valid_o = 1'b0;
     dma_cmd_data_o = { MEM_DATA_WIDTH{1'bX} };
     dma_cmd_write_o = 1'bX;
+    dma_cmd_address_o = 32'bX;
 
     if( cpu_transaction_active ) begin
         if( cpu_send_counter>0 ) begin
