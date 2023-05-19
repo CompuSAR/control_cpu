@@ -228,7 +228,6 @@ logic[MEM_DATA_WIDTH-1:0] spi_shift_buffer;
 logic [3:0] spi_dq_o, spi_dq_i;
 logic spi_dq_dir = 1'b1;
 
-assign spi_dq_o = spi_shift_buffer[3:0];
 IOBUF dq0_buffer(.T(spi_qspi_state ? spi_dq_dir : 1'b0), .I(spi_dq_o[0]), .O(spi_dq_i[0]), .IO(spi_dq_io[0]));
 IOBUF dq1_buffer(.T(spi_qspi_state ? spi_dq_dir : 1'b1), .I(spi_dq_o[1]), .O(spi_dq_i[1]), .IO(spi_dq_io[1]));
 IOBUF dq2_buffer(.T(spi_qspi_state ? spi_dq_dir : 1'b0), .I(spi_qspi_state ? spi_dq_o[2] : 1'b1), .O(spi_dq_i[2]), .IO(spi_dq_io[2]));
@@ -237,6 +236,8 @@ IOBUF dq3_buffer(.T(spi_qspi_state ? spi_dq_dir : 1'b0), .I(spi_qspi_state ? spi
 always_ff@(negedge spi_ref_clock_i) begin
     spi_cs_n_o <= !spi_transaction_active;
     spi_dq_dir <= spi_send_counter>0 ? 1'b0 : 1'b1;
+
+    spi_dq_o <= spi_shift_buffer[3:0];
 end
 
 genvar i, j;
@@ -250,7 +251,7 @@ for( i=0; i<MEM_DATA_WIDTH; i+=8 ) begin
 end
 
 for( i=0; i<MEM_DATA_WIDTH-5; i++ ) begin : read_shift_gen
-    always_ff@(negedge spi_ref_clock_i) begin
+    always_ff@(posedge spi_ref_clock_i) begin
         if( spi_clk_enable ) begin
             if( spi_qspi_state )
                 spi_shift_buffer[i] <= spi_shift_buffer[i+4];
@@ -264,7 +265,7 @@ for( i=0; i<MEM_DATA_WIDTH-5; i++ ) begin : read_shift_gen
 end : read_shift_gen
 
 for( i=MEM_DATA_WIDTH-5; i<MEM_DATA_WIDTH-1; i++ ) begin : read_shift_gen_h
-    always_ff@(negedge spi_ref_clock_i) begin
+    always_ff@(posedge spi_ref_clock_i) begin
         if( spi_clk_enable ) begin
             if( spi_qspi_state )
                 spi_shift_buffer[i] <= 1'b0;
@@ -277,7 +278,7 @@ for( i=MEM_DATA_WIDTH-5; i<MEM_DATA_WIDTH-1; i++ ) begin : read_shift_gen_h
     end
 end : read_shift_gen_h
 
-always_ff@(negedge spi_ref_clock_i) begin
+always_ff@(posedge spi_ref_clock_i) begin
     if( spi_clk_enable )
         spi_shift_buffer[MEM_DATA_WIDTH-1] <= 1'b0;
 
