@@ -66,6 +66,7 @@ static void recovery_first_step() {
 
 void interface_rescue() {
     recovery_first_step();
+    recovery_helper(16);
 }
 
 } // namespace SPI

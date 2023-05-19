@@ -26,7 +26,7 @@ module spi_ctrl#(
     // DMA interface
     output logic                dma_cmd_valid_o,
     output logic[31:0]          dma_cmd_address_o,
-    output logic[MEM_DATA_WIDTH-1:0] dma_cmd_data_o,
+    output [MEM_DATA_WIDTH-1:0] dma_cmd_data_o,
     output logic                dma_cmd_write_o,
     input                       dma_cmd_ack_i,
 
@@ -42,11 +42,16 @@ BUFGCE spi_clock_buf(
     .CE(spi_clk_enable)
 );
 
+// SPI commands scan the bytes LSB but the bits in the byte MSB, so we need to
+// shuffle the bits around a bit.
+logic [MEM_DATA_WIDTH-1:0] dma_cmd_data_mixed, dma_rsp_data_mixed;
+
 reg [31:0] cpu_dma_addr_send, cpu_dma_addr_recv, cpu_num_send_cycles, cpu_num_recv_cycles, cpu_transfer_mode;
 reg [31:0] spi_num_send_cycles, spi_num_recv_cycles, spi_transfer_mode;
 reg cpu_transaction_active = 1'b0, spi_transaction_active = 1'b0;
 
-wire cpu_qspi_state = cpu_transfer_mode[16], spi_qspi_state = spi_transfer_mode[16];
+wire cpu_qspi_state = cpu_transfer_mode[16];
+logic spi_qspi_state = 1'bX;
 
 xpm_cdc_array_single#(
     .WIDTH(32),
@@ -115,14 +120,16 @@ task set_invalid_state();
 endtask
 
 wire[31:0] num_send_bits = cpu_qspi_state ? cpu_num_send_cycles * 4 : cpu_num_send_cycles;
-logic[31:0] rounded_send_bits;
+wire[31:0] num_recv_bits = cpu_qspi_state ? cpu_num_recv_cycles * 4 : cpu_num_recv_cycles;
+logic[31:0] rounded_send_bits, rounded_recv_bits;
 assign rounded_send_bits = num_send_bits + (MEM_DATA_WIDTH - 1);
+assign rounded_recv_bits = num_recv_bits + (MEM_DATA_WIDTH - 1);
 
 task start_transaction();
     cpu_transaction_active <= 1'b1;
 
     cpu_send_counter <= rounded_send_bits[31:$clog2(MEM_DATA_WIDTH)];
-    cpu_recv_counter <= cpu_num_recv_cycles;
+    cpu_recv_counter <= rounded_recv_bits[31:$clog2(MEM_DATA_WIDTH)];
 endtask
 
 task wait_transaction();
@@ -176,7 +183,7 @@ always_ff@(posedge cpu_clock_i) begin
     dma_read_in_progress <= dma_read_in_progress_next;
 
     if( dma_read_in_progress && dma_rsp_valid_i ) begin
-        data_buffer <= dma_rsp_data_i;
+        data_buffer <= dma_rsp_data_mixed;
         data_buffer_full <= 1'b1;
         cpu_send_counter <= cpu_send_counter-1;
         cpu_dma_addr_send <= cpu_dma_addr_send + MEM_DATA_WIDTH/8;
@@ -196,7 +203,7 @@ end
 always_comb begin
     dma_read_in_progress_next = dma_read_in_progress;
     dma_cmd_valid_o = 1'b0;
-    dma_cmd_data_o = { MEM_DATA_WIDTH{1'bX} };
+    dma_cmd_data_mixed = { MEM_DATA_WIDTH{1'bX} };
     dma_cmd_write_o = 1'bX;
     dma_cmd_address_o = 32'bX;
 
@@ -232,8 +239,15 @@ always_ff@(negedge spi_ref_clock_i) begin
     spi_dq_dir <= spi_send_counter>0 ? 1'b0 : 1'b1;
 end
 
-genvar i;
+genvar i, j;
 generate
+
+for( i=0; i<MEM_DATA_WIDTH; i+=8 ) begin
+    for( j=0; j<8; j++ ) begin
+        assign dma_rsp_data_mixed[i+7-j] = dma_rsp_data_i[i+j];
+        assign dma_cmd_data_o[i+j] = dma_cmd_data_mixed[i+7-j];
+    end
+end
 
 for( i=0; i<MEM_DATA_WIDTH-5; i++ ) begin : read_shift_gen
     always_ff@(negedge spi_ref_clock_i) begin
@@ -307,6 +321,7 @@ always_ff@(posedge spi_ref_clock_i) begin
             spi_send_counter <= spi_num_send_cycles - 1; // Must send at least one bit
             spi_recv_counter <= spi_num_recv_cycles;
             spi_dummy_counter <= spi_transfer_mode[15:0];
+            spi_qspi_state <= spi_transfer_mode[16];
 
             spi_transaction_active <= 1'b1;
 
