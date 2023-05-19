@@ -83,6 +83,8 @@ logic [15:0]                    spi_dummy_counter = 0;
 logic [31:0]                    cpu_send_counter = 0, spi_send_counter = 0, cpu_recv_counter = 0, spi_recv_counter = 0;
 logic [$clog2(MEM_DATA_WIDTH)-1:0] spi_shift_fill = 0;
 
+wire cpu_send_idle = !cpu_dma_read_valid && !cpu_dma_read_ack;
+
 xpm_cdc_handshake#(
     .DEST_EXT_HSK(1),
     .WIDTH(MEM_DATA_WIDTH),
@@ -181,11 +183,14 @@ always_ff@(posedge cpu_clock_i) begin
         dma_read_in_progress <= 1'b0;
     end
 
-    if( data_buffer_full && !cpu_dma_read_valid && !cpu_dma_read_ack )
+    if( data_buffer_full && cpu_send_idle )
         cpu_dma_read_valid <= 1'b1;
 
     if( data_buffer_full && cpu_dma_read_valid && cpu_dma_read_ack )
         data_buffer_full <= 1'b0;
+
+    if( cpu_transaction_active && cpu_send_counter==0 && cpu_recv_counter==0 )
+        cpu_transaction_active <= 1'b0;
 end
 
 always_comb begin
@@ -198,7 +203,7 @@ always_comb begin
     if( cpu_transaction_active ) begin
         if( cpu_send_counter>0 ) begin
             if( !data_buffer_full ) begin
-                if( !dma_read_in_progress ) begin
+                if( cpu_send_idle && !dma_read_in_progress ) begin
                     dma_cmd_valid_o = 1'b1;
                     dma_cmd_address_o = cpu_dma_addr_send;
                     dma_cmd_write_o = 1'b0;
