@@ -18,7 +18,23 @@ void bl1_start() {
 
     uart_send("Memory initialized. Initializing SPI flash\n");
 
+    struct spi_command {
+        uint8_t buffer[32];
+    } __attribute__((aligned(16)))__;
+    spi_command write_enhanced_register;
+    write_enhanced_register.buffer[0] = 0x61;
+    write_enhanced_register.buffer[1] = 0x6f;
+
+    /*
+    SPI::set_config( SPI::Config::ESPI, 0 );
+    SPI::start_transaction( &write_enhanced_register, 2, nullptr, 0 );
+    SPI::wait_transaction();
     SPI::interface_rescue();
+    SPI::set_config( SPI::Config::ESPI, 0 );
+    SPI::start_transaction( &write_enhanced_register, 2, nullptr, 0 );
+    */
+    SPI::set_config( SPI::Config::ESPI, 0 );
+    SPI::start_transaction( (const void *)0x80000000, 33, nullptr, 0 );
 #if 0
     uint32_t offset = 0;
 

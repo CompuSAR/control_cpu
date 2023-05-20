@@ -1,0 +1,33 @@
+//-MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON-
+//-MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON-
+//-MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON-
+//
+//  MT25TU256HBA8Exx-0xxx
+//
+//  Verilog Behavioral Model
+//  Version 1.6 
+//
+//  Copyright (c) 2013 Micron Inc.
+//
+//-MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON-
+//-MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON-
+//-MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON--MICRON-
+
+//`define MT25TU256HBA8Exx_0xxx
+//`define MT25QU128ABB8E0
+`define N25Q128A11E
+`define DENSITY_128
+
+`define FILENAME_mem_die1 "mem_Q128_die1.vmf" // Memory File Name 
+`define FILENAME_mem_die2 "mem_Q128_die2.vmf" // Memory File Name 
+`define FILENAME_mem "mem_Q128.vmf" // Memory File Name 
+//`define FILENAME_sfdp "sfdp.vmf" // SFDP File Name 
+`define FILENAME_sfdp "" // SFDP File Name 
+`define NVCR_DEFAULT_VALUE 'hFFFF
+`undef RESET_pin
+`define HOLD_pin
+//`define Feature_8
+
+`define INT_RST_SEQ
+
+`define TIMING_166
