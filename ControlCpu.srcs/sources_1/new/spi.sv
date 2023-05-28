@@ -34,7 +34,7 @@ module spi_ctrl#(
     input [MEM_DATA_WIDTH-1:0]  dma_rsp_data_i
 );
 
-logic spi_clk_enable = 1'b0;
+logic spi_clk_enable;
 
 BUFGCE spi_clock_buf(
     .O(spi_clk_o),
@@ -87,7 +87,7 @@ logic                           cpu_dma_write_ack = 1'b0, spi_dma_write_ack;
 logic [15:0]                    spi_dummy_counter = 0;
 logic [31:0]                    cpu_send_counter = 0, spi_send_counter = 0, cpu_recv_counter = 0, spi_recv_counter = 0;
 logic [$clog2(MEM_DATA_WIDTH):0] spi_shift_fill = 0;
-wire spi_shift_fill_empty = spi_shift_fill==0 || spi_shift_fill==1;
+wire spi_shift_fill_empty = spi_shift_fill==0;
 
 wire cpu_send_idle = !cpu_dma_read_valid && !cpu_dma_read_ack;
 
@@ -202,6 +202,22 @@ always_ff@(posedge cpu_clock_i) begin
 end
 
 always_comb begin
+    spi_clk_enable = 1'b0;
+
+    if( spi_transaction_active ) begin
+        if( spi_send_counter!=0 ) begin
+            // In send stage of transaction
+            if( spi_shift_fill!=0 )
+                spi_clk_enable = 1'b1;
+        end else begin
+            // In recv stage of transaction
+            if( spi_shift_fill!=MEM_DATA_WIDTH )
+                spi_clk_enable = 1'b1;
+        end
+    end
+end
+
+always_comb begin
     dma_read_in_progress_next = dma_read_in_progress;
     dma_cmd_valid_o = 1'b0;
     dma_cmd_data_mixed = { MEM_DATA_WIDTH{1'bX} };
@@ -224,7 +240,11 @@ always_comb begin
     end
 end
 
-logic[MEM_DATA_WIDTH-1:0] spi_shift_buffer;
+logic[MEM_DATA_WIDTH-1:0] spi_send_shift_buffer, spi_recv_shift_buffer, spi_recv_buffer;
+logic spi_recv_buffer_loaded = 1'b0;
+
+wire spi_recv_buffer_reset = 1'b0; // !spi_recv_buffer_loaded && spi_recv_buffer_loaded_next;
+wire spi_send_buffer_load = spi_dma_read_valid && !spi_dma_read_ack && spi_shift_fill_empty;
 
 logic [3:0] spi_dq_o, spi_dq_i;
 logic spi_dq_dir = 1'b1;
@@ -238,12 +258,13 @@ always_ff@(negedge spi_ref_clock_i) begin
     spi_cs_n_o <= !spi_transaction_active;
     spi_dq_dir <= spi_send_counter>0 ? 1'b0 : 1'b1;
 
-    spi_dq_o <= spi_shift_buffer[3:0];
+    spi_dq_o <= spi_send_shift_buffer[3:0];
 end
 
 genvar i, j;
 generate
 
+// Remix bits: Pure LSB to mixed LSByte-MSbit
 for( i=0; i<MEM_DATA_WIDTH; i+=8 ) begin
     for( j=0; j<8; j++ ) begin
         assign dma_rsp_data_mixed[i+7-j] = dma_rsp_data_i[i+j];
@@ -251,17 +272,18 @@ for( i=0; i<MEM_DATA_WIDTH; i+=8 ) begin
     end
 end
 
+// Shift down send buffer
 for( i=0; i<MEM_DATA_WIDTH-5; i++ ) begin : read_shift_gen
     always_ff@(posedge spi_ref_clock_i) begin
         if( spi_clk_enable ) begin
             if( spi_qspi_state )
-                spi_shift_buffer[i] <= spi_shift_buffer[i+4];
+                spi_send_shift_buffer[i] <= spi_send_shift_buffer[i+4];
             else
-                spi_shift_buffer[i] <= spi_shift_buffer[i+1];
+                spi_send_shift_buffer[i] <= spi_send_shift_buffer[i+1];
         end
 
-        if( spi_dma_read_valid && !spi_dma_read_ack && spi_shift_fill_empty )
-            spi_shift_buffer[i] <= spi_dma_read_data[i];
+        if( spi_send_buffer_load )
+            spi_send_shift_buffer[i] <= spi_dma_read_data[i];
     end
 end : read_shift_gen
 
@@ -269,22 +291,63 @@ for( i=MEM_DATA_WIDTH-5; i<MEM_DATA_WIDTH-1; i++ ) begin : read_shift_gen_h
     always_ff@(posedge spi_ref_clock_i) begin
         if( spi_clk_enable ) begin
             if( spi_qspi_state )
-                spi_shift_buffer[i] <= 1'bX;
+                spi_send_shift_buffer[i] <= 1'bX;
             else
-                spi_shift_buffer[i] <= spi_shift_buffer[i+1];
+                spi_send_shift_buffer[i] <= spi_send_shift_buffer[i+1];
         end
 
-        if( spi_dma_read_valid && !spi_dma_read_ack && spi_shift_fill_empty )
-            spi_shift_buffer[i] <= spi_dma_read_data[i];
+        if( spi_send_buffer_load )
+            spi_send_shift_buffer[i] <= spi_dma_read_data[i];
     end
 end : read_shift_gen_h
 
 always_ff@(posedge spi_ref_clock_i) begin
     if( spi_clk_enable )
-        spi_shift_buffer[MEM_DATA_WIDTH-1] <= 1'bX;
+        spi_send_shift_buffer[MEM_DATA_WIDTH-1] <= 1'bX;
 
-    if( spi_dma_read_valid && !spi_dma_read_ack && spi_shift_fill_empty )
-        spi_shift_buffer[MEM_DATA_WIDTH-1] <= spi_dma_read_data[MEM_DATA_WIDTH-1];
+    if( spi_send_buffer_load )
+        spi_send_shift_buffer[MEM_DATA_WIDTH-1] <= spi_dma_read_data[MEM_DATA_WIDTH-1];
+end
+
+// Shift up recv buffer
+always_ff@(posedge spi_ref_clock_i) begin
+    if( spi_clk_enable ) begin
+        if( spi_qspi_state )
+            spi_recv_shift_buffer[0] <= spi_dq_i[0];
+        else
+            spi_recv_shift_buffer[0] <= spi_dq_i[1];
+    end
+end
+
+for( i=1; i<4; i++ ) begin
+    always_ff@(posedge spi_ref_clock_i) begin
+        if( spi_clk_enable ) begin
+            if( spi_qspi_state ) begin
+                // 4 bit SPI mode
+                spi_recv_shift_buffer[i] <= spi_dq_i[i];
+            end else begin
+                // Single bit SPI mode
+                if( spi_recv_buffer_reset )
+                    spi_recv_shift_buffer[i] <= 1'b0;
+                else
+                    spi_recv_shift_buffer[i] <= spi_recv_shift_buffer[i-1];
+            end
+        end
+    end
+end
+
+for( i=4; i<MEM_DATA_WIDTH; i++ ) begin
+    always_ff@(posedge spi_ref_clock_i) begin
+        if( spi_clk_enable) begin
+            if( spi_qspi_state )
+                spi_recv_shift_buffer[i] <= spi_recv_shift_buffer[i-4];
+            else
+                spi_recv_shift_buffer[i] <= spi_recv_shift_buffer[i-1];
+
+            if( spi_recv_buffer_reset )
+                spi_recv_shift_buffer[i] <= 1'b0;
+        end
+    end
 end
 
 endgenerate
@@ -295,16 +358,13 @@ task send_buffer_from_cpu(input new_transaction);
     else
         spi_shift_fill <= spi_send_counter<MEM_DATA_WIDTH ? spi_send_counter : MEM_DATA_WIDTH;
     spi_dma_read_ack <= 1'b1;
-    spi_clk_enable <= 1'b1;
 endtask
 
 task recv_buffer_to_cpu();
-    if( !spi_dma_write_ack ) begin
-        spi_dma_write_valid <= 1'b1;
-        spi_shift_fill <= 0;
-        spi_clk_enable <= 1'b1;
-    end else
-        spi_clk_enable <= 1'b0;
+    if( !spi_recv_buffer_loaded ) begin
+        spi_recv_buffer <= spi_recv_shift_buffer;
+        spi_recv_buffer_loaded <= 1'b1;
+    end
 endtask
 
 always_ff@(posedge spi_ref_clock_i) begin
@@ -320,7 +380,7 @@ always_ff@(posedge spi_ref_clock_i) begin
             recv_buffer_to_cpu();
         end else if( spi_dma_read_valid && !spi_dma_read_ack ) begin
             // New transaction started
-            spi_send_counter <= spi_num_send_cycles - 1; // Must send at least one bit
+            spi_send_counter <= spi_num_send_cycles; // Must send at least one bit
             spi_recv_counter <= spi_num_recv_cycles;
             spi_dummy_counter <= spi_transfer_mode[15:0];
             spi_qspi_state <= spi_transfer_mode[16];
@@ -330,32 +390,45 @@ always_ff@(posedge spi_ref_clock_i) begin
             send_buffer_from_cpu(1'b1);
         end
     end else begin
+        // Transaction active
         if( spi_send_counter>0 ) begin
             // Send stage of request
             if( spi_shift_fill_empty ) begin
                 if( spi_dma_read_valid && !spi_dma_read_ack ) begin
-                    spi_send_counter <= spi_send_counter-1;
+                    spi_send_counter <= spi_send_counter;
                     send_buffer_from_cpu(1'b0);
-                end else begin
-                    // Buffer underrun. Stop the clock
-                    spi_clk_enable <= 1'b0;
                 end
             end else begin
+                // Send tick
                 spi_shift_fill <= spi_shift_fill-1;
                 spi_send_counter <= spi_send_counter-1;
             end
         end else if( spi_dummy_counter>0 ) begin
+            // Dummy tick
             spi_dummy_counter <= spi_dummy_counter-1;
         end else if( spi_recv_counter>0 ) begin
+            // Recv stage of request
             if( spi_shift_fill==MEM_DATA_WIDTH || spi_recv_counter==0 )
                 recv_buffer_to_cpu();
+            else if( spi_clk_enable ) begin
+                spi_recv_counter <= spi_recv_counter-1;
+                spi_shift_fill <= spi_shift_fill+1;
+            end
         end else begin
             // All done
             if( spi_shift_fill>0 )
                 recv_buffer_to_cpu();
 
             spi_transaction_active <= 1'b0;
-            spi_clk_enable <= 1'b0;
+        end
+    end
+
+    if( spi_recv_buffer_loaded ) begin
+        if( spi_dma_write_ack ) begin
+            spi_recv_buffer_loaded <= 1'b0;
+            spi_dma_write_valid <= 1'b0;
+        end else begin
+            spi_dma_write_valid <= 1'b1;
         end
     end
 end

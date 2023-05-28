@@ -21,7 +21,7 @@ void set_config( Config config, uint16_t num_dummy_cycles ) {
 
 void start_transaction( const void *read_data, size_t read_size, void *write_data, size_t write_size ) {
     // First write the values that the SPI clocked parts need
-    Config current_config = Config( reg_read_32(SpiDevice, REG_MODE) );
+    Config current_config = Config( (reg_read_32(SpiDevice, REG_MODE)>>16) & 0x01 );
     if( current_config==Config::ESPI ) {
         reg_write_32( SpiDevice, REG_NUM_SEND_CYCLES, read_size*8 );
         reg_write_32( SpiDevice, REG_NUM_RECV_CYCLES, write_size*8 );

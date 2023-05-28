@@ -2,6 +2,7 @@
 #include "format.h"
 #include "irq.h"
 #include "spi.h"
+#include "spi_flash.h"
 #include "uart.h"
 
 extern "C" void bl1_start();
@@ -21,9 +22,15 @@ void bl1_start() {
     struct spi_command {
         uint8_t buffer[32];
     } __attribute__((aligned(16)))__;
-    spi_command write_enhanced_register;
-    write_enhanced_register.buffer[0] = 0x61;
-    write_enhanced_register.buffer[1] = 0x6f;
+
+    spi_command rsfd, rsfd_result;
+    rsfd.buffer[0] = static_cast<uint8_t>(SPI_FLASH::Commands::ReadSerialFlashDiscoveryParameters);
+    rsfd.buffer[1] = 0;
+    rsfd.buffer[2] = 0;
+    rsfd.buffer[3] = 0;
+
+    SPI::set_config( SPI::Config::ESPI, 8 );
+    SPI::start_transaction( &rsfd, 4, &rsfd_result, 34 );
 
     /*
     SPI::set_config( SPI::Config::ESPI, 0 );

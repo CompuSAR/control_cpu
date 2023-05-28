@@ -11,19 +11,20 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="813,747.576 ns"></ZoomStartTime>
-      <ZoomEndTime time="815,230.577 ns"></ZoomEndTime>
-      <Cursor1Time time="813,994.742 ns"></Cursor1Time>
+      <ZoomStartTime time="820,466.022 ns"></ZoomStartTime>
+      <ZoomEndTime time="820,639.891 ns"></ZoomEndTime>
+      <Cursor1Time time="820,620.000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="283"></NameColumnWidth>
-      <ValueColumnWidth column_width="110"></ValueColumnWidth>
+      <ValueColumnWidth column_width="90"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="45" />
+   <WVObjectSize size="49" />
    <wave_markers>
-      <marker label="" time="814160000" />
-      <marker label="" time="813994742" />
-      <marker label="" time="814480000" />
+      <marker label="" time="814660000" />
+      <marker label="" time="815290000" />
+      <marker label="" time="815470000" />
+      <marker label="" time="818030000" />
    </wave_markers>
    <wvobject type="logic" fp_name="/sim_top/top_module/uart_tx">
       <obj_property name="ElementShortName">uart_tx</obj_property>
@@ -167,9 +168,25 @@
       <obj_property name="ObjectShortName">spi_flash_dq[3:0]</obj_property>
       <obj_property name="isExpanded"></obj_property>
    </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_shift_fill">
+      <obj_property name="ElementShortName">spi_shift_fill[7:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_shift_fill[7:0]</obj_property>
+   </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_shift_buffer">
       <obj_property name="ElementShortName">spi_shift_buffer[127:0]</obj_property>
       <obj_property name="ObjectShortName">spi_shift_buffer[127:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_send_counter">
+      <obj_property name="ElementShortName">spi_send_counter[31:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_send_counter[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_dummy_counter">
+      <obj_property name="ElementShortName">spi_dummy_counter[15:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_dummy_counter[15:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_recv_counter">
+      <obj_property name="ElementShortName">spi_recv_counter[31:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_recv_counter[31:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/cpu_dma_addr_send">
       <obj_property name="ElementShortName">cpu_dma_addr_send[31:0]</obj_property>
