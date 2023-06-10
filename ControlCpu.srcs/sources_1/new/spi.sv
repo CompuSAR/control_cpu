@@ -80,7 +80,7 @@ logic [MEM_DATA_WIDTH-1:0]      cpu_dma_read_data, spi_dma_read_data;
 logic                           cpu_dma_read_valid = 1'b0, spi_dma_read_valid;
 logic                           cpu_dma_read_ack, spi_dma_read_ack = 1'b0;
 
-logic [MEM_DATA_WIDTH-1:0]      cpu_dma_write_data, spi_dma_write_data;
+logic [MEM_DATA_WIDTH-1:0]      cpu_dma_write_data;
 logic                           cpu_dma_write_valid, spi_dma_write_valid = 1'b0;
 logic                           cpu_dma_write_ack = 1'b0, spi_dma_write_ack;
 
@@ -107,7 +107,7 @@ xpm_cdc_handshake#(
     .dest_ack(spi_dma_read_ack)
 ), cdc_dma_write_info(
     .src_clk(spi_ref_clock_i),
-    .src_in(spi_dma_write_data),
+    .src_in(spi_recv_buffer),
     .src_send(spi_dma_write_valid),
     .src_rcv(spi_dma_write_ack),
 
@@ -197,6 +197,12 @@ always_ff@(posedge cpu_clock_i) begin
     if( data_buffer_full && cpu_dma_read_valid && cpu_dma_read_ack )
         data_buffer_full <= 1'b0;
 
+    if( dma_cmd_valid_o && dma_cmd_write_o && dma_cmd_ack_i ) begin
+        cpu_dma_write_ack <= 1'b1;
+        cpu_dma_addr_send <= cpu_dma_addr_send + MEM_DATA_WIDTH/8;
+        cpu_recv_counter <= cpu_recv_counter - 1;
+    end
+
     if( cpu_transaction_active && cpu_send_counter==0 && cpu_recv_counter==0 )
         cpu_transaction_active <= 1'b0;
 end
@@ -226,6 +232,7 @@ always_comb begin
 
     if( cpu_transaction_active ) begin
         if( cpu_send_counter>0 ) begin
+            // DMA read
             if( !data_buffer_full ) begin
                 if( cpu_send_idle && !dma_read_in_progress ) begin
                     dma_cmd_valid_o = 1'b1;
@@ -235,6 +242,14 @@ always_comb begin
                     if( dma_cmd_ack_i )
                         dma_read_in_progress_next = 1'b1;
                 end
+            end
+        end else begin
+            // DMA write
+            if( cpu_dma_write_valid && !cpu_dma_write_ack ) begin
+                dma_cmd_valid_o = 1'b1;
+                dma_cmd_write_o = 1'b1;
+                dma_cmd_data_mixed = cpu_dma_write_data;
+                dma_cmd_address_o = cpu_dma_addr_send;
             end
         end
     end
@@ -364,14 +379,20 @@ task recv_buffer_to_cpu();
     if( !spi_recv_buffer_loaded ) begin
         spi_recv_buffer <= spi_recv_shift_buffer;
         spi_recv_buffer_loaded <= 1'b1;
+        buffer_loaded_while_with_no_cdc_ack:
+            assert( !spi_dma_write_ack )
+            else
+                $error("%m check failed");
+        spi_dma_write_valid <= 1'b1;
+        spi_shift_fill <= 0;
+    end else begin
+        // Backpressure
     end
 endtask
 
 always_ff@(posedge spi_ref_clock_i) begin
     if( !spi_dma_read_valid && spi_dma_read_ack )
         spi_dma_read_ack <= 1'b0;
-    if( spi_dma_write_valid && spi_dma_write_ack )
-        spi_dma_write_valid <= 1'b1;
 
     if( !spi_transaction_active ) begin
         // No active transaction
@@ -414,6 +435,9 @@ always_ff@(posedge spi_ref_clock_i) begin
                 spi_recv_counter <= spi_recv_counter-1;
                 spi_shift_fill <= spi_shift_fill+1;
             end
+
+            if( spi_recv_counter==1 )
+                spi_transaction_active <= 1'b0;
         end else begin
             // All done
             if( spi_shift_fill>0 )
@@ -425,9 +449,11 @@ always_ff@(posedge spi_ref_clock_i) begin
 
     if( spi_recv_buffer_loaded ) begin
         if( spi_dma_write_ack ) begin
+            // Our last CDC finished
             spi_recv_buffer_loaded <= 1'b0;
             spi_dma_write_valid <= 1'b0;
         end else begin
+            // Start a new CDC
             spi_dma_write_valid <= 1'b1;
         end
     end
