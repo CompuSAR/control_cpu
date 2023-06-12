@@ -23,6 +23,12 @@ SECTIONS
         . = ALIGN(4);
     } >preload
 
+    .sdata : {
+        . = ALIGN(4);
+         *(.sdata*)
+        . = ALIGN(4);
+    } >preload
+
     .got : {
         . = ALIGN(4);
         *(.got)

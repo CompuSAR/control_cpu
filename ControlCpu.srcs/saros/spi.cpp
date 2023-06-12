@@ -1,6 +1,9 @@
 #include "spi.h"
 
 #include "reg.h"
+#include "hw-params.h"
+
+#include <cstddef>
 
 namespace SPI {
 
@@ -15,14 +18,30 @@ enum SpiRegister : uint32_t {
     REG_MODE,
 };
 
-void set_config( Config config, uint16_t num_dummy_cycles ) {
-    reg_write_32( SpiDevice, REG_MODE, static_cast<uint32_t>(num_dummy_cycles) | (static_cast<uint32_t>(config)<<16) );
+static Config current_config = Config(0xff);
+
+void set_config( Config config ) {
+    current_config = config;
 }
 
-void start_transaction( const void *read_data, size_t read_size, void *write_data, size_t write_size ) {
+void postprocess_buffer( void *buffer, size_t recv_size ) {
+    // Realign the response to the beginning of the cacheline
+    if( recv_size%CACHELINE_SIZE_BYTES!=0 ) {
+        std::byte *buffer_c = reinterpret_cast<std::byte *>(buffer);
+        buffer_c += (recv_size/CACHELINE_SIZE_BYTES) * CACHELINE_SIZE_BYTES;     // Only the last line needs special handling
+
+        const size_t delta = CACHELINE_SIZE_BYTES - recv_size%CACHELINE_SIZE_BYTES;
+        for( int i=recv_size%CACHELINE_SIZE_BYTES; i>=0; --i ) {
+            buffer_c[i] = buffer_c[i+delta];
+        }
+    }
+}
+
+void start_transaction( const void *read_data, size_t read_size, uint16_t num_dummy_cycles, void *write_data, size_t write_size )
+{
     // First write the values that the SPI clocked parts need
-    Config current_config = Config( (reg_read_32(SpiDevice, REG_MODE)>>16) & 0x01 );
-    if( current_config==Config::ESPI ) {
+    reg_write_32( SpiDevice, REG_MODE, static_cast<uint32_t>(num_dummy_cycles) | (static_cast<uint32_t>(current_config)<<16) );
+    if( current_config==Config::Single ) {
         reg_write_32( SpiDevice, REG_NUM_SEND_CYCLES, read_size*8 );
         reg_write_32( SpiDevice, REG_NUM_RECV_CYCLES, write_size*8 );
     } else {
@@ -47,7 +66,8 @@ struct RecoveryData {
 } __attribute__((aligned(16) ))__;
 const RecoveryData RecoveryFirstStepData;
 static void recovery_helper(uint32_t num_cycles) {
-    set_config( Config::ESPI, 0 );
+    set_config( Config::Single );
+    reg_write_32( SpiDevice, REG_MODE, 0 ); // Single SPI, no dummy cycles
     reg_write_32( SpiDevice, REG_NUM_SEND_CYCLES, num_cycles );
     reg_write_32( SpiDevice, REG_NUM_RECV_CYCLES, 0 );
     reg_write_32( SpiDevice, REG_SEND_DMA_ADDR, reinterpret_cast<uint32_t>(&RecoveryFirstStepData.data) );

@@ -11,21 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="812.914759 us"></ZoomStartTime>
-      <ZoomEndTime time="828.024760 us"></ZoomEndTime>
-      <Cursor1Time time="815.433092 us"></Cursor1Time>
+      <ZoomStartTime time="820,892.551 ns"></ZoomStartTime>
+      <ZoomEndTime time="821,328.552 ns"></ZoomEndTime>
+      <Cursor1Time time="821,965.051 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="283"></NameColumnWidth>
-      <ValueColumnWidth column_width="82"></ValueColumnWidth>
+      <NameColumnWidth column_width="394"></NameColumnWidth>
+      <ValueColumnWidth column_width="193"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="60" />
-   <wave_markers>
-      <marker label="" time="814660000" />
-      <marker label="" time="815300000" />
-      <marker label="" time="820940000" />
-      <marker label="" time="815460000" />
-   </wave_markers>
    <wvobject type="logic" fp_name="/sim_top/top_module/uart_tx">
       <obj_property name="ElementShortName">uart_tx</obj_property>
       <obj_property name="ObjectShortName">uart_tx</obj_property>

@@ -34,6 +34,8 @@ module spi_ctrl#(
     input [MEM_DATA_WIDTH-1:0]  dma_rsp_data_i
 );
 
+localparam MEM_DATA_WIDTH_BYTES = MEM_DATA_WIDTH/8;
+
 logic spi_clk_enable;
 
 BUFGCE spi_clock_buf(
@@ -187,7 +189,7 @@ always_ff@(posedge cpu_clock_i) begin
         data_buffer <= dma_rsp_data_mixed;
         data_buffer_full <= 1'b1;
         cpu_send_counter <= cpu_send_counter-1;
-        cpu_dma_addr_send <= cpu_dma_addr_send + MEM_DATA_WIDTH/8;
+        cpu_dma_addr_send <= cpu_dma_addr_send + MEM_DATA_WIDTH_BYTES;
         dma_read_in_progress <= 1'b0;
     end
 
@@ -199,7 +201,7 @@ always_ff@(posedge cpu_clock_i) begin
 
     if( dma_cmd_valid_o && dma_cmd_write_o && dma_cmd_ack_i ) begin
         cpu_dma_write_ack <= 1'b1;
-        cpu_dma_addr_send <= cpu_dma_addr_send + MEM_DATA_WIDTH/8;
+        cpu_dma_addr_send <= cpu_dma_addr_send + MEM_DATA_WIDTH_BYTES;
         cpu_recv_counter <= cpu_recv_counter - 1;
     end
 
@@ -280,10 +282,12 @@ genvar i, j;
 generate
 
 // Remix bits: Pure LSB to mixed LSByte-MSbit
-for( i=0; i<MEM_DATA_WIDTH; i+=8 ) begin
+for( i=0; i<MEM_DATA_WIDTH_BYTES; i+=1 ) begin
     for( j=0; j<8; j++ ) begin
-        assign dma_rsp_data_mixed[i+7-j] = dma_rsp_data_i[i+j];
-        assign dma_cmd_data_o[i+j] = dma_cmd_data_mixed[i+7-j];
+        // Send data shifts down and needs the bits in each byte reversed
+        assign dma_rsp_data_mixed[i*8+7-j] = dma_rsp_data_i[i*8+j];
+        // Recv data shifts up, and needs the byte order reversed
+        assign dma_cmd_data_o[i*8+j] = dma_cmd_data_mixed[(MEM_DATA_WIDTH_BYTES-i-1)*8+j];
     end
 end
 

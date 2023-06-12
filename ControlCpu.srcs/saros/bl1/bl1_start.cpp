@@ -14,24 +14,36 @@ static constexpr unsigned int MEMORY_SIZE=(256*1024*1024 - 32*1024)/4;
 extern volatile unsigned int DDR_MEMORY[MEMORY_SIZE];
 
 void bl1_start() {
-    uart_send("Initializing memory\n");
+    uart_send("\nInitializing memory\n");
     ddr_init();
 
     uart_send("Memory initialized. Initializing SPI flash\n");
 
     struct spi_command {
-        uint8_t buffer[32];
+        uint32_t buffer[20];
     } __attribute__((aligned(16)))__;
 
     spi_command rsfd, rsfd_result;
-    rsfd.buffer[0] = static_cast<uint8_t>(SPI_FLASH::Commands::ReadSerialFlashDiscoveryParameters);
+    rsfd.buffer[0] = static_cast<uint8_t>(SPI_FLASH::Commands::ReadId);
     rsfd.buffer[1] = 0;
     rsfd.buffer[2] = 0;
     rsfd.buffer[3] = 0;
 
-    SPI::set_config( SPI::Config::ESPI, 8 );
-    SPI::start_transaction( &rsfd, 4, &rsfd_result, 34 );
+    SPI::set_config( SPI::Config::Single );
+    while(true) {
+        SPI::start_transaction( &rsfd, 1, 0, &rsfd_result, sizeof(spi_command::buffer) );
+        SPI::wait_transaction();
+        SPI::postprocess_buffer( &rsfd_result, sizeof(spi_command::buffer) );
+        print_hex(rsfd_result.buffer[0]);
+        uart_send("\n");
+        sleep_ns(1'000'000'000);
+    }
 
+    uart_send("RSFD command results\n");
+    for( int i=0; i<20; ++i ) {
+        print_hex(rsfd_result.buffer[i]);
+        uart_send(" ");
+    }
     /*
     SPI::set_config( SPI::Config::ESPI, 0 );
     SPI::start_transaction( &write_enhanced_register, 2, nullptr, 0 );
@@ -40,8 +52,7 @@ void bl1_start() {
     SPI::set_config( SPI::Config::ESPI, 0 );
     SPI::start_transaction( &write_enhanced_register, 2, nullptr, 0 );
     */
-    SPI::set_config( SPI::Config::ESPI, 0 );
-    SPI::start_transaction( (const void *)0x80000000, 33, nullptr, 0 );
+    SPI::start_transaction( (const void *)0x80000000, 0, 33, nullptr, 0 );
 #if 0
     uint32_t offset = 0;
 
