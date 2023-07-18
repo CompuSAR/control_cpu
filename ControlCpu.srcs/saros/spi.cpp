@@ -31,7 +31,7 @@ void postprocess_buffer( void *buffer, size_t recv_size ) {
         buffer_c += (recv_size/CACHELINE_SIZE_BYTES) * CACHELINE_SIZE_BYTES;     // Only the last line needs special handling
 
         const size_t delta = CACHELINE_SIZE_BYTES - recv_size%CACHELINE_SIZE_BYTES;
-        for( int i=recv_size%CACHELINE_SIZE_BYTES; i>=0; --i ) {
+        for( int i=(recv_size%CACHELINE_SIZE_BYTES)-1; i>=0; --i ) {
             buffer_c[i] = buffer_c[i+delta];
         }
     }

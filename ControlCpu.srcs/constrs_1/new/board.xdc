@@ -9,7 +9,7 @@ set_property PACKAGE_PIN L14 [get_ports uart_output]
 set_property IOSTANDARD LVCMOS33 [get_ports uart_output]
 set_property PULLUP true [get_ports uart_output]
 
-set_property PACKAGE_PIN E11 [get_ports debug]
+set_property PACKAGE_PIN M13 [get_ports debug]
 set_property IOSTANDARD LVCMOS33 [get_ports debug]
 
 set_property PACKAGE_PIN P10 [get_ports uart_rx]

@@ -9,6 +9,8 @@ module spi_ctrl#(
     input                       spi_ref_clock_i,
     output                      irq,
 
+    output logic                debug,
+
     input                       ctrl_cmd_valid_i,
     input [15:0]                ctrl_cmd_address_i,
     input [31:0]                ctrl_cmd_data_i,
@@ -186,11 +188,17 @@ always_ff@(posedge cpu_clock_i) begin
     dma_read_in_progress <= dma_read_in_progress_next;
 
     if( dma_read_in_progress && dma_rsp_valid_i ) begin
+        // DMA read in progress
         data_buffer <= dma_rsp_data_mixed;
         data_buffer_full <= 1'b1;
         cpu_send_counter <= cpu_send_counter-1;
         cpu_dma_addr_send <= cpu_dma_addr_send + MEM_DATA_WIDTH_BYTES;
         dma_read_in_progress <= 1'b0;
+    end
+
+    if( dma_cmd_valid_o && dma_cmd_write_o && dma_cmd_ack_i ) begin
+        // DMA write sent
+        cpu_dma_addr_recv <= cpu_dma_addr_recv + MEM_DATA_WIDTH_BYTES;
     end
 
     if( data_buffer_full && cpu_send_idle )
@@ -251,7 +259,7 @@ always_comb begin
                 dma_cmd_valid_o = 1'b1;
                 dma_cmd_write_o = 1'b1;
                 dma_cmd_data_mixed = cpu_dma_write_data;
-                dma_cmd_address_o = cpu_dma_addr_send;
+                dma_cmd_address_o = cpu_dma_addr_recv;
             end
         end
     end

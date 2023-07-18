@@ -479,6 +479,8 @@ spi_ctrl#(.MEM_DATA_WIDTH(CACHELINE_BITS)) spi_flash(
     .spi_ref_clock_i(board_clock),
     .irq(),
 
+    .debug(debug),
+
     .ctrl_cmd_valid_i(spi_enable),
     .ctrl_cmd_address_i(ctrl_dBus_cmd_payload_address[15:0]),
     .ctrl_cmd_data_i(ctrl_dBus_cmd_payload_data),

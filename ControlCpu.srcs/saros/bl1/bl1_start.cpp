@@ -25,17 +25,42 @@ void bl1_start() {
 
     spi_command rsfd, rsfd_result;
     rsfd.buffer[0] = static_cast<uint8_t>(SPI_FLASH::Commands::ReadId);
+    //rsfd.buffer[0] = static_cast<uint8_t>(SPI_FLASH::Commands::PageProgram);
     rsfd.buffer[1] = 0;
     rsfd.buffer[2] = 0;
     rsfd.buffer[3] = 0;
 
+    //SPI::set_config( SPI::Config::Quad );
     SPI::set_config( SPI::Config::Single );
     while(true) {
-        SPI::start_transaction( &rsfd, 1, 0, &rsfd_result, sizeof(spi_command::buffer) );
+        rsfd_result.buffer[0]=0x62801b11;
+        rsfd_result.buffer[1]=0x7c495b0a;
+        rsfd_result.buffer[2]=0xc764059d;
+        rsfd_result.buffer[3]=0x779121ed;
+        rsfd_result.buffer[4]=0x99fdd077;
+        SPI::start_transaction( &rsfd, 1, 0, &rsfd_result, 3/*sizeof(spi_command::buffer)*/ );
         SPI::wait_transaction();
-        SPI::postprocess_buffer( &rsfd_result, sizeof(spi_command::buffer) );
         print_hex(rsfd_result.buffer[0]);
         uart_send("\n");
+        print_hex(rsfd_result.buffer[1]);
+        uart_send("\n");
+        print_hex(rsfd_result.buffer[2]);
+        uart_send("\n");
+        print_hex(rsfd_result.buffer[3]);
+        uart_send("\n");
+        print_hex(rsfd_result.buffer[4]);
+        uart_send("\n->\n");
+        SPI::postprocess_buffer( &rsfd_result, 3 );
+        print_hex(rsfd_result.buffer[0]);
+        uart_send("\n");
+        print_hex(rsfd_result.buffer[1]);
+        uart_send("\n");
+        print_hex(rsfd_result.buffer[2]);
+        uart_send("\n");
+        print_hex(rsfd_result.buffer[3]);
+        uart_send("\n");
+        print_hex(rsfd_result.buffer[4]);
+        uart_send("\n--\n\n");
         sleep_ns(1'000'000'000);
     }
 

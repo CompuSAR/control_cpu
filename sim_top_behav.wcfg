@@ -11,15 +11,22 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="820,892.551 ns"></ZoomStartTime>
-      <ZoomEndTime time="821,328.552 ns"></ZoomEndTime>
-      <Cursor1Time time="821,965.051 ns"></Cursor1Time>
+      <ZoomStartTime time="827,657.182 ns"></ZoomStartTime>
+      <ZoomEndTime time="827,702.183 ns"></ZoomEndTime>
+      <Cursor1Time time="827,678.865 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="394"></NameColumnWidth>
-      <ValueColumnWidth column_width="193"></ValueColumnWidth>
+      <ValueColumnWidth column_width="181"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="60" />
+   <WVObjectSize size="62" />
+   <wave_markers>
+      <marker label="" time="813559278" />
+      <marker label="" time="817333298" />
+      <marker label="" time="827665670" />
+      <marker label="" time="828114329" />
+      <marker label="" time="815063608" />
+   </wave_markers>
    <wvobject type="logic" fp_name="/sim_top/top_module/uart_tx">
       <obj_property name="ElementShortName">uart_tx</obj_property>
       <obj_property name="ObjectShortName">uart_tx</obj_property>
@@ -119,6 +126,10 @@
       <obj_property name="ElementShortName">ctrl_cmd_ack_o</obj_property>
       <obj_property name="ObjectShortName">ctrl_cmd_ack_o</obj_property>
    </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/ctrl_rsp_valid_o">
+      <obj_property name="ElementShortName">ctrl_rsp_valid_o</obj_property>
+      <obj_property name="ObjectShortName">ctrl_rsp_valid_o</obj_property>
+   </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/cpu_transaction_active">
       <obj_property name="ElementShortName">cpu_transaction_active</obj_property>
       <obj_property name="ObjectShortName">cpu_transaction_active</obj_property>
@@ -160,7 +171,6 @@
    <wvobject type="array" fp_name="/sim_top/spi_flash_dq">
       <obj_property name="ElementShortName">spi_flash_dq[3:0]</obj_property>
       <obj_property name="ObjectShortName">spi_flash_dq[3:0]</obj_property>
-      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_shift_fill">
       <obj_property name="ElementShortName">spi_shift_fill[7:0]</obj_property>
@@ -273,5 +283,9 @@
    <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/cpu_transaction_active">
       <obj_property name="ElementShortName">cpu_transaction_active</obj_property>
       <obj_property name="ObjectShortName">cpu_transaction_active</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_qspi_state">
+      <obj_property name="ElementShortName">spi_qspi_state</obj_property>
+      <obj_property name="ObjectShortName">spi_qspi_state</obj_property>
    </wvobject>
 </wave_config>
