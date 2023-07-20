@@ -37,11 +37,15 @@ wire    [1:0]   ddr3_dqs_p;
 wire    [1:0]   ddr3_dqs_n;
 wire    [15:0]  ddr3_dq;
 
+wire[3:0] debugs;
+
 top top_module(
     .board_clock(clock), .nReset(nReset),
-    .uart_output(1'b0), .debug(debug),
-    .spi_cs_n(spi_flash_cs), .spi_dq(spi_flash_dq), .spi_clk(spi_flash_clock),
+    .uart_output(1'b0),
+    .spi_cs_n(spi_flash_cs), .spi_dq(spi_flash_dq), .debug(debugs),
     .ddr3_dqs_p(ddr3_dqs_p), .ddr3_dqs_n(ddr3_dqs_n), .ddr3_dq(ddr3_dq));
+
+assign spi_flash_clock = debugs[0];
 
 ddr3_model ddr(
     .rst_n      (top_module.ddr3_reset_n),

@@ -11,6 +11,8 @@ noinst_PROGRAMS=bl1.elf
 REMOVED_SECTIONS=
 TOOLCHAIN_LIB_PATH=/opt/riscv/lib/gcc/$(HOST_TRIPLET)/12.2.0
 
+COMMON=$(top_srcdir)/common
+
 %.coe: %.raw
 	sed -e '$$s:,:;:' "$<" > "$@".tmp
 	mv "$@".tmp "$@"
@@ -31,7 +33,7 @@ bl1.mem: bl1.bin
 bl1.bin: bl1.elf
 	$(HOST_TRIPLET)-objcopy -O binary "$<" "$@" $(foreach rem,$(REMOVED_SECTIONS), --remove-section="$(rem)")
 
-bl1_elf_SOURCES=crt.s bl1_start.cpp uart.cpp format.cpp ddr.cpp gpio.cpp irq.cpp reg.cpp ../spi.cpp
+bl1_elf_SOURCES=crt.s bl1_start.cpp uart.cpp format.cpp ddr.cpp gpio.cpp irq.cpp reg.cpp $(COMMON)/spi.cpp $(COMMON)/spi_flash.cpp
 EXTRA_bl1_elf_DEPENDENCIES=$(srcdir)/bl1.lds
 bl1_elf_LDFLAGS=-T $(srcdir)/bl1.lds
 bl1_elf_LDADD=$(TOOLCHAIN_LIB_PATH)/libgcc.a

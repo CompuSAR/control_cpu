@@ -19,65 +19,8 @@ void bl1_start() {
 
     uart_send("Memory initialized. Initializing SPI flash\n");
 
-    struct spi_command {
-        uint32_t buffer[20];
-    } __attribute__((aligned(16)))__;
+    SPI_FLASH::init_flash();
 
-    spi_command rsfd, rsfd_result;
-    rsfd.buffer[0] = static_cast<uint8_t>(SPI_FLASH::Commands::ReadId);
-    //rsfd.buffer[0] = static_cast<uint8_t>(SPI_FLASH::Commands::PageProgram);
-    rsfd.buffer[1] = 0;
-    rsfd.buffer[2] = 0;
-    rsfd.buffer[3] = 0;
-
-    //SPI::set_config( SPI::Config::Quad );
-    SPI::set_config( SPI::Config::Single );
-    while(true) {
-        rsfd_result.buffer[0]=0x62801b11;
-        rsfd_result.buffer[1]=0x7c495b0a;
-        rsfd_result.buffer[2]=0xc764059d;
-        rsfd_result.buffer[3]=0x779121ed;
-        rsfd_result.buffer[4]=0x99fdd077;
-        SPI::start_transaction( &rsfd, 1, 0, &rsfd_result, 3/*sizeof(spi_command::buffer)*/ );
-        SPI::wait_transaction();
-        print_hex(rsfd_result.buffer[0]);
-        uart_send("\n");
-        print_hex(rsfd_result.buffer[1]);
-        uart_send("\n");
-        print_hex(rsfd_result.buffer[2]);
-        uart_send("\n");
-        print_hex(rsfd_result.buffer[3]);
-        uart_send("\n");
-        print_hex(rsfd_result.buffer[4]);
-        uart_send("\n->\n");
-        SPI::postprocess_buffer( &rsfd_result, 3 );
-        print_hex(rsfd_result.buffer[0]);
-        uart_send("\n");
-        print_hex(rsfd_result.buffer[1]);
-        uart_send("\n");
-        print_hex(rsfd_result.buffer[2]);
-        uart_send("\n");
-        print_hex(rsfd_result.buffer[3]);
-        uart_send("\n");
-        print_hex(rsfd_result.buffer[4]);
-        uart_send("\n--\n\n");
-        sleep_ns(1'000'000'000);
-    }
-
-    uart_send("RSFD command results\n");
-    for( int i=0; i<20; ++i ) {
-        print_hex(rsfd_result.buffer[i]);
-        uart_send(" ");
-    }
-    /*
-    SPI::set_config( SPI::Config::ESPI, 0 );
-    SPI::start_transaction( &write_enhanced_register, 2, nullptr, 0 );
-    SPI::wait_transaction();
-    SPI::interface_rescue();
-    SPI::set_config( SPI::Config::ESPI, 0 );
-    SPI::start_transaction( &write_enhanced_register, 2, nullptr, 0 );
-    */
-    SPI::start_transaction( (const void *)0x80000000, 0, 33, nullptr, 0 );
 #if 0
     uint32_t offset = 0;
 

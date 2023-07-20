@@ -26,7 +26,7 @@ module top
     input nReset,
     input uart_output,
 
-    output logic debug,
+    output logic[3:0] debug,
 
     output uart_tx,
     input uart_rx,

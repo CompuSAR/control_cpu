@@ -11,22 +11,23 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="827,657.182 ns"></ZoomStartTime>
-      <ZoomEndTime time="827,702.183 ns"></ZoomEndTime>
-      <Cursor1Time time="827,678.865 ns"></Cursor1Time>
+      <ZoomStartTime time="817,388.667 ns"></ZoomStartTime>
+      <ZoomEndTime time="818,296.668 ns"></ZoomEndTime>
+      <Cursor1Time time="818,040.000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="394"></NameColumnWidth>
-      <ValueColumnWidth column_width="181"></ValueColumnWidth>
+      <ValueColumnWidth column_width="177"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="62" />
+   <WVObjectSize size="63" />
    <wave_markers>
-      <marker label="" time="813559278" />
-      <marker label="" time="817333298" />
-      <marker label="" time="827665670" />
-      <marker label="" time="828114329" />
-      <marker label="" time="815063608" />
+      <marker label="" time="818040000" />
    </wave_markers>
+   <wvobject type="array" fp_name="/sim_top/top_module/debug">
+      <obj_property name="ElementShortName">debug[3:0]</obj_property>
+      <obj_property name="ObjectShortName">debug[3:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/uart_tx">
       <obj_property name="ElementShortName">uart_tx</obj_property>
       <obj_property name="ObjectShortName">uart_tx</obj_property>

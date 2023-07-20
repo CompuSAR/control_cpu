@@ -9,7 +9,7 @@ module spi_ctrl#(
     input                       spi_ref_clock_i,
     output                      irq,
 
-    output logic                debug,
+    output logic[3:0]           debug,
 
     input                       ctrl_cmd_valid_i,
     input [15:0]                ctrl_cmd_address_i,
@@ -39,6 +39,11 @@ module spi_ctrl#(
 localparam MEM_DATA_WIDTH_BYTES = MEM_DATA_WIDTH/8;
 
 logic spi_clk_enable;
+
+assign debug[0] = spi_clk_o;
+assign debug[1] = spi_cs_n_o;
+assign debug[2] = spi_clk_enable;
+assign debug[3] = spi_dq_i[1];
 
 BUFGCE spi_clock_buf(
     .O(spi_clk_o),
