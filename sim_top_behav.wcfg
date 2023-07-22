@@ -11,17 +11,17 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="817,388.667 ns"></ZoomStartTime>
-      <ZoomEndTime time="818,296.668 ns"></ZoomEndTime>
-      <Cursor1Time time="818,040.000 ns"></Cursor1Time>
+      <ZoomStartTime time="813,745.700 ns"></ZoomStartTime>
+      <ZoomEndTime time="814,011.501 ns"></ZoomEndTime>
+      <Cursor1Time time="813,790.000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="394"></NameColumnWidth>
-      <ValueColumnWidth column_width="177"></ValueColumnWidth>
+      <ValueColumnWidth column_width="153"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="63" />
+   <WVObjectSize size="66" />
    <wave_markers>
-      <marker label="" time="818040000" />
+      <marker label="" time="813790000" />
    </wave_markers>
    <wvobject type="array" fp_name="/sim_top/top_module/debug">
       <obj_property name="ElementShortName">debug[3:0]</obj_property>
@@ -139,6 +139,10 @@
       <obj_property name="ElementShortName">cpu_dma_read_valid</obj_property>
       <obj_property name="ObjectShortName">cpu_dma_read_valid</obj_property>
    </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/cpu_dma_read_data">
+      <obj_property name="ElementShortName">cpu_dma_read_data[127:0]</obj_property>
+      <obj_property name="ObjectShortName">cpu_dma_read_data[127:0]</obj_property>
+   </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/cpu_dma_read_ack">
       <obj_property name="ElementShortName">cpu_dma_read_ack</obj_property>
       <obj_property name="ObjectShortName">cpu_dma_read_ack</obj_property>
@@ -147,21 +151,45 @@
       <obj_property name="ElementShortName">cpu_send_idle</obj_property>
       <obj_property name="ObjectShortName">cpu_send_idle</obj_property>
    </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_ref_clock_i">
+      <obj_property name="ElementShortName">spi_ref_clock_i</obj_property>
+      <obj_property name="ObjectShortName">spi_ref_clock_i</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_state">
+      <obj_property name="ElementShortName">spi_state[3:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_state[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_state_next">
+      <obj_property name="ElementShortName">spi_state_next[3:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_state_next[3:0]</obj_property>
+   </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_dma_read_valid">
       <obj_property name="ElementShortName">spi_dma_read_valid</obj_property>
       <obj_property name="ObjectShortName">spi_dma_read_valid</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_dma_read_data">
+      <obj_property name="ElementShortName">spi_dma_read_data[127:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_dma_read_data[127:0]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_dma_read_ack">
       <obj_property name="ElementShortName">spi_dma_read_ack</obj_property>
       <obj_property name="ObjectShortName">spi_dma_read_ack</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_transaction_active">
-      <obj_property name="ElementShortName">spi_transaction_active</obj_property>
-      <obj_property name="ObjectShortName">spi_transaction_active</obj_property>
-   </wvobject>
    <wvobject type="logic" fp_name="/sim_top/spi_flash_clock">
       <obj_property name="ElementShortName">spi_flash_clock</obj_property>
       <obj_property name="ObjectShortName">spi_flash_clock</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_send_cycles">
+      <obj_property name="ElementShortName">spi_send_cycles[31:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_send_cycles[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_recv_cycles">
+      <obj_property name="ElementShortName">spi_recv_cycles[31:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_recv_cycles[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_dummy_cycles">
+      <obj_property name="ElementShortName">spi_dummy_cycles[16:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_dummy_cycles[16:0]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/spi_flash_cs">
       <obj_property name="ElementShortName">spi_flash_cs</obj_property>
@@ -169,25 +197,22 @@
       <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_buffer_fill">
+      <obj_property name="ElementShortName">spi_buffer_fill[7:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_buffer_fill[7:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_shift_buffer">
+      <obj_property name="ElementShortName">spi_shift_buffer[127:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_shift_buffer[127:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_load_buffer">
+      <obj_property name="ElementShortName">spi_load_buffer</obj_property>
+      <obj_property name="ObjectShortName">spi_load_buffer</obj_property>
+   </wvobject>
    <wvobject type="array" fp_name="/sim_top/spi_flash_dq">
       <obj_property name="ElementShortName">spi_flash_dq[3:0]</obj_property>
       <obj_property name="ObjectShortName">spi_flash_dq[3:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_shift_fill">
-      <obj_property name="ElementShortName">spi_shift_fill[7:0]</obj_property>
-      <obj_property name="ObjectShortName">spi_shift_fill[7:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_send_counter">
-      <obj_property name="ElementShortName">spi_send_counter[31:0]</obj_property>
-      <obj_property name="ObjectShortName">spi_send_counter[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_dummy_counter">
-      <obj_property name="ElementShortName">spi_dummy_counter[15:0]</obj_property>
-      <obj_property name="ObjectShortName">spi_dummy_counter[15:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_recv_counter">
-      <obj_property name="ElementShortName">spi_recv_counter[31:0]</obj_property>
-      <obj_property name="ObjectShortName">spi_recv_counter[31:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/cpu_dma_addr_send">
       <obj_property name="ElementShortName">cpu_dma_addr_send[31:0]</obj_property>
@@ -205,21 +230,13 @@
       <obj_property name="ElementShortName">cpu_transfer_mode[31:0]</obj_property>
       <obj_property name="ObjectShortName">cpu_transfer_mode[31:0]</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_recv_buffer_loaded">
-      <obj_property name="ElementShortName">spi_recv_buffer_loaded</obj_property>
-      <obj_property name="ObjectShortName">spi_recv_buffer_loaded</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_recv_buffer">
-      <obj_property name="ElementShortName">spi_recv_buffer[127:0]</obj_property>
-      <obj_property name="ObjectShortName">spi_recv_buffer[127:0]</obj_property>
+   <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_recv_buffer">
+      <obj_property name="ElementShortName">spi_recv_buffer</obj_property>
+      <obj_property name="ObjectShortName">spi_recv_buffer</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_dma_write_valid">
       <obj_property name="ElementShortName">spi_dma_write_valid</obj_property>
       <obj_property name="ObjectShortName">spi_dma_write_valid</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_recv_shift_buffer">
-      <obj_property name="ElementShortName">spi_recv_shift_buffer[127:0]</obj_property>
-      <obj_property name="ObjectShortName">spi_recv_shift_buffer[127:0]</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/cpu_dma_write_valid">
       <obj_property name="ElementShortName">cpu_dma_write_valid</obj_property>
@@ -284,9 +301,5 @@
    <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/cpu_transaction_active">
       <obj_property name="ElementShortName">cpu_transaction_active</obj_property>
       <obj_property name="ObjectShortName">cpu_transaction_active</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_qspi_state">
-      <obj_property name="ElementShortName">spi_qspi_state</obj_property>
-      <obj_property name="ObjectShortName">spi_qspi_state</obj_property>
    </wvobject>
 </wave_config>
