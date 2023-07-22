@@ -434,7 +434,9 @@ BUFGCE spi_clock_buf(
 
 logic[3:0] spi_dq_o, spi_dq_raw_i, spi_dq_i;
 
-assign spi_dq_o = spi_state[2] ? spi_shift_buffer[3:0] : 4'b1111;
+assign spi_dq_o = spi_state[2] ?
+    (spi_quad_mode ? {spi_shift_buffer[0], spi_shift_buffer[1], spi_shift_buffer[2], spi_shift_buffer[3]} : spi_shift_buffer[3:0]) :
+    4'b1111;
 
 wire spi_dq_dir = !spi_state[2];
 IOBUF dq0_buffer(.T(spi_quad_mode ? spi_dq_dir : 1'b0), .I(spi_dq_o[0]), .O(spi_dq_raw_i[0]), .IO(spi_dq_io[0]));

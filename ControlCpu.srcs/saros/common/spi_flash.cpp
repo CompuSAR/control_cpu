@@ -85,6 +85,8 @@ void init_flash() {
 
     spi_command spi_cmd, spi_result;
     
+    SPI::interface_rescue();
+
     spi_cmd.buffer[0].bytes[0] = static_cast<uint8_t>(SPI_FLASH::Commands::ReadId);
     //rsfd.buffer[0] = static_cast<uint8_t>(SPI_FLASH::Commands::PageProgram);
 
