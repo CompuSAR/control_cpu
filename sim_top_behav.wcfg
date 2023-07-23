@@ -11,17 +11,17 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="813,745.700 ns"></ZoomStartTime>
-      <ZoomEndTime time="814,011.501 ns"></ZoomEndTime>
-      <Cursor1Time time="813,790.000 ns"></Cursor1Time>
+      <ZoomStartTime time="852,245.300 ns"></ZoomStartTime>
+      <ZoomEndTime time="852,513.501 ns"></ZoomEndTime>
+      <Cursor1Time time="852,450.000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="394"></NameColumnWidth>
-      <ValueColumnWidth column_width="153"></ValueColumnWidth>
+      <ValueColumnWidth column_width="141"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="66" />
+   <WVObjectSize size="67" />
    <wave_markers>
-      <marker label="" time="813790000" />
+      <marker label="" time="852290000" />
    </wave_markers>
    <wvobject type="array" fp_name="/sim_top/top_module/debug">
       <obj_property name="ElementShortName">debug[3:0]</obj_property>
@@ -205,6 +205,10 @@
       <obj_property name="ElementShortName">spi_shift_buffer[127:0]</obj_property>
       <obj_property name="ObjectShortName">spi_shift_buffer[127:0]</obj_property>
    </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_shift_buffer_mixed">
+      <obj_property name="ElementShortName">spi_shift_buffer_mixed[127:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_shift_buffer_mixed[127:0]</obj_property>
+   </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_load_buffer">
       <obj_property name="ElementShortName">spi_load_buffer</obj_property>
       <obj_property name="ObjectShortName">spi_load_buffer</obj_property>
@@ -213,6 +217,63 @@
       <obj_property name="ElementShortName">spi_flash_dq[3:0]</obj_property>
       <obj_property name="ObjectShortName">spi_flash_dq[3:0]</obj_property>
       <obj_property name="isExpanded"></obj_property>
+      <wvobject type="logic" fp_name="/sim_top/spi_flash_dq[3]">
+         <obj_property name="ElementShortName">[3]</obj_property>
+         <obj_property name="ObjectShortName">[3]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/sim_top/spi_flash_dq[2]">
+         <obj_property name="ElementShortName">[2]</obj_property>
+         <obj_property name="ObjectShortName">[2]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/sim_top/spi_flash_dq[1]">
+         <obj_property name="ElementShortName">[1]</obj_property>
+         <obj_property name="ObjectShortName">[1]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/sim_top/spi_flash_dq[0]">
+         <obj_property name="ElementShortName">[0]</obj_property>
+         <obj_property name="ObjectShortName">[0]</obj_property>
+         <obj_property name="CustomSignalColor">#800000</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/sim_top/spi_flash_dq[3]">
+         <obj_property name="ElementShortName">[3]</obj_property>
+         <obj_property name="ObjectShortName">[3]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/sim_top/spi_flash_dq[2]">
+         <obj_property name="ElementShortName">[2]</obj_property>
+         <obj_property name="ObjectShortName">[2]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/sim_top/spi_flash_dq[1]">
+         <obj_property name="ElementShortName">[1]</obj_property>
+         <obj_property name="ObjectShortName">[1]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/sim_top/spi_flash_dq[0]">
+         <obj_property name="ElementShortName">[0]</obj_property>
+         <obj_property name="ObjectShortName">[0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_dq_i">
+      <obj_property name="ElementShortName">spi_dq_i[3:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_dq_i[3:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_dq_i[3]">
+         <obj_property name="ElementShortName">[3]</obj_property>
+         <obj_property name="ObjectShortName">[3]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_dq_i[2]">
+         <obj_property name="ElementShortName">[2]</obj_property>
+         <obj_property name="ObjectShortName">[2]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_dq_i[1]">
+         <obj_property name="ElementShortName">[1]</obj_property>
+         <obj_property name="ObjectShortName">[1]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_dq_i[0]">
+         <obj_property name="ElementShortName">[0]</obj_property>
+         <obj_property name="ObjectShortName">[0]</obj_property>
+         <obj_property name="CustomSignalColor">#800000</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
    </wvobject>
    <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/cpu_dma_addr_send">
       <obj_property name="ElementShortName">cpu_dma_addr_send[31:0]</obj_property>
@@ -229,10 +290,6 @@
    <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/cpu_transfer_mode">
       <obj_property name="ElementShortName">cpu_transfer_mode[31:0]</obj_property>
       <obj_property name="ObjectShortName">cpu_transfer_mode[31:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_recv_buffer">
-      <obj_property name="ElementShortName">spi_recv_buffer</obj_property>
-      <obj_property name="ObjectShortName">spi_recv_buffer</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_dma_write_valid">
       <obj_property name="ElementShortName">spi_dma_write_valid</obj_property>

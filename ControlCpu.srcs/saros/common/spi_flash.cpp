@@ -80,64 +80,87 @@ enum class Commands : uint8_t {
 void init_flash() {
     // Dummy first op. Because "hardware does not have bugs, just idiocyncracies" was too long.
     struct spi_command {
-        union { uint8_t bytes[4]; uint32_t word; } buffer[8];
+        uint8_t bytes[34];
     } __attribute__((aligned(16)))__;
 
     spi_command spi_cmd, spi_result;
     
     SPI::interface_rescue();
 
-    spi_cmd.buffer[0].bytes[0] = static_cast<uint8_t>(SPI_FLASH::Commands::ReadId);
+    spi_cmd.bytes[0] = static_cast<uint8_t>(Commands::WriteEnable);
+    SPI::start_transaction( &spi_cmd, 1, 0, nullptr, 0 );
+    SPI::wait_transaction();
+
+    spi_cmd.bytes[0] = static_cast<uint8_t>(Commands::WriteEnhancedVolatileConfRegister);
+    spi_cmd.bytes[1] = 0xff; // Quad I/O, single rate, default driver strength
+    SPI::start_transaction( &spi_cmd, 2, 0, nullptr, 0 );
+    SPI::wait_transaction();
+
+    spi_cmd.bytes[0] = static_cast<uint8_t>(SPI_FLASH::Commands::ReadId);
     //rsfd.buffer[0] = static_cast<uint8_t>(SPI_FLASH::Commands::PageProgram);
 
     set_config( SPI::Config::Single );
     SPI::start_transaction( &spi_cmd, 1, 0, &spi_result, 16 );
     SPI::wait_transaction();
+    uart_send("Dummy ReadId prepost returned:");
+    for( int i=0; i<16; ++i ) {
+        uart_send(" ");
+        print_hex(spi_result.bytes[i]);
+    }
+    uart_send("\n");
+
     SPI::postprocess_buffer( &spi_result, 16 );
 
     uart_send("Dummy ReadId op returned:");
-    for( int i=0; i<4; ++i ) {
-        for( int j=0; j<4; ++j ) {
-            uart_send(" ");
-            print_hex(spi_result.buffer[i].bytes[j]);
-        }
+    for( int i=0; i<16; ++i ) {
+        uart_send(" ");
+        print_hex(spi_result.bytes[i]);
     }
     uart_send("\n");
 
-    SPI::start_transaction( &spi_cmd, 1, 0, &spi_result, 16 );
+    SPI::start_transaction( &spi_cmd, 1, 0, &spi_result, 34 );
     SPI::wait_transaction();
-    SPI::postprocess_buffer( &spi_result, 16 );
+    SPI::postprocess_buffer( &spi_result, 34 );
 
     uart_send("Second ReadId returned:");
-    for( int i=0; i<4; ++i ) {
-        for( int j=0; j<4; ++j ) {
-            uart_send(" ");
-            print_hex(spi_result.buffer[i].bytes[j]);
-        }
+    for( int i=0; i<34; ++i ) {
+        uart_send(" ");
+        print_hex(spi_result.bytes[i]);
     }
     uart_send("\n");
 
-    spi_cmd.buffer[0].bytes[0] = static_cast<uint8_t>(Commands::WriteEnable);
+    spi_cmd.bytes[0] = static_cast<uint8_t>(Commands::WriteEnable);
     SPI::start_transaction( &spi_cmd, 1, 0, nullptr, 0 );
     SPI::wait_transaction();
 
-    spi_cmd.buffer[0].bytes[0] = static_cast<uint8_t>(Commands::WriteEnhancedVolatileConfRegister);
-    spi_cmd.buffer[0].bytes[1] = 0x3f; // Quad I/O, single rate, default driver strength
+    spi_cmd.bytes[0] = static_cast<uint8_t>(Commands::WriteEnhancedVolatileConfRegister);
+    spi_cmd.bytes[1] = 0x3f; // Quad I/O, single rate, default driver strength
     SPI::start_transaction( &spi_cmd, 2, 0, nullptr, 0 );
     SPI::wait_transaction();
 
     set_config( SPI::Config::Quad );
-    spi_cmd.buffer[0].bytes[0] = static_cast<uint8_t>(SPI_FLASH::Commands::MultiplIOReadId);
+    spi_cmd.bytes[0] = static_cast<uint8_t>(SPI_FLASH::Commands::MultiplIOReadId);
     SPI::start_transaction( &spi_cmd, 1, 0, &spi_result, 16 );
     SPI::wait_transaction();
     SPI::postprocess_buffer( &spi_result, 16 );
 
     uart_send("Quad ReadId returned:");
-    for( int i=0; i<4; ++i ) {
-        for( int j=0; j<4; ++j ) {
-            uart_send(" ");
-            print_hex(spi_result.buffer[i].bytes[j]);
-        }
+    for( int i=0; i<16; ++i ) {
+        uart_send(" ");
+        print_hex(spi_result.bytes[i]);
+    }
+    uart_send("\n");
+
+    set_config( SPI::Config::Quad );
+    spi_cmd.bytes[0] = static_cast<uint8_t>(SPI_FLASH::Commands::MultiplIOReadId);
+    SPI::start_transaction( &spi_cmd, 1, 0, &spi_result, 34 );
+    SPI::wait_transaction();
+    SPI::postprocess_buffer( &spi_result, 34 );
+
+    uart_send("Quad ReadId returned:");
+    for( int i=0; i<34; ++i ) {
+        uart_send(" ");
+        print_hex(spi_result.bytes[i]);
     }
     uart_send("\n");
 
