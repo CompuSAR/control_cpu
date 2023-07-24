@@ -351,7 +351,7 @@ always_comb begin
         RECV_ACTIVE: begin
             if( spi_recv_cycles==1 ) begin
                 spi_state_next = IDLE_PENDING;
-            end else if( spi_buffer_fill==MEM_DATA_WIDTH-1 ) begin
+            end else if( spi_buffer_fill==(spi_quad_mode ? MEM_DATA_WIDTH-4 : MEM_DATA_WIDTH-1) ) begin
                 spi_state_next = RECV_PENDING;
             end
         end
