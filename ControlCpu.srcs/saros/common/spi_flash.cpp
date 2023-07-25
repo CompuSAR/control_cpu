@@ -97,36 +97,25 @@ void init_flash() {
     SPI::wait_transaction();
 
     spi_cmd.bytes[0] = static_cast<uint8_t>(SPI_FLASH::Commands::ReadId);
-    //rsfd.buffer[0] = static_cast<uint8_t>(SPI_FLASH::Commands::PageProgram);
 
     set_config( SPI::Config::Single );
-    SPI::start_transaction( &spi_cmd, 1, 0, &spi_result, 16 );
+    SPI::start_transaction( &spi_cmd, 1, 0, &spi_result, 20 );
     SPI::wait_transaction();
-    uart_send("Dummy ReadId prepost returned:");
-    for( int i=0; i<16; ++i ) {
+    uart_send("ReadId prepost returned:");
+    for( int i=0; i<20; ++i ) {
         uart_send(" ");
         print_hex(spi_result.bytes[i]);
     }
     uart_send("\n");
 
-    SPI::postprocess_buffer( &spi_result, 16 );
+    SPI::postprocess_buffer( &spi_result, 20 );
 
-    uart_send("Dummy ReadId op returned:");
-    for( int i=0; i<16; ++i ) {
+    uart_send("ReadId returned:");
+    for( int i=0; i<20; ++i ) {
         uart_send(" ");
         print_hex(spi_result.bytes[i]);
     }
-    uart_send("\n");
 
-    SPI::start_transaction( &spi_cmd, 1, 0, &spi_result, 34 );
-    SPI::wait_transaction();
-    SPI::postprocess_buffer( &spi_result, 34 );
-
-    uart_send("Second ReadId returned:");
-    for( int i=0; i<34; ++i ) {
-        uart_send(" ");
-        print_hex(spi_result.bytes[i]);
-    }
     uart_send("\n");
 
     spi_cmd.bytes[0] = static_cast<uint8_t>(Commands::WriteEnable);
@@ -140,73 +129,17 @@ void init_flash() {
 
     set_config( SPI::Config::Quad );
     spi_cmd.bytes[0] = static_cast<uint8_t>(SPI_FLASH::Commands::MultiplIOReadId);
-    SPI::start_transaction( &spi_cmd, 1, 0, &spi_result, 16 );
+    SPI::start_transaction( &spi_cmd, 1, 0, &spi_result, 20 );
     SPI::wait_transaction();
-    SPI::postprocess_buffer( &spi_result, 16 );
+    SPI::postprocess_buffer( &spi_result, 20 );
 
     uart_send("Quad ReadId returned:");
-    for( int i=0; i<16; ++i ) {
-        uart_send(" ");
-        print_hex(spi_result.bytes[i]);
-    }
-    uart_send("\n");
-
-    set_config( SPI::Config::Quad );
-    spi_cmd.bytes[0] = static_cast<uint8_t>(SPI_FLASH::Commands::MultiplIOReadId);
-    SPI::start_transaction( &spi_cmd, 1, 0, &spi_result, 34 );
-    SPI::wait_transaction();
-    SPI::postprocess_buffer( &spi_result, 34 );
-
-    uart_send("Quad ReadId returned:");
-    for( int i=0; i<34; ++i ) {
-        uart_send(" ");
-        print_hex(spi_result.bytes[i]);
-    }
-    uart_send("\n");
-
-
-#if 0
-    //set_config( Config::Quad );
-    while(true) {
-        rsfd_result.buffer[0]=0x62801b11;
-        rsfd_result.buffer[1]=0x7c495b0a;
-        rsfd_result.buffer[2]=0xc764059d;
-        rsfd_result.buffer[3]=0x779121ed;
-        rsfd_result.buffer[4]=0x99fdd077;
-        start_transaction( &rsfd, 4, 0, &rsfd_result, 17/*sizeof(spi_command::buffer)*/ );
-        wait_transaction();
-        sleep_ns(20000000);
-        print_hex(rsfd_result.buffer[0]);
-        uart_send("\n");
-        print_hex(rsfd_result.buffer[1]);
-        uart_send("\n");
-        print_hex(rsfd_result.buffer[2]);
-        uart_send("\n");
-        print_hex(rsfd_result.buffer[3]);
-        uart_send("\n");
-        print_hex(rsfd_result.buffer[4]);
-        uart_send("\n->\n");
-        postprocess_buffer( &rsfd_result, 17 );
-        print_hex(rsfd_result.buffer[0]);
-        uart_send("\n");
-        print_hex(rsfd_result.buffer[1]);
-        uart_send("\n");
-        print_hex(rsfd_result.buffer[2]);
-        uart_send("\n");
-        print_hex(rsfd_result.buffer[3]);
-        uart_send("\n");
-        print_hex(rsfd_result.buffer[4]);
-        uart_send("\n--\n\n");
-        sleep_ns(1'000'000'000);
-        rsfd.buffer[0] += 256;
-    }
-
-    uart_send("RSFD command results\n");
     for( int i=0; i<20; ++i ) {
-        print_hex(rsfd_result.buffer[i]);
         uart_send(" ");
+        print_hex(spi_result.bytes[i]);
     }
-#endif
+    uart_send("\n");
+
 }
 
 } // namespace SPI_FLASH
