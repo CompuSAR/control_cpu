@@ -511,7 +511,7 @@ STARTUPE2 startup_cfg(
     .PACK(1'b0),
     .PREQ(),
     .USRCCLKO(spi_clk),
-    .USRCCLKTS(1'b0),
+    .USRCCLKTS(spi_cs_n),
     .USRDONEO(1'b1),
     .USRDONETS(1'b1)
 );

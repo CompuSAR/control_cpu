@@ -41,6 +41,14 @@ SECTIONS
         . = ALIGN(4);
     } > preload
 
+    .bss : {
+        . = ALIGN(4);
+        BSS_START = .;
+        * (.bss*)
+        . = ALIGN(4);
+        BSS_END = .;
+    } >preload
+
     /DISCARD/ : { *(.eh_frame) }
 
     .debug_info : { *(.debug_info) }

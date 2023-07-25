@@ -76,17 +76,32 @@ enum class Commands : uint8_t {
     CyclicRedundancyCheck2                      = 0x27,
 };
 
+struct spi_command {
+    uint8_t bytes[34];
+} __attribute__((aligned(16)))__;
+
+void read_id(Commands cmd, size_t size) {
+    spi_command spi_cmd, spi_result;
+
+    spi_cmd.bytes[0] = static_cast<uint8_t>(cmd);
+
+    SPI::start_transaction( &spi_cmd, 1, 0, &spi_result, size );
+    SPI::wait_transaction();
+    SPI::postprocess_buffer( &spi_result, size );
+    for( int i=0; i<size; ++i ) {
+        uart_send(" ");
+        print_hex(spi_result.bytes[i]);
+    }
+    uart_send("\n");
+}
 
 void init_flash() {
     // Dummy first op. Because "hardware does not have bugs, just idiocyncracies" was too long.
-    struct spi_command {
-        uint8_t bytes[34];
-    } __attribute__((aligned(16)))__;
-
     spi_command spi_cmd, spi_result;
     
     SPI::interface_rescue();
 
+    set_config( SPI::Config::Single );
     spi_cmd.bytes[0] = static_cast<uint8_t>(Commands::WriteEnable);
     SPI::start_transaction( &spi_cmd, 1, 0, nullptr, 0 );
     SPI::wait_transaction();
@@ -96,27 +111,11 @@ void init_flash() {
     SPI::start_transaction( &spi_cmd, 2, 0, nullptr, 0 );
     SPI::wait_transaction();
 
-    spi_cmd.bytes[0] = static_cast<uint8_t>(SPI_FLASH::Commands::ReadId);
-
-    set_config( SPI::Config::Single );
-    SPI::start_transaction( &spi_cmd, 1, 0, &spi_result, 20 );
-    SPI::wait_transaction();
-    uart_send("ReadId prepost returned:");
-    for( int i=0; i<20; ++i ) {
-        uart_send(" ");
-        print_hex(spi_result.bytes[i]);
-    }
-    uart_send("\n");
-
-    SPI::postprocess_buffer( &spi_result, 20 );
+    uart_send("ReadId returned:");
+    read_id(Commands::ReadId, 20);
 
     uart_send("ReadId returned:");
-    for( int i=0; i<20; ++i ) {
-        uart_send(" ");
-        print_hex(spi_result.bytes[i]);
-    }
-
-    uart_send("\n");
+    read_id(Commands::ReadId, 34);
 
     spi_cmd.bytes[0] = static_cast<uint8_t>(Commands::WriteEnable);
     SPI::start_transaction( &spi_cmd, 1, 0, nullptr, 0 );
@@ -128,17 +127,12 @@ void init_flash() {
     SPI::wait_transaction();
 
     set_config( SPI::Config::Quad );
-    spi_cmd.bytes[0] = static_cast<uint8_t>(SPI_FLASH::Commands::MultiplIOReadId);
-    SPI::start_transaction( &spi_cmd, 1, 0, &spi_result, 20 );
-    SPI::wait_transaction();
-    SPI::postprocess_buffer( &spi_result, 20 );
 
     uart_send("Quad ReadId returned:");
-    for( int i=0; i<20; ++i ) {
-        uart_send(" ");
-        print_hex(spi_result.bytes[i]);
-    }
-    uart_send("\n");
+    read_id(Commands::MultiplIOReadId, 20);
+
+    uart_send("Quad ReadId returned:");
+    read_id(Commands::MultiplIOReadId, 34);
 
 }
 

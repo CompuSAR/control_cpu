@@ -342,7 +342,7 @@ always_comb begin
         end
         DUMMY: begin
             if( spi_dummy_cycles==1 ) begin
-                if( spi_recv_cycles==0 )
+                if( spi_recv_cycles!=0 )
                     spi_state_next = RECV_ACTIVE;
                 else
                     spi_state_next = IDLE;
@@ -386,7 +386,7 @@ always_ff@(posedge spi_ref_clock_p) begin
         case( spi_state )
             IDLE: begin
                 spi_send_cycles <= spi_num_send_cycles - 1;
-                spi_recv_cycles <= spi_num_recv_cycles;
+                spi_recv_cycles <= spi_num_recv_cycles == 0 ? 0 : spi_num_recv_cycles - 1;
                 spi_dummy_cycles <= spi_transfer_mode[15:0];
                 spi_quad_mode <= spi_transfer_mode[16];
 
@@ -439,10 +439,10 @@ assign spi_dq_o = spi_state[2] ?
     4'b1111;
 
 wire spi_dq_dir = !spi_state[2];
-IOBUF dq0_buffer(.T(spi_quad_mode ? spi_dq_dir : 1'b0), .I(spi_dq_o[0]), .O(spi_dq_raw_i[0]), .IO(spi_dq_io[0]));
-IOBUF dq1_buffer(.T(spi_quad_mode ? spi_dq_dir : 1'b1), .I(spi_dq_o[1]), .O(spi_dq_raw_i[1]), .IO(spi_dq_io[1]));
-IOBUF dq2_buffer(.T(spi_quad_mode ? spi_dq_dir : 1'b0), .I(spi_quad_mode ? spi_dq_o[2] : 1'b1), .O(spi_dq_raw_i[2]), .IO(spi_dq_io[2]));
-IOBUF dq3_buffer(.T(spi_quad_mode ? spi_dq_dir : 1'b0), .I(spi_quad_mode ? spi_dq_o[3] : 1'b1), .O(spi_dq_raw_i[3]), .IO(spi_dq_io[3]));
+IOBUF dq0_buffer(.T(spi_cs_n_o ? 1'b1 : (spi_quad_mode ? spi_dq_dir : 1'b0)), .I(spi_dq_o[0]), .O(spi_dq_raw_i[0]), .IO(spi_dq_io[0]));
+IOBUF dq1_buffer(.T(spi_cs_n_o ? 1'b1 : (spi_quad_mode ? spi_dq_dir : 1'b1)), .I(spi_dq_o[1]), .O(spi_dq_raw_i[1]), .IO(spi_dq_io[1]));
+IOBUF dq2_buffer(.T(spi_cs_n_o ? 1'b1 : (spi_quad_mode ? spi_dq_dir : 1'b0)), .I(spi_quad_mode ? spi_dq_o[2] : 1'b1), .O(spi_dq_raw_i[2]), .IO(spi_dq_io[2]));
+IOBUF dq3_buffer(.T(spi_cs_n_o ? 1'b1 : (spi_quad_mode ? spi_dq_dir : 1'b0)), .I(spi_quad_mode ? spi_dq_o[3] : 1'b1), .O(spi_dq_raw_i[3]), .IO(spi_dq_io[3]));
 
 always_ff@(posedge spi_ref_clock_n)
     spi_dq_i <= spi_dq_raw_i;

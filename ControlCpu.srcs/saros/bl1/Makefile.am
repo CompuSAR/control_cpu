@@ -2,8 +2,8 @@ ARCH=-march=rv32i
 ABI=-mabi=ilp32
 
 AM_CCASFLAGS=$(ARCH) $(ABI)
-AM_CXXFLAGS=$(ARCH) $(ABI)
-AM_CFLAGS=$(ARCH) $(ABI)
+AM_CXXFLAGS=$(ARCH) $(ABI) -fno-builtin
+AM_CFLAGS=$(ARCH) $(ABI) -fno-builtin
 AM_CPPFLAGS=-I$(top_srcdir)/include
 
 noinst_PROGRAMS=bl1.elf
