@@ -2,14 +2,15 @@ ARCH=-march=rv32i
 ABI=-mabi=ilp32
 
 AM_CCASFLAGS=$(ARCH) $(ABI)
-AM_CXXFLAGS=$(ARCH) $(ABI) -fno-builtin
-AM_CFLAGS=$(ARCH) $(ABI) -fno-builtin
+AM_CXXFLAGS=$(ARCH) $(ABI)
+AM_CFLAGS=$(ARCH) $(ABI)
 AM_CPPFLAGS=-I$(top_srcdir)/include
 
 noinst_PROGRAMS=bl1.elf
 
 REMOVED_SECTIONS=
-TOOLCHAIN_LIB_PATH=/opt/riscv/lib/gcc/$(HOST_TRIPLET)/12.2.0
+TOOLCHAIN_PATH=/opt/riscv
+TOOLCHAIN_LIB_PATH=$(TOOLCHAIN_PATH)/lib/gcc/$(HOST_TRIPLET)/12.2.0
 
 COMMON=$(top_srcdir)/common
 
@@ -36,7 +37,7 @@ bl1.bin: bl1.elf
 bl1_elf_SOURCES=crt.s bl1_start.cpp uart.cpp format.cpp ddr.cpp gpio.cpp irq.cpp reg.cpp $(COMMON)/spi.cpp $(COMMON)/spi_flash.cpp
 EXTRA_bl1_elf_DEPENDENCIES=$(srcdir)/bl1.lds
 bl1_elf_LDFLAGS=-T $(srcdir)/bl1.lds
-bl1_elf_LDADD=$(TOOLCHAIN_LIB_PATH)/libgcc.a
+bl1_elf_LDADD=$(TOOLCHAIN_LIB_PATH)/libgcc.a $(TOOLCHAIN_PATH)/$(HOST_TRIPLET)/lib/libc.a
 
 bl1.elf$(EXEEXT): $(bl1_elf_OBJECTS) $(EXTRA_bl1_elf_DEPENDENCIES)
 	$(HOST_TRIPLET)-ld $(LDFLAGS) $(AM_LDFLAGS) $(bl1_elf_LDFLAGS) -melf32lriscv $(bl1_elf_OBJECTS) -o "$@" $(bl1_elf_LDADD)

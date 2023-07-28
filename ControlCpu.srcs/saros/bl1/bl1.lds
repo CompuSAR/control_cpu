@@ -46,6 +46,8 @@ SECTIONS
         BSS_START = .;
         * (.bss*)
         . = ALIGN(4);
+        * (.sbss*)
+        . = ALIGN(4);
         BSS_END = .;
     } >preload
 

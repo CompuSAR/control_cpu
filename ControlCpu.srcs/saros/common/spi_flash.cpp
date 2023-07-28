@@ -76,64 +76,102 @@ enum class Commands : uint8_t {
     CyclicRedundancyCheck2                      = 0x27,
 };
 
-struct spi_command {
-    uint8_t bytes[34];
-} __attribute__((aligned(16)))__;
+struct SpiCommand {
+    Commands cmd;
+    uint8_t bytes[15];
+} __attribute__(( aligned(16) ));
 
-void read_id(Commands cmd, size_t size) {
-    spi_command spi_cmd, spi_result;
+template<size_t NumWords>
+struct SpiResult {
+    uint8_t bytes[16*NumWords];
+} __attribute__(( aligned(16) ));
 
-    spi_cmd.bytes[0] = static_cast<uint8_t>(cmd);
+static size_t last_op_size;
+static void *last_op_dest;
+static constexpr size_t NumDummyCycles = 3;
 
-    SPI::start_transaction( &spi_cmd, 1, 0, &spi_result, size );
+FlashId read_id() {
+    SpiCommand cmd;
+    FlashId id __attribute__(( aligned(16) ));
+
+    cmd.cmd = Commands::MultiplIOReadId;
+
+    SPI::start_transaction( &cmd, 1, 0, &id, sizeof(id) );
     SPI::wait_transaction();
-    SPI::postprocess_buffer( &spi_result, size );
-    for( int i=0; i<size; ++i ) {
-        uart_send(" ");
-        print_hex(spi_result.bytes[i]);
-    }
-    uart_send("\n");
+    SPI::postprocess_buffer( &id, sizeof(id) );
+
+    return id;
+}
+
+static void write_enable() {
+    SpiCommand cmd;
+
+    cmd.cmd = Commands::WriteEnable;
+    SPI::start_transaction( &cmd, 1, 0, nullptr, 0 );
+    SPI::wait_transaction();
 }
 
 void init_flash() {
-    // Dummy first op. Because "hardware does not have bugs, just idiocyncracies" was too long.
-    spi_command spi_cmd, spi_result;
+    SpiCommand cmd;
     
+    // Make sure the flash is in a known state
     SPI::interface_rescue();
 
+    FlashId id = read_id();
+    uart_send("Flash Id (Single): ");
+    for( int i=0; i<(id.extended_id + 4); ++i ) {
+        uart_send(" ");
+        print_hex(reinterpret_cast<const uint8_t *>(&id)[i]);
+    }
+    uart_send("\n");
+
+    // Allow writes to the NV reg
     set_config( SPI::Config::Single );
-    spi_cmd.bytes[0] = static_cast<uint8_t>(Commands::WriteEnable);
-    SPI::start_transaction( &spi_cmd, 1, 0, nullptr, 0 );
+    write_enable();
+
+    // Set dummy cycles
+    cmd.cmd = Commands::WriteVolatileConfRegister;
+    cmd.bytes[0] = (NumDummyCycles<<4) | 0x0b; // No XIP, continuous wrap
+    SPI::start_transaction( &cmd, 2, 0, nullptr, 0 );
     SPI::wait_transaction();
 
-    spi_cmd.bytes[0] = static_cast<uint8_t>(Commands::WriteEnhancedVolatileConfRegister);
-    spi_cmd.bytes[1] = 0xff; // Quad I/O, single rate, default driver strength
-    SPI::start_transaction( &spi_cmd, 2, 0, nullptr, 0 );
-    SPI::wait_transaction();
+    write_enable();
 
-    uart_send("ReadId returned:");
-    read_id(Commands::ReadId, 20);
-
-    uart_send("ReadId returned:");
-    read_id(Commands::ReadId, 34);
-
-    spi_cmd.bytes[0] = static_cast<uint8_t>(Commands::WriteEnable);
-    SPI::start_transaction( &spi_cmd, 1, 0, nullptr, 0 );
-    SPI::wait_transaction();
-
-    spi_cmd.bytes[0] = static_cast<uint8_t>(Commands::WriteEnhancedVolatileConfRegister);
-    spi_cmd.bytes[1] = 0x3f; // Quad I/O, single rate, default driver strength
-    SPI::start_transaction( &spi_cmd, 2, 0, nullptr, 0 );
+    // Set flash state to Quad SPI
+    cmd.cmd = Commands::WriteEnhancedVolatileConfRegister;
+    cmd.bytes[0] = 0x2f; // Quad I/O, single rate, Hold disabled, default driver strength
+    SPI::start_transaction( &cmd, 2, 0, nullptr, 0 );
     SPI::wait_transaction();
 
     set_config( SPI::Config::Quad );
 
-    uart_send("Quad ReadId returned:");
-    read_id(Commands::MultiplIOReadId, 20);
+    id = read_id();
+    uart_send("Flash Id (Quad):   ");
+    for( int i=0; i<(id.extended_id + 4); ++i ) {
+        uart_send(" ");
+        print_hex(reinterpret_cast<const uint8_t *>(&id)[i]);
+    }
+    uart_send("\n");
+}
 
-    uart_send("Quad ReadId returned:");
-    read_id(Commands::MultiplIOReadId, 34);
+void initiate_read(uint32_t start_address, size_t size, void *dest) {
+    SpiCommand cmd;
 
+    cmd.cmd = Commands::FastRead;
+    cmd.bytes[0] = (start_address>>16) & 0xff;
+    cmd.bytes[1] = (start_address>>8) & 0xff;
+    cmd.bytes[2] = start_address & 0xff;
+
+    SPI::start_transaction( &cmd, 4, NumDummyCycles, dest, size );
+    last_op_dest = dest;
+    last_op_size = size;
+}
+
+void wait_done() {
+    SPI::wait_transaction();
+
+    if( last_op_size!=0 )
+        SPI::postprocess_buffer( last_op_dest, last_op_size );
 }
 
 } // namespace SPI_FLASH

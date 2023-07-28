@@ -341,7 +341,7 @@ always_comb begin
                 spi_state_next = SEND_ACTIVE;
         end
         DUMMY: begin
-            if( spi_dummy_cycles==1 ) begin
+            if( spi_dummy_cycles==0 ) begin
                 if( spi_recv_cycles!=0 )
                     spi_state_next = RECV_ACTIVE;
                 else
@@ -368,9 +368,9 @@ end
 
 task ack_buffer_from_cpu(input new_transaction);
     if( new_transaction )
-        spi_buffer_fill <= spi_num_send_cycles<MEM_DATA_WIDTH ? spi_num_send_cycles : MEM_DATA_WIDTH;
+        spi_buffer_fill <= spi_num_send_cycles<=(MEM_DATA_WIDTH-1) ? (spi_num_send_cycles - 1) : (MEM_DATA_WIDTH - 1);
     else
-        spi_buffer_fill <= spi_send_cycles<MEM_DATA_WIDTH ? spi_send_cycles : MEM_DATA_WIDTH;
+        spi_buffer_fill <= spi_send_cycles<(MEM_DATA_WIDTH-1) ? spi_send_cycles : (MEM_DATA_WIDTH - 1);
 
     spi_dma_read_ack <= 1'b1;
 endtask
@@ -386,7 +386,7 @@ always_ff@(posedge spi_ref_clock_p) begin
         case( spi_state )
             IDLE: begin
                 spi_send_cycles <= spi_num_send_cycles - 1;
-                spi_recv_cycles <= spi_num_recv_cycles == 0 ? 0 : spi_num_recv_cycles - 1;
+                spi_recv_cycles <= spi_num_recv_cycles;
                 spi_dummy_cycles <= spi_transfer_mode[15:0];
                 spi_quad_mode <= spi_transfer_mode[16];
 
@@ -397,16 +397,23 @@ always_ff@(posedge spi_ref_clock_p) begin
                     ack_buffer_from_cpu(1'b0);
                     spi_state <= SEND_ACTIVE;
                 end
+                if( spi_state_next==DUMMY )
+                    spi_dummy_cycles <= spi_dummy_cycles - 1;
                 spi_buffer_fill <= 0;
             end
             RECV_ACTIVE: begin
+                spi_recv_cycles <= spi_recv_cycles - 1;
+                spi_buffer_fill <= spi_buffer_fill + (spi_quad_mode ? 4 : 1);
+
                 if( spi_state_next[3] ) begin // Need to flush
                     if( !spi_dma_write_ack )
                         spi_dma_write_valid <= 1'b1;
                 end
-                spi_buffer_fill <= 0;
             end
-            RECV_PENDING: spi_dma_write_valid <= 1'b0;
+            RECV_PENDING: begin
+                spi_buffer_fill <= 0;
+                spi_dma_write_valid <= 1'b0;
+            end
             IDLE_PENDING: spi_dma_write_valid <= 1'b0;
         endcase
     end else begin
@@ -420,7 +427,13 @@ always_ff@(posedge spi_ref_clock_p) begin
                 spi_recv_cycles <= spi_recv_cycles - 1;
                 spi_buffer_fill <= spi_buffer_fill + (spi_quad_mode ? 4 : 1);
             end
-            RECV_PENDING: spi_dma_write_valid <= !spi_dma_write_ack;
+            DUMMY: begin
+                spi_dummy_cycles <= spi_dummy_cycles - 1;
+            end
+            RECV_PENDING: begin
+                spi_buffer_fill <= 0;
+                spi_dma_write_valid <= !spi_dma_write_ack;
+            end
             IDLE_PENDING: spi_dma_write_valid <= !spi_dma_write_ack;
         endcase
     end
