@@ -1,4 +1,4 @@
-all: ControlCpu.srcs/saros/boot_loader_state.mem
+all: ControlCpu.srcs/saros/boot_loader_state.mem ControlCpu.gen/saros/saros.bin
 
 ControlCpu.runs/ControlCpu.mcs:
 

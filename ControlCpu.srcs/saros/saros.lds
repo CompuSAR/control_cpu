@@ -1,61 +1,57 @@
 # Linker script for Boot Loader stage 1
-MEMORY { preload : ORIGIN = 0x80000000, LENGTH = 0x8000 }
+MEMORY { preload(rwx) : ORIGIN = 0x80000000, LENGTH = 0x8000 }
 MEMORY { discard : ORIGIN = 0x1000000, LENGTH = 0x1000000 }
 MEMORY { error : ORIGIN = 0xf0000000, LENGTH = 0 }
-MEMORY { ddr : ORIGIN = 0x80008000, LENGTH = 256*1024*1024 - 0x8000 }
+MEMORY { exe(rx) : ORIGIN = 0x80008000, LENGTH = 1*1024*1024 - 0x8000 }
+MEMORY { readonly(r) : ORIGIN = 0x80100000, LENGTH = 1*1024*1024 }
+MEMORY { ram(rw) : ORIGIN = 0x80200000, LENGTH = 256*1024*1024 - 0x200000 }
+ENTRY(_start)
 SECTIONS
 {
     .text : {
         . = ALIGN(4);
-        crt.o (.text*)
         * (.text*)
         . = ALIGN(4);
-    } >preload
+    } >exe
     .rodata : {
         . = ALIGN(4);
          *(.rodata*)
         . = ALIGN(4);
-    } >preload
-
-    .data : {
-        . = ALIGN(4);
-         *(.data*)
-        . = ALIGN(4);
-    } >preload
-
-    .sdata : {
-        . = ALIGN(4);
-         *(.sdata*)
-        . = ALIGN(4);
-    } >preload
+    } >readonly
 
     .got : {
         . = ALIGN(4);
         *(.got)
         . = ALIGN(4);
-    } > preload
+    } >readonly
 
     .got.plt : {
         . = ALIGN(4);
         *(.got.plt)
         . = ALIGN(4);
-    } > preload
+    } >readonly
+
+    .data : {
+        . = ALIGN(4);
+         *(.data*)
+        . = ALIGN(4);
+    } >ram
+
+    .sdata : {
+        . = ALIGN(4);
+         *(.sdata*)
+        . = ALIGN(4);
+    } >ram
 
     .bss : {
-        . = ALIGN(4);
-        BSS_START = .;
+        . = ALIGN(32);
         * (.bss*)
-        . = ALIGN(4);
+        . = ALIGN(32);
         * (.sbss*)
-        . = ALIGN(4);
-        BSS_END = .;
+        . = ALIGN(32);
+    } >ram
 
-        . = ALIGN(16);
-        OS_LOAD_BUFFER = .;
-        . = . + 4096;
-        OS_LOAD_BUFFER_END = .;
-    } >preload
-
+    PROVIDE(HEAP_START = .);
 
     /DISCARD/ : { *(.eh_frame) }
 
@@ -73,6 +69,5 @@ SECTIONS
     .riscv.attributes : { *(.riscv.attributes) } >discard
     .comment : { *(.comment) } >discard
 
-    PROVIDE(DDR_MEMORY = 0x80008000);
     .unknown : { *(.*) } >error
 }

@@ -1,4 +1,5 @@
 #include "ddr.h"
+#include "elf_reader.h"
 #include "format.h"
 #include "irq.h"
 #include "spi.h"
@@ -34,18 +35,11 @@ void bl1_start() {
 
     SPI_FLASH::init_flash();
 
-    uart_send("\nReading from 2MB (0x200000):\n");
+    ElfReader::EntryPoint start_addr = ElfReader::load_os();
 
-    SPI_FLASH::initiate_read(2*1024*1024, 1024, &DDR_MEMORY[0]);
-    hex_dump(DDR_MEMORY, 1024);
-    uart_send("\n\nReading from 2MB+64KB (0x210000):\n");
-
-    SPI_FLASH::initiate_read(2*1024*1024+64*1024, 1024, &DDR_MEMORY[64*1024]);
-    hex_dump(DDR_MEMORY+(64*1024), 1024);
+    uart_send("OS loaded with entry point ");
+    print_hex(reinterpret_cast<uint32_t>(start_addr));
     uart_send("\n");
 
-    uart_send("Halting\n");
     halt();
-
-    uart_send("Post halt code reached\n");
 }

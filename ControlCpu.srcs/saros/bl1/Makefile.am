@@ -34,7 +34,7 @@ bl1.mem: bl1.bin
 bl1.bin: bl1.elf
 	$(HOST_TRIPLET)-objcopy -O binary "$<" "$@" $(foreach rem,$(REMOVED_SECTIONS), --remove-section="$(rem)")
 
-bl1_elf_SOURCES=crt.s bl1_start.cpp uart.cpp format.cpp ddr.cpp gpio.cpp irq.cpp reg.cpp $(COMMON)/spi.cpp $(COMMON)/spi_flash.cpp
+bl1_elf_SOURCES=crt.s bl1_start.cpp $(COMMON)/uart.cpp $(COMMON)/format.cpp ddr.cpp $(COMMON)/gpio.cpp $(COMMON)/irq.cpp $(COMMON)/reg.cpp $(COMMON)/spi.cpp $(COMMON)/spi_flash.cpp elf_reader.cpp
 EXTRA_bl1_elf_DEPENDENCIES=$(srcdir)/bl1.lds
 bl1_elf_LDFLAGS=-T $(srcdir)/bl1.lds
 bl1_elf_LDADD=$(TOOLCHAIN_LIB_PATH)/libgcc.a $(TOOLCHAIN_PATH)/$(HOST_TRIPLET)/lib/libc.a

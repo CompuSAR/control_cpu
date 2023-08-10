@@ -1,1 +1,28 @@
 SUBDIRS=bl1
+
+ARCH=-march=rv32i
+ABI=-mabi=ilp32
+
+AM_CCASFLAGS=$(ARCH) $(ABI)
+AM_CXXFLAGS=$(ARCH) $(ABI)
+AM_CFLAGS=$(ARCH) $(ABI)
+AM_CPPFLAGS=-I$(top_srcdir)/include
+
+noinst_PROGRAMS=saros.elf
+
+REMOVED_SECTIONS=
+TOOLCHAIN_PATH=/opt/riscv
+TOOLCHAIN_LIB_PATH=$(TOOLCHAIN_PATH)/lib/gcc/$(HOST_TRIPLET)/12.2.0
+
+saros_elf_SOURCES=saros/start.cpp common/uart.cpp common/format.cpp common/irq.cpp common/reg.cpp common/gpio.cpp
+EXTRA_saros_elf_DEPENDENCIES=$(srcdir)/saros.lds
+saros_elf_LDFLAGS=-T $(srcdir)/saros.lds
+saros_elf_LDADD=$(TOOLCHAIN_LIB_PATH)/libgcc.a $(TOOLCHAIN_PATH)/$(HOST_TRIPLET)/lib/libc.a
+
+saros.elf$(EXEEXT): $(saros_elf_OBJECTS) $(EXTRA_saros_elf_DEPENDENCIES)
+	$(HOST_TRIPLET)-ld $(LDFLAGS) $(AM_LDFLAGS) $(saros_elf_LDFLAGS) -melf32lriscv $(saros_elf_OBJECTS) -o "$@" $(saros_elf_LDADD)
+
+saros.bin: saros.elf
+	cp $< $@.tmp
+	$(HOST_TRIPLET)-strip $@.tmp
+	mv $@.tmp $@
