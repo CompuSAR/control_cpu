@@ -1,10 +1,13 @@
-all: ControlCpu.srcs/saros/boot_loader_state.mem ControlCpu.gen/saros/saros.bin
+all: ControlCpu.srcs/saros/boot_loader_state.mem ControlCpu.gen/saros/saros.mcs
 
 ControlCpu.runs/ControlCpu.mcs:
 
 ControlCpu.gen/saros/%: ControlCpu.gen/saros/config.log
 	$(MAKE) -C "$(@D)" "$(@F)"
-.PHONY: ControlCpu.gen/saros/%
+
+ControlCpu.gen/saros/saros.mcs: ControlCpu.gen/saros/config.log
+	$(MAKE) -C "$(@D)" "$(@F)"
+.PHONY: ControlCpu.gen/saros/saros.mcs
 
 ControlCpu.gen/saros/bl1/bl1.coe: ControlCpu.gen/saros/config.log
 	$(MAKE) -C "$(@D)" "$(@F)"

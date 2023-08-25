@@ -35,11 +35,15 @@ void bl1_start() {
 
     SPI_FLASH::init_flash();
 
-    ElfReader::EntryPoint start_addr = ElfReader::load_os();
+    ElfReader::EntryPoint second_stage = ElfReader::load_os();
 
     uart_send("OS loaded with entry point ");
-    print_hex(reinterpret_cast<uint32_t>(start_addr));
+    print_hex(reinterpret_cast<uint32_t>(second_stage));
     uart_send("\n");
+
+    second_stage();
+
+    uart_send("Second stage code unexpectedly returned\n");
 
     halt();
 }
