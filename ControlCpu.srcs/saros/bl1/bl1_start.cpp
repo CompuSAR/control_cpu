@@ -33,13 +33,16 @@ void bl1_start() {
 
     uart_send("Memory initialized. Initializing SPI flash\n");
 
-    SPI_FLASH::init_flash();
+    SPI_FLASH::init();
 
     ElfReader::EntryPoint second_stage = ElfReader::load_os();
 
     uart_send("OS loaded with entry point ");
     print_hex(reinterpret_cast<uint32_t>(second_stage));
     uart_send("\n");
+
+    // So that Vivado can write to the flash, if needed
+    SPI_FLASH::deinit();
 
     second_stage();
 

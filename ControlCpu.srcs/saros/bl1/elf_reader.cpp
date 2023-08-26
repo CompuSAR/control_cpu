@@ -13,7 +13,7 @@ extern uint8_t OS_LOAD_BUFFER[], OS_LOAD_BUFFER_END[];
 
 namespace ElfReader {
 
-static constexpr uint32_t OS_FLASH_ADDRESS = 0x400000;  // 2MB into the flash
+static constexpr uint32_t OS_FLASH_ADDRESS = 0x200000;  // 2MB into the flash
 
 template<typename T>
 static void check_value(T value, T desired) {
@@ -24,6 +24,7 @@ static void check_value(T value, T desired) {
         print_hex(value);
         uart_send(".\n");
 
+        SPI_FLASH::deinit();
         halt();
     }
 }
@@ -73,6 +74,7 @@ EntryPoint load_os() {
         print_hex(header.e_phnum);
         uart_send(".\n");
 
+        SPI_FLASH::deinit();
         halt();
         return nullptr;
     }

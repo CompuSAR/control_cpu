@@ -5,7 +5,7 @@ extern unsigned char HEAP_START[];
 
 extern "C"
 int _start() {
-    uart_send("Second stage!");
+    uart_send("Second stage!\n");
 
     halt();
 }

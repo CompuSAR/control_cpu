@@ -5,7 +5,8 @@
 
 namespace SPI_FLASH {
 
-void init_flash();
+void init();
+void deinit();
 void initiate_read(uint32_t start_address, size_t size, void *dest);
 
 struct FlashId {

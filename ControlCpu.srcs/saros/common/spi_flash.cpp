@@ -111,7 +111,7 @@ static void write_enable() {
     SPI::wait_transaction();
 }
 
-void init_flash() {
+void init() {
     SpiCommand cmd;
     
     // Make sure the flash is in a known state
@@ -151,6 +151,46 @@ void init_flash() {
         uart_send(" ");
         print_hex(reinterpret_cast<const uint8_t *>(&id)[i]);
     }
+    uart_send("\n");
+}
+
+void deinit() {
+    SpiCommand cmd;
+
+    SPI_FLASH::write_enable();
+    cmd.cmd = Commands::WriteVolatileConfRegister;
+    cmd.bytes[0] = 0xfb;
+    SPI::start_transaction( &cmd, 2, 0, nullptr, 0 );
+    SPI::wait_transaction();
+
+    write_enable();
+
+    cmd.cmd = Commands::WriteEnhancedVolatileConfRegister;
+    cmd.bytes[0] = 0xff; // Quad I/O, single rate, Hold disabled, default driver strength
+    SPI::start_transaction( &cmd, 2, 0, nullptr, 0 );
+    SPI::wait_transaction();
+
+    set_config( SPI::Config::Quad );
+}
+
+void erase_all() {
+    SpiCommand cmd;
+    uint8_t result[16] __attribute__(( aligned(16) ));
+
+    write_enable();
+
+    cmd.cmd = Commands::BulkErase;
+    SPI::start_transaction( &cmd, 1, 0, nullptr, 0 );
+    SPI::wait_transaction();
+    uart_send("Erase started\n");
+
+    do {
+        cmd.cmd = Commands::ReadStatusRegister;
+        SPI::start_transaction( &cmd, 1, 0, &result[0], 1 );
+        SPI::wait_transaction();
+    } while(result[0] & 1);
+
+    print_hex(result[0]);
     uart_send("\n");
 }
 
