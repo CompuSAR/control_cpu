@@ -15,7 +15,10 @@ module timer_int_ctrl#(
 
     // Response
     output logic[31:0]  rsp_data_o,
-    output logic        rsp_valid_o
+    output logic        rsp_valid_o,
+
+    // Self explanatory
+    output logic        interrupt_o
 );
 
 logic[63:0] cycles_counter = 64'h0;
@@ -24,6 +27,8 @@ logic       cycles_counter_save_flag;
 logic[63:0] wait_cycle, wait_cycle_next;
 logic[31:0] pending_address, pending_address_next;
 logic prev_valid = 1'b0, prev_valid_next;
+
+assign interrupt_o = wait_expired;
 
 always_ff@(posedge clock) begin
     cycles_counter <= cycles_counter+1;

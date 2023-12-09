@@ -152,7 +152,7 @@ VexRiscv control_cpu(
     .clk(ctrl_cpu_clock),
     .reset(!nReset || !clocks_locked),
 
-    .timerInterrupt(1'b0),
+    .timerInterrupt(ctrl_timer_interrupt),
     .externalInterrupt(1'b0),
     .softwareInterrupt(1'b0),
 
@@ -455,7 +455,9 @@ timer_int_ctrl#(.CLOCK_HZ(CTRL_CLOCK_HZ)) timer_interrupt(
     .req_ready_o(irq_req_ack),
 
     .rsp_data_o(irq_rsp_data),
-    .rsp_valid_o(irq_rsp_valid)
+    .rsp_valid_o(irq_rsp_valid),
+
+    .interrupt_o(ctrl_timer_interrupt)
 );
 
 gpio#(.NUM_IN_PORTS(1)) gpio(
