@@ -1,30 +1,30 @@
-// Generator : SpinalHDL v1.8.1    git head : 2a7592004363e5b40ec43e1f122ed8641cd8965b
+// Generator : SpinalHDL v1.9.4    git head : 270018552577f3bb8e5339ee2583c9c22d324215
 // Component : VexRiscv
-// Git hash  : c52433575dec04f10063b2fd7cebd0545c8b1be9
+// Git hash  : 35e5f4cad89c1406b4f727b9d7429ab67ec5c4fa
 
 `timescale 1ns/1ps
 
 module VexRiscv (
-  output              iBus_cmd_valid,
-  input               iBus_cmd_ready,
-  output     [31:0]   iBus_cmd_payload_pc,
-  input               iBus_rsp_valid,
-  input               iBus_rsp_payload_error,
-  input      [31:0]   iBus_rsp_payload_inst,
-  input               timerInterrupt,
-  input               externalInterrupt,
-  input               softwareInterrupt,
-  output              dBus_cmd_valid,
-  input               dBus_cmd_ready,
-  output              dBus_cmd_payload_wr,
-  output     [31:0]   dBus_cmd_payload_address,
-  output     [31:0]   dBus_cmd_payload_data,
-  output     [1:0]    dBus_cmd_payload_size,
-  input               dBus_rsp_ready,
-  input               dBus_rsp_error,
-  input      [31:0]   dBus_rsp_data,
-  input               clk,
-  input               reset
+  output wire          iBus_cmd_valid,
+  input  wire          iBus_cmd_ready,
+  output wire [31:0]   iBus_cmd_payload_pc,
+  input  wire          iBus_rsp_valid,
+  input  wire          iBus_rsp_payload_error,
+  input  wire [31:0]   iBus_rsp_payload_inst,
+  input  wire          timerInterrupt,
+  input  wire          externalInterrupt,
+  input  wire          softwareInterrupt,
+  output wire          dBus_cmd_valid,
+  input  wire          dBus_cmd_ready,
+  output wire          dBus_cmd_payload_wr,
+  output wire [31:0]   dBus_cmd_payload_address,
+  output wire [31:0]   dBus_cmd_payload_data,
+  output wire [1:0]    dBus_cmd_payload_size,
+  input  wire          dBus_rsp_ready,
+  input  wire          dBus_rsp_error,
+  input  wire [31:0]   dBus_rsp_data,
+  input  wire          clk,
+  input  wire          reset
 );
   localparam BranchCtrlEnum_INC = 2'd0;
   localparam BranchCtrlEnum_B = 2'd1;
@@ -52,6 +52,7 @@ module VexRiscv (
   localparam Src1CtrlEnum_URS1 = 2'd3;
 
   wire                IBusSimplePlugin_rspJoin_rspBuffer_c_io_pop_ready;
+  wire                IBusSimplePlugin_rspJoin_rspBuffer_c_io_flush;
   reg        [31:0]   _zz_RegFilePlugin_regFile_port0;
   reg        [31:0]   _zz_RegFilePlugin_regFile_port1;
   wire                IBusSimplePlugin_rspJoin_rspBuffer_c_io_push_ready;
@@ -59,6 +60,7 @@ module VexRiscv (
   wire                IBusSimplePlugin_rspJoin_rspBuffer_c_io_pop_payload_error;
   wire       [31:0]   IBusSimplePlugin_rspJoin_rspBuffer_c_io_pop_payload_inst;
   wire       [0:0]    IBusSimplePlugin_rspJoin_rspBuffer_c_io_occupancy;
+  wire       [0:0]    IBusSimplePlugin_rspJoin_rspBuffer_c_io_availability;
   wire       [1:0]    _zz_IBusSimplePlugin_jump_pcLoad_payload_1;
   wire       [1:0]    _zz_IBusSimplePlugin_jump_pcLoad_payload_2;
   wire       [31:0]   _zz_IBusSimplePlugin_fetchPc_pc;
@@ -168,8 +170,6 @@ module VexRiscv (
   wire       [31:0]   _zz_execute_SrcPlugin_addSub_2;
   wire       [31:0]   _zz_execute_SrcPlugin_addSub_3;
   wire       [31:0]   _zz_execute_SrcPlugin_addSub_4;
-  wire       [31:0]   _zz_execute_SrcPlugin_addSub_5;
-  wire       [31:0]   _zz_execute_SrcPlugin_addSub_6;
   wire       [31:0]   _zz__zz_execute_to_memory_REGFILE_WRITE_DATA_1;
   wire       [32:0]   _zz__zz_execute_to_memory_REGFILE_WRITE_DATA_1_1;
   wire       [19:0]   _zz__zz_execute_BranchPlugin_branch_src2;
@@ -395,7 +395,6 @@ module VexRiscv (
   reg                 IBusSimplePlugin_fetchPc_booted;
   reg                 IBusSimplePlugin_fetchPc_inc;
   wire                when_Fetcher_l133;
-  wire                IBusSimplePlugin_fetchPc_output_fire_1;
   wire                when_Fetcher_l133_1;
   reg        [31:0]   IBusSimplePlugin_fetchPc_pc;
   reg                 IBusSimplePlugin_fetchPc_flushed;
@@ -485,27 +484,26 @@ module VexRiscv (
   wire                IBusSimplePlugin_rspJoin_join_payload_isRvc;
   wire                IBusSimplePlugin_rspJoin_exceptionDetected;
   wire                IBusSimplePlugin_rspJoin_join_fire;
-  wire                IBusSimplePlugin_rspJoin_join_fire_1;
   wire                _zz_IBusSimplePlugin_iBusRsp_output_valid;
   wire                _zz_dBus_cmd_valid;
   reg                 execute_DBusSimplePlugin_skipCmd;
   reg        [31:0]   _zz_dBus_cmd_payload_data;
-  wire                when_DBusSimplePlugin_l428;
+  wire                when_DBusSimplePlugin_l436;
   reg        [3:0]    _zz_execute_DBusSimplePlugin_formalMask;
   wire       [3:0]    execute_DBusSimplePlugin_formalMask;
-  wire                when_DBusSimplePlugin_l482;
+  wire                when_DBusSimplePlugin_l490;
   reg        [31:0]   writeBack_DBusSimplePlugin_rspShifted;
-  wire       [1:0]    switch_Misc_l226;
+  wire       [1:0]    switch_Misc_l232;
   wire                _zz_writeBack_DBusSimplePlugin_rspFormated;
   reg        [31:0]   _zz_writeBack_DBusSimplePlugin_rspFormated_1;
   wire                _zz_writeBack_DBusSimplePlugin_rspFormated_2;
   reg        [31:0]   _zz_writeBack_DBusSimplePlugin_rspFormated_3;
   reg        [31:0]   writeBack_DBusSimplePlugin_rspFormated;
-  wire                when_DBusSimplePlugin_l558;
+  wire                when_DBusSimplePlugin_l566;
   wire       [1:0]    CsrPlugin_misa_base;
   wire       [25:0]   CsrPlugin_misa_extensions;
   wire       [1:0]    CsrPlugin_mtvec_mode;
-  wire       [29:0]   CsrPlugin_mtvec_base;
+  reg        [29:0]   CsrPlugin_mtvec_base;
   reg        [31:0]   CsrPlugin_mepc;
   reg                 CsrPlugin_mstatus_MIE;
   reg                 CsrPlugin_mstatus_MPIE;
@@ -566,7 +564,7 @@ module VexRiscv (
   wire                execute_CsrPlugin_writeEnable;
   wire                execute_CsrPlugin_readEnable;
   wire       [31:0]   execute_CsrPlugin_readToWriteData;
-  wire                switch_Misc_l226_1;
+  wire                switch_Misc_l232_1;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_writeDataSignal;
   wire                when_CsrPlugin_l1587;
   wire                when_CsrPlugin_l1591;
@@ -593,7 +591,7 @@ module VexRiscv (
   reg                 lastStageRegFileWrite_valid /* verilator public */ ;
   reg        [4:0]    lastStageRegFileWrite_payload_address /* verilator public */ ;
   reg        [31:0]   lastStageRegFileWrite_payload_data /* verilator public */ ;
-  reg                 _zz_2;
+  reg                 _zz_5;
   reg        [31:0]   execute_IntAluPlugin_bitwise;
   reg        [31:0]   _zz_execute_REGFILE_WRITE_DATA;
   reg        [31:0]   _zz_decode_SRC1;
@@ -640,7 +638,7 @@ module VexRiscv (
   wire                when_HazardSimplePlugin_l108;
   wire                when_HazardSimplePlugin_l113;
   wire                execute_BranchPlugin_eq;
-  wire       [2:0]    switch_Misc_l226_2;
+  wire       [2:0]    switch_Misc_l232_2;
   reg                 _zz_execute_BRANCH_DO;
   reg                 _zz_execute_BRANCH_DO_1;
   wire       [31:0]   execute_BranchPlugin_branch_src1;
@@ -754,16 +752,21 @@ module VexRiscv (
   wire                when_CsrPlugin_l1669_2;
   reg                 execute_CsrPlugin_csr_772;
   wire                when_CsrPlugin_l1669_3;
+  reg                 execute_CsrPlugin_csr_773;
+  wire                when_CsrPlugin_l1669_4;
   reg                 execute_CsrPlugin_csr_834;
   wire       [1:0]    switch_CsrPlugin_l1031;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_readDataInit;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_readDataInit_1;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_readDataInit_2;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_readDataInit_3;
+  reg        [31:0]   _zz_CsrPlugin_csrMapping_readDataInit_4;
   wire                when_CsrPlugin_l1702;
-  reg                 when_CsrPlugin_l1712;
-  wire                when_CsrPlugin_l1710;
-  wire                when_CsrPlugin_l1718;
+  wire       [11:0]   _zz_when_CsrPlugin_l1709;
+  wire                when_CsrPlugin_l1709;
+  reg                 when_CsrPlugin_l1719;
+  wire                when_CsrPlugin_l1717;
+  wire                when_CsrPlugin_l1725;
   `ifndef SYNTHESIS
   reg [31:0] decode_BRANCH_CTRL_string;
   reg [31:0] _zz_decode_BRANCH_CTRL_string;
@@ -853,10 +856,8 @@ module VexRiscv (
   assign _zz_execute_SrcPlugin_addSub_1 = ($signed(_zz_execute_SrcPlugin_addSub_2) + $signed(_zz_execute_SrcPlugin_addSub_3));
   assign _zz_execute_SrcPlugin_addSub_2 = execute_SRC1;
   assign _zz_execute_SrcPlugin_addSub_3 = (execute_SRC_USE_SUB_LESS ? (~ execute_SRC2) : execute_SRC2);
-  assign _zz_execute_SrcPlugin_addSub_4 = (execute_SRC_USE_SUB_LESS ? _zz_execute_SrcPlugin_addSub_5 : _zz_execute_SrcPlugin_addSub_6);
-  assign _zz_execute_SrcPlugin_addSub_5 = 32'h00000001;
-  assign _zz_execute_SrcPlugin_addSub_6 = 32'h0;
-  assign _zz__zz_execute_to_memory_REGFILE_WRITE_DATA_1 = (_zz__zz_execute_to_memory_REGFILE_WRITE_DATA_1_1 >>> 1);
+  assign _zz_execute_SrcPlugin_addSub_4 = (execute_SRC_USE_SUB_LESS ? 32'h00000001 : 32'h00000000);
+  assign _zz__zz_execute_to_memory_REGFILE_WRITE_DATA_1 = (_zz__zz_execute_to_memory_REGFILE_WRITE_DATA_1_1 >>> 1'd1);
   assign _zz__zz_execute_to_memory_REGFILE_WRITE_DATA_1_1 = {((execute_SHIFT_CTRL == ShiftCtrlEnum_SRA_1) && execute_LightShifterPlugin_shiftInput[31]),execute_LightShifterPlugin_shiftInput};
   assign _zz__zz_execute_BranchPlugin_branch_src2 = {{{execute_INSTRUCTION[31],execute_INSTRUCTION[19 : 12]},execute_INSTRUCTION[20]},execute_INSTRUCTION[30 : 21]};
   assign _zz__zz_execute_BranchPlugin_branch_src2_4 = {{{execute_INSTRUCTION[31],execute_INSTRUCTION[7]},execute_INSTRUCTION[30 : 25]},execute_INSTRUCTION[11 : 8]};
@@ -924,17 +925,17 @@ module VexRiscv (
   assign _zz__zz_decode_SRC_LESS_UNSIGNED_54 = {(_zz__zz_decode_SRC_LESS_UNSIGNED_55 == _zz__zz_decode_SRC_LESS_UNSIGNED_56),(_zz__zz_decode_SRC_LESS_UNSIGNED_57 == _zz__zz_decode_SRC_LESS_UNSIGNED_58)};
   assign _zz__zz_decode_SRC_LESS_UNSIGNED_61 = (decode_INSTRUCTION & 32'h00000070);
   assign _zz__zz_decode_SRC_LESS_UNSIGNED_62 = 32'h00000020;
-  assign _zz__zz_decode_SRC_LESS_UNSIGNED_64 = ((decode_INSTRUCTION & 32'h00000020) == 32'h0);
-  assign _zz__zz_decode_SRC_LESS_UNSIGNED_66 = ((decode_INSTRUCTION & _zz__zz_decode_SRC_LESS_UNSIGNED_67) == 32'h0);
+  assign _zz__zz_decode_SRC_LESS_UNSIGNED_64 = ((decode_INSTRUCTION & 32'h00000020) == 32'h00000000);
+  assign _zz__zz_decode_SRC_LESS_UNSIGNED_66 = ((decode_INSTRUCTION & _zz__zz_decode_SRC_LESS_UNSIGNED_67) == 32'h00000000);
   assign _zz__zz_decode_SRC_LESS_UNSIGNED_68 = {_zz_decode_SRC_LESS_UNSIGNED_3,{_zz_decode_SRC_LESS_UNSIGNED_2,_zz__zz_decode_SRC_LESS_UNSIGNED_69}};
-  assign _zz__zz_decode_SRC_LESS_UNSIGNED_71 = ((decode_INSTRUCTION & _zz__zz_decode_SRC_LESS_UNSIGNED_72) == 32'h0);
+  assign _zz__zz_decode_SRC_LESS_UNSIGNED_71 = ((decode_INSTRUCTION & _zz__zz_decode_SRC_LESS_UNSIGNED_72) == 32'h00000000);
   assign _zz__zz_decode_SRC_LESS_UNSIGNED_73 = (|{_zz__zz_decode_SRC_LESS_UNSIGNED_74,{_zz__zz_decode_SRC_LESS_UNSIGNED_75,_zz__zz_decode_SRC_LESS_UNSIGNED_76}});
   assign _zz__zz_decode_SRC_LESS_UNSIGNED_77 = (|{_zz__zz_decode_SRC_LESS_UNSIGNED_78,_zz__zz_decode_SRC_LESS_UNSIGNED_79});
   assign _zz__zz_decode_SRC_LESS_UNSIGNED_80 = (|{_zz__zz_decode_SRC_LESS_UNSIGNED_81,_zz__zz_decode_SRC_LESS_UNSIGNED_82});
   assign _zz__zz_decode_SRC_LESS_UNSIGNED_55 = (decode_INSTRUCTION & 32'h0000000c);
   assign _zz__zz_decode_SRC_LESS_UNSIGNED_56 = 32'h00000004;
   assign _zz__zz_decode_SRC_LESS_UNSIGNED_57 = (decode_INSTRUCTION & 32'h00000028);
-  assign _zz__zz_decode_SRC_LESS_UNSIGNED_58 = 32'h0;
+  assign _zz__zz_decode_SRC_LESS_UNSIGNED_58 = 32'h00000000;
   assign _zz__zz_decode_SRC_LESS_UNSIGNED_67 = 32'h00000044;
   assign _zz__zz_decode_SRC_LESS_UNSIGNED_69 = ((decode_INSTRUCTION & 32'h00005004) == 32'h00001000);
   assign _zz__zz_decode_SRC_LESS_UNSIGNED_72 = 32'h00000058;
@@ -972,8 +973,9 @@ module VexRiscv (
     .io_pop_ready          (IBusSimplePlugin_rspJoin_rspBuffer_c_io_pop_ready             ), //i
     .io_pop_payload_error  (IBusSimplePlugin_rspJoin_rspBuffer_c_io_pop_payload_error     ), //o
     .io_pop_payload_inst   (IBusSimplePlugin_rspJoin_rspBuffer_c_io_pop_payload_inst[31:0]), //o
-    .io_flush              (1'b0                                                          ), //i
+    .io_flush              (IBusSimplePlugin_rspJoin_rspBuffer_c_io_flush                 ), //i
     .io_occupancy          (IBusSimplePlugin_rspJoin_rspBuffer_c_io_occupancy             ), //o
+    .io_availability       (IBusSimplePlugin_rspJoin_rspBuffer_c_io_availability          ), //o
     .clk                   (clk                                                           ), //i
     .reset                 (reset                                                         )  //i
   );
@@ -1523,7 +1525,7 @@ module VexRiscv (
   assign decode_BYPASSABLE_EXECUTE_STAGE = _zz_decode_SRC_LESS_UNSIGNED[8];
   assign decode_MEMORY_ENABLE = _zz_decode_SRC_LESS_UNSIGNED[3];
   assign decode_CSR_READ_OPCODE = (decode_INSTRUCTION[13 : 7] != 7'h20);
-  assign decode_CSR_WRITE_OPCODE = (! (((decode_INSTRUCTION[14 : 13] == 2'b01) && (decode_INSTRUCTION[19 : 15] == 5'h0)) || ((decode_INSTRUCTION[14 : 13] == 2'b11) && (decode_INSTRUCTION[19 : 15] == 5'h0))));
+  assign decode_CSR_WRITE_OPCODE = (! (((decode_INSTRUCTION[14 : 13] == 2'b01) && (decode_INSTRUCTION[19 : 15] == 5'h00)) || ((decode_INSTRUCTION[14 : 13] == 2'b11) && (decode_INSTRUCTION[19 : 15] == 5'h00))));
   assign writeBack_FORMAL_PC_NEXT = memory_to_writeBack_FORMAL_PC_NEXT;
   assign memory_FORMAL_PC_NEXT = execute_to_memory_FORMAL_PC_NEXT;
   assign execute_FORMAL_PC_NEXT = decode_to_execute_FORMAL_PC_NEXT;
@@ -1595,7 +1597,7 @@ module VexRiscv (
   assign writeBack_ENV_CTRL = _zz_writeBack_ENV_CTRL;
   always @(*) begin
     _zz_lastStageRegFileWrite_payload_data = writeBack_REGFILE_WRITE_DATA;
-    if(when_DBusSimplePlugin_l558) begin
+    if(when_DBusSimplePlugin_l566) begin
       _zz_lastStageRegFileWrite_payload_data = writeBack_DBusSimplePlugin_rspFormated;
     end
   end
@@ -1647,7 +1649,7 @@ module VexRiscv (
   assign decode_arbitration_flushNext = 1'b0;
   always @(*) begin
     execute_arbitration_haltItself = 1'b0;
-    if(when_DBusSimplePlugin_l428) begin
+    if(when_DBusSimplePlugin_l436) begin
       execute_arbitration_haltItself = 1'b1;
     end
     if(when_CsrPlugin_l1591) begin
@@ -1674,7 +1676,7 @@ module VexRiscv (
   assign execute_arbitration_flushNext = 1'b0;
   always @(*) begin
     memory_arbitration_haltItself = 1'b0;
-    if(when_DBusSimplePlugin_l482) begin
+    if(when_DBusSimplePlugin_l490) begin
       memory_arbitration_haltItself = 1'b1;
     end
   end
@@ -1745,6 +1747,9 @@ module VexRiscv (
     if(when_CsrPlugin_l1702) begin
       CsrPlugin_csrMapping_allowCsrSignal = 1'b1;
     end
+    if(when_CsrPlugin_l1709) begin
+      CsrPlugin_csrMapping_allowCsrSignal = 1'b1;
+    end
   end
 
   assign CsrPlugin_csrMapping_doForceFailCsr = 1'b0;
@@ -1804,7 +1809,6 @@ module VexRiscv (
   end
 
   assign when_Fetcher_l133 = (IBusSimplePlugin_fetchPc_correction || IBusSimplePlugin_fetchPc_pcRegPropagate);
-  assign IBusSimplePlugin_fetchPc_output_fire_1 = (IBusSimplePlugin_fetchPc_output_valid && IBusSimplePlugin_fetchPc_output_ready);
   assign when_Fetcher_l133_1 = ((! IBusSimplePlugin_fetchPc_output_valid) && IBusSimplePlugin_fetchPc_output_ready);
   always @(*) begin
     IBusSimplePlugin_fetchPc_pc = (IBusSimplePlugin_fetchPc_pcReg + _zz_IBusSimplePlugin_fetchPc_pc);
@@ -1924,8 +1928,7 @@ module VexRiscv (
   assign IBusSimplePlugin_rspJoin_join_payload_isRvc = IBusSimplePlugin_rspJoin_fetchRsp_isRvc;
   assign IBusSimplePlugin_rspJoin_join_fire = (IBusSimplePlugin_rspJoin_join_valid && IBusSimplePlugin_rspJoin_join_ready);
   assign IBusSimplePlugin_iBusRsp_stages_1_output_ready = (IBusSimplePlugin_iBusRsp_stages_1_output_valid ? IBusSimplePlugin_rspJoin_join_fire : IBusSimplePlugin_rspJoin_join_ready);
-  assign IBusSimplePlugin_rspJoin_join_fire_1 = (IBusSimplePlugin_rspJoin_join_valid && IBusSimplePlugin_rspJoin_join_ready);
-  assign IBusSimplePlugin_rspJoin_rspBuffer_output_ready = IBusSimplePlugin_rspJoin_join_fire_1;
+  assign IBusSimplePlugin_rspJoin_rspBuffer_output_ready = IBusSimplePlugin_rspJoin_join_fire;
   assign _zz_IBusSimplePlugin_iBusRsp_output_valid = (! IBusSimplePlugin_rspJoin_exceptionDetected);
   assign IBusSimplePlugin_rspJoin_join_ready = (IBusSimplePlugin_iBusRsp_output_ready && _zz_IBusSimplePlugin_iBusRsp_output_valid);
   assign IBusSimplePlugin_iBusRsp_output_valid = (IBusSimplePlugin_rspJoin_join_valid && _zz_IBusSimplePlugin_iBusRsp_output_valid);
@@ -1959,7 +1962,7 @@ module VexRiscv (
   end
 
   assign dBus_cmd_payload_data = _zz_dBus_cmd_payload_data;
-  assign when_DBusSimplePlugin_l428 = ((((execute_arbitration_isValid && execute_MEMORY_ENABLE) && (! dBus_cmd_ready)) && (! execute_DBusSimplePlugin_skipCmd)) && (! _zz_dBus_cmd_valid));
+  assign when_DBusSimplePlugin_l436 = ((((execute_arbitration_isValid && execute_MEMORY_ENABLE) && (! dBus_cmd_ready)) && (! execute_DBusSimplePlugin_skipCmd)) && (! _zz_dBus_cmd_valid));
   always @(*) begin
     case(dBus_cmd_payload_size)
       2'b00 : begin
@@ -1976,7 +1979,7 @@ module VexRiscv (
 
   assign execute_DBusSimplePlugin_formalMask = (_zz_execute_DBusSimplePlugin_formalMask <<< dBus_cmd_payload_address[1 : 0]);
   assign dBus_cmd_payload_address = execute_SRC_ADD;
-  assign when_DBusSimplePlugin_l482 = (((memory_arbitration_isValid && memory_MEMORY_ENABLE) && (! memory_MEMORY_STORE)) && ((! dBus_rsp_ready) || 1'b0));
+  assign when_DBusSimplePlugin_l490 = (((memory_arbitration_isValid && memory_MEMORY_ENABLE) && (! memory_MEMORY_STORE)) && ((! dBus_rsp_ready) || 1'b0));
   always @(*) begin
     writeBack_DBusSimplePlugin_rspShifted = writeBack_MEMORY_READ_DATA;
     case(writeBack_MEMORY_ADDRESS_LOW)
@@ -1994,7 +1997,7 @@ module VexRiscv (
     endcase
   end
 
-  assign switch_Misc_l226 = writeBack_INSTRUCTION[13 : 12];
+  assign switch_Misc_l232 = writeBack_INSTRUCTION[13 : 12];
   assign _zz_writeBack_DBusSimplePlugin_rspFormated = (writeBack_DBusSimplePlugin_rspShifted[7] && (! writeBack_INSTRUCTION[14]));
   always @(*) begin
     _zz_writeBack_DBusSimplePlugin_rspFormated_1[31] = _zz_writeBack_DBusSimplePlugin_rspFormated;
@@ -2046,7 +2049,7 @@ module VexRiscv (
   end
 
   always @(*) begin
-    case(switch_Misc_l226)
+    case(switch_Misc_l232)
       2'b00 : begin
         writeBack_DBusSimplePlugin_rspFormated = _zz_writeBack_DBusSimplePlugin_rspFormated_1;
       end
@@ -2059,7 +2062,7 @@ module VexRiscv (
     endcase
   end
 
-  assign when_DBusSimplePlugin_l558 = (writeBack_arbitration_isValid && writeBack_MEMORY_ENABLE);
+  assign when_DBusSimplePlugin_l566 = (writeBack_arbitration_isValid && writeBack_MEMORY_ENABLE);
   always @(*) begin
     CsrPlugin_privilege = 2'b11;
     if(CsrPlugin_forceMachineWire) begin
@@ -2070,7 +2073,6 @@ module VexRiscv (
   assign CsrPlugin_misa_base = 2'b01;
   assign CsrPlugin_misa_extensions = 26'h0000042;
   assign CsrPlugin_mtvec_mode = 2'b00;
-  assign CsrPlugin_mtvec_base = 30'h00000008;
   assign _zz_when_CsrPlugin_l1302 = (CsrPlugin_mip_MTIP && CsrPlugin_mie_MTIE);
   assign _zz_when_CsrPlugin_l1302_1 = (CsrPlugin_mip_MSIP && CsrPlugin_mie_MSIE);
   assign _zz_when_CsrPlugin_l1302_2 = (CsrPlugin_mip_MEIP && CsrPlugin_mie_MEIE);
@@ -2137,6 +2139,9 @@ module VexRiscv (
     if(execute_CsrPlugin_csr_772) begin
       execute_CsrPlugin_illegalAccess = 1'b0;
     end
+    if(execute_CsrPlugin_csr_773) begin
+      execute_CsrPlugin_illegalAccess = 1'b0;
+    end
     if(execute_CsrPlugin_csr_834) begin
       if(execute_CSR_READ_OPCODE) begin
         execute_CsrPlugin_illegalAccess = 1'b0;
@@ -2145,10 +2150,10 @@ module VexRiscv (
     if(CsrPlugin_csrMapping_allowCsrSignal) begin
       execute_CsrPlugin_illegalAccess = 1'b0;
     end
-    if(when_CsrPlugin_l1712) begin
+    if(when_CsrPlugin_l1719) begin
       execute_CsrPlugin_illegalAccess = 1'b1;
     end
-    if(when_CsrPlugin_l1718) begin
+    if(when_CsrPlugin_l1725) begin
       execute_CsrPlugin_illegalAccess = 1'b0;
     end
   end
@@ -2166,14 +2171,14 @@ module VexRiscv (
   assign when_CsrPlugin_l1548 = (CsrPlugin_privilege < execute_INSTRUCTION[29 : 28]);
   always @(*) begin
     execute_CsrPlugin_writeInstruction = ((execute_arbitration_isValid && execute_IS_CSR) && execute_CSR_WRITE_OPCODE);
-    if(when_CsrPlugin_l1712) begin
+    if(when_CsrPlugin_l1719) begin
       execute_CsrPlugin_writeInstruction = 1'b0;
     end
   end
 
   always @(*) begin
     execute_CsrPlugin_readInstruction = ((execute_arbitration_isValid && execute_IS_CSR) && execute_CSR_READ_OPCODE);
-    if(when_CsrPlugin_l1712) begin
+    if(when_CsrPlugin_l1719) begin
       execute_CsrPlugin_readInstruction = 1'b0;
     end
   end
@@ -2182,9 +2187,9 @@ module VexRiscv (
   assign execute_CsrPlugin_readEnable = (execute_CsrPlugin_readInstruction && (! execute_arbitration_isStuck));
   assign CsrPlugin_csrMapping_hazardFree = (! execute_CsrPlugin_blockedBySideEffects);
   assign execute_CsrPlugin_readToWriteData = CsrPlugin_csrMapping_readDataSignal;
-  assign switch_Misc_l226_1 = execute_INSTRUCTION[13];
+  assign switch_Misc_l232_1 = execute_INSTRUCTION[13];
   always @(*) begin
-    case(switch_Misc_l226_1)
+    case(switch_Misc_l232_1)
       1'b0 : begin
         _zz_CsrPlugin_csrMapping_writeDataSignal = execute_SRC1;
       end
@@ -2200,7 +2205,7 @@ module VexRiscv (
   assign execute_CsrPlugin_csrAddress = execute_INSTRUCTION[31 : 20];
   assign _zz_decode_SRC_LESS_UNSIGNED_1 = ((decode_INSTRUCTION & 32'h00004050) == 32'h00004050);
   assign _zz_decode_SRC_LESS_UNSIGNED_2 = ((decode_INSTRUCTION & 32'h00006004) == 32'h00002000);
-  assign _zz_decode_SRC_LESS_UNSIGNED_3 = ((decode_INSTRUCTION & 32'h00000018) == 32'h0);
+  assign _zz_decode_SRC_LESS_UNSIGNED_3 = ((decode_INSTRUCTION & 32'h00000018) == 32'h00000000);
   assign _zz_decode_SRC_LESS_UNSIGNED_4 = ((decode_INSTRUCTION & 32'h00000004) == 32'h00000004);
   assign _zz_decode_SRC_LESS_UNSIGNED_5 = ((decode_INSTRUCTION & 32'h00000050) == 32'h00000010);
   assign _zz_decode_SRC_LESS_UNSIGNED_6 = ((decode_INSTRUCTION & 32'h00000048) == 32'h00000048);
@@ -2219,29 +2224,29 @@ module VexRiscv (
   assign _zz_decode_SHIFT_CTRL_1 = _zz_decode_SHIFT_CTRL_2;
   assign _zz_decode_BRANCH_CTRL_2 = _zz_decode_SRC_LESS_UNSIGNED[24 : 23];
   assign _zz_decode_BRANCH_CTRL_1 = _zz_decode_BRANCH_CTRL_2;
-  assign when_RegFilePlugin_l63 = (decode_INSTRUCTION[11 : 7] == 5'h0);
+  assign when_RegFilePlugin_l63 = (decode_INSTRUCTION[11 : 7] == 5'h00);
   assign decode_RegFilePlugin_regFileReadAddress1 = decode_INSTRUCTION_ANTICIPATED[19 : 15];
   assign decode_RegFilePlugin_regFileReadAddress2 = decode_INSTRUCTION_ANTICIPATED[24 : 20];
   assign decode_RegFilePlugin_rs1Data = _zz_RegFilePlugin_regFile_port0;
   assign decode_RegFilePlugin_rs2Data = _zz_RegFilePlugin_regFile_port1;
   always @(*) begin
     lastStageRegFileWrite_valid = (_zz_lastStageRegFileWrite_valid && writeBack_arbitration_isFiring);
-    if(_zz_2) begin
+    if(_zz_5) begin
       lastStageRegFileWrite_valid = 1'b1;
     end
   end
 
   always @(*) begin
     lastStageRegFileWrite_payload_address = _zz_lastStageRegFileWrite_payload_address[11 : 7];
-    if(_zz_2) begin
-      lastStageRegFileWrite_payload_address = 5'h0;
+    if(_zz_5) begin
+      lastStageRegFileWrite_payload_address = 5'h00;
     end
   end
 
   always @(*) begin
     lastStageRegFileWrite_payload_data = _zz_lastStageRegFileWrite_payload_data;
-    if(_zz_2) begin
-      lastStageRegFileWrite_payload_data = 32'h0;
+    if(_zz_5) begin
+      lastStageRegFileWrite_payload_data = 32'h00000000;
     end
   end
 
@@ -2282,7 +2287,7 @@ module VexRiscv (
         _zz_decode_SRC1 = {29'd0, _zz__zz_decode_SRC1};
       end
       Src1CtrlEnum_IMU : begin
-        _zz_decode_SRC1 = {decode_INSTRUCTION[31 : 12],12'h0};
+        _zz_decode_SRC1 = {decode_INSTRUCTION[31 : 12],12'h000};
       end
       default : begin
         _zz_decode_SRC1 = {27'd0, _zz__zz_decode_SRC1_1};
@@ -2367,7 +2372,7 @@ module VexRiscv (
   assign execute_LightShifterPlugin_amplitude = (execute_LightShifterPlugin_isActive ? execute_LightShifterPlugin_amplitudeReg : execute_SRC2[4 : 0]);
   assign execute_LightShifterPlugin_shiftInput = (execute_LightShifterPlugin_isActive ? memory_REGFILE_WRITE_DATA : execute_SRC1);
   assign execute_LightShifterPlugin_done = (execute_LightShifterPlugin_amplitude[4 : 1] == 4'b0000);
-  assign when_ShiftPlugins_l169 = ((execute_arbitration_isValid && execute_LightShifterPlugin_isShift) && (execute_SRC2[4 : 0] != 5'h0));
+  assign when_ShiftPlugins_l169 = ((execute_arbitration_isValid && execute_LightShifterPlugin_isShift) && (execute_SRC2[4 : 0] != 5'h00));
   always @(*) begin
     case(execute_SHIFT_CTRL)
       ShiftCtrlEnum_SLL_1 : begin
@@ -2468,9 +2473,9 @@ module VexRiscv (
   assign when_HazardSimplePlugin_l108 = (! decode_RS2_USE);
   assign when_HazardSimplePlugin_l113 = (decode_arbitration_isValid && (HazardSimplePlugin_src0Hazard || HazardSimplePlugin_src1Hazard));
   assign execute_BranchPlugin_eq = (execute_SRC1 == execute_SRC2);
-  assign switch_Misc_l226_2 = execute_INSTRUCTION[14 : 12];
+  assign switch_Misc_l232_2 = execute_INSTRUCTION[14 : 12];
   always @(*) begin
-    case(switch_Misc_l226_2)
+    case(switch_Misc_l232_2)
       3'b000 : begin
         _zz_execute_BRANCH_DO = execute_BranchPlugin_eq;
       end
@@ -2682,9 +2687,10 @@ module VexRiscv (
   assign when_CsrPlugin_l1669_1 = (! execute_arbitration_isStuck);
   assign when_CsrPlugin_l1669_2 = (! execute_arbitration_isStuck);
   assign when_CsrPlugin_l1669_3 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1669_4 = (! execute_arbitration_isStuck);
   assign switch_CsrPlugin_l1031 = CsrPlugin_csrMapping_writeDataSignal[12 : 11];
   always @(*) begin
-    _zz_CsrPlugin_csrMapping_readDataInit = 32'h0;
+    _zz_CsrPlugin_csrMapping_readDataInit = 32'h00000000;
     if(execute_CsrPlugin_csr_768) begin
       _zz_CsrPlugin_csrMapping_readDataInit[7 : 7] = CsrPlugin_mstatus_MPIE;
       _zz_CsrPlugin_csrMapping_readDataInit[3 : 3] = CsrPlugin_mstatus_MIE;
@@ -2693,7 +2699,7 @@ module VexRiscv (
   end
 
   always @(*) begin
-    _zz_CsrPlugin_csrMapping_readDataInit_1 = 32'h0;
+    _zz_CsrPlugin_csrMapping_readDataInit_1 = 32'h00000000;
     if(execute_CsrPlugin_csr_836) begin
       _zz_CsrPlugin_csrMapping_readDataInit_1[11 : 11] = CsrPlugin_mip_MEIP;
       _zz_CsrPlugin_csrMapping_readDataInit_1[7 : 7] = CsrPlugin_mip_MTIP;
@@ -2702,7 +2708,7 @@ module VexRiscv (
   end
 
   always @(*) begin
-    _zz_CsrPlugin_csrMapping_readDataInit_2 = 32'h0;
+    _zz_CsrPlugin_csrMapping_readDataInit_2 = 32'h00000000;
     if(execute_CsrPlugin_csr_772) begin
       _zz_CsrPlugin_csrMapping_readDataInit_2[11 : 11] = CsrPlugin_mie_MEIE;
       _zz_CsrPlugin_csrMapping_readDataInit_2[7 : 7] = CsrPlugin_mie_MTIE;
@@ -2711,24 +2717,34 @@ module VexRiscv (
   end
 
   always @(*) begin
-    _zz_CsrPlugin_csrMapping_readDataInit_3 = 32'h0;
-    if(execute_CsrPlugin_csr_834) begin
-      _zz_CsrPlugin_csrMapping_readDataInit_3[31 : 31] = CsrPlugin_mcause_interrupt;
-      _zz_CsrPlugin_csrMapping_readDataInit_3[3 : 0] = CsrPlugin_mcause_exceptionCode;
+    _zz_CsrPlugin_csrMapping_readDataInit_3 = 32'h00000000;
+    if(execute_CsrPlugin_csr_773) begin
+      _zz_CsrPlugin_csrMapping_readDataInit_3[31 : 2] = CsrPlugin_mtvec_base;
     end
   end
 
-  assign CsrPlugin_csrMapping_readDataInit = ((_zz_CsrPlugin_csrMapping_readDataInit | _zz_CsrPlugin_csrMapping_readDataInit_1) | (_zz_CsrPlugin_csrMapping_readDataInit_2 | _zz_CsrPlugin_csrMapping_readDataInit_3));
-  assign when_CsrPlugin_l1702 = ((execute_arbitration_isValid && execute_IS_CSR) && (({execute_CsrPlugin_csrAddress[11 : 2],2'b00} == 12'h3a0) || ({execute_CsrPlugin_csrAddress[11 : 4],4'b0000} == 12'h3b0)));
   always @(*) begin
-    when_CsrPlugin_l1712 = CsrPlugin_csrMapping_doForceFailCsr;
-    if(when_CsrPlugin_l1710) begin
-      when_CsrPlugin_l1712 = 1'b1;
+    _zz_CsrPlugin_csrMapping_readDataInit_4 = 32'h00000000;
+    if(execute_CsrPlugin_csr_834) begin
+      _zz_CsrPlugin_csrMapping_readDataInit_4[31 : 31] = CsrPlugin_mcause_interrupt;
+      _zz_CsrPlugin_csrMapping_readDataInit_4[3 : 0] = CsrPlugin_mcause_exceptionCode;
     end
   end
 
-  assign when_CsrPlugin_l1710 = (CsrPlugin_privilege < execute_CsrPlugin_csrAddress[9 : 8]);
-  assign when_CsrPlugin_l1718 = ((! execute_arbitration_isValid) || (! execute_IS_CSR));
+  assign CsrPlugin_csrMapping_readDataInit = (((_zz_CsrPlugin_csrMapping_readDataInit | _zz_CsrPlugin_csrMapping_readDataInit_1) | (_zz_CsrPlugin_csrMapping_readDataInit_2 | _zz_CsrPlugin_csrMapping_readDataInit_3)) | _zz_CsrPlugin_csrMapping_readDataInit_4);
+  assign when_CsrPlugin_l1702 = ((execute_arbitration_isValid && execute_IS_CSR) && (({execute_CsrPlugin_csrAddress[11 : 2],2'b00} == 12'h3a0) || ({execute_CsrPlugin_csrAddress[11 : 4],4'b0000} == 12'h3b0)));
+  assign _zz_when_CsrPlugin_l1709 = (execute_CsrPlugin_csrAddress & 12'hf60);
+  assign when_CsrPlugin_l1709 = (((execute_arbitration_isValid && execute_IS_CSR) && (5'h03 <= execute_CsrPlugin_csrAddress[4 : 0])) && (((_zz_when_CsrPlugin_l1709 == 12'hb00) || (((_zz_when_CsrPlugin_l1709 == 12'hc00) && (! execute_CsrPlugin_writeInstruction)) && (CsrPlugin_privilege == 2'b11))) || ((execute_CsrPlugin_csrAddress & 12'hfe0) == 12'h320)));
+  always @(*) begin
+    when_CsrPlugin_l1719 = CsrPlugin_csrMapping_doForceFailCsr;
+    if(when_CsrPlugin_l1717) begin
+      when_CsrPlugin_l1719 = 1'b1;
+    end
+  end
+
+  assign when_CsrPlugin_l1717 = (CsrPlugin_privilege < execute_CsrPlugin_csrAddress[9 : 8]);
+  assign when_CsrPlugin_l1725 = ((! execute_arbitration_isValid) || (! execute_IS_CSR));
+  assign IBusSimplePlugin_rspJoin_rspBuffer_c_io_flush = 1'b0;
   always @(posedge clk or posedge reset) begin
     if(reset) begin
       IBusSimplePlugin_fetchPc_pcReg <= 32'h80000000;
@@ -2744,21 +2760,22 @@ module VexRiscv (
       IBusSimplePlugin_injector_nextPcCalc_valids_4 <= 1'b0;
       IBusSimplePlugin_pending_value <= 3'b000;
       IBusSimplePlugin_rspJoin_rspBuffer_discardCounter <= 3'b000;
+      CsrPlugin_mtvec_base <= 30'h00000008;
       CsrPlugin_mstatus_MIE <= 1'b0;
       CsrPlugin_mstatus_MPIE <= 1'b0;
       CsrPlugin_mstatus_MPP <= 2'b11;
       CsrPlugin_mie_MEIE <= 1'b0;
       CsrPlugin_mie_MTIE <= 1'b0;
       CsrPlugin_mie_MSIE <= 1'b0;
-      CsrPlugin_mcycle <= 64'h0;
-      CsrPlugin_minstret <= 64'h0;
+      CsrPlugin_mcycle <= 64'h0000000000000000;
+      CsrPlugin_minstret <= 64'h0000000000000000;
       CsrPlugin_interrupt_valid <= 1'b0;
       CsrPlugin_pipelineLiberator_pcValids_0 <= 1'b0;
       CsrPlugin_pipelineLiberator_pcValids_1 <= 1'b0;
       CsrPlugin_pipelineLiberator_pcValids_2 <= 1'b0;
       CsrPlugin_hadException <= 1'b0;
       execute_CsrPlugin_wfiWake <= 1'b0;
-      _zz_2 <= 1'b1;
+      _zz_5 <= 1'b1;
       execute_LightShifterPlugin_isActive <= 1'b0;
       HazardSimplePlugin_writeBackBuffer_valid <= 1'b0;
       execute_arbitration_isValid <= 1'b0;
@@ -2775,7 +2792,7 @@ module VexRiscv (
       if(when_Fetcher_l133) begin
         IBusSimplePlugin_fetchPc_inc <= 1'b0;
       end
-      if(IBusSimplePlugin_fetchPc_output_fire_1) begin
+      if(IBusSimplePlugin_fetchPc_output_fire) begin
         IBusSimplePlugin_fetchPc_inc <= 1'b1;
       end
       if(when_Fetcher_l133_1) begin
@@ -2904,7 +2921,7 @@ module VexRiscv (
         endcase
       end
       execute_CsrPlugin_wfiWake <= (({_zz_when_CsrPlugin_l1302_2,{_zz_when_CsrPlugin_l1302_1,_zz_when_CsrPlugin_l1302}} != 3'b000) || CsrPlugin_thirdPartyWake);
-      _zz_2 <= 1'b0;
+      _zz_5 <= 1'b0;
       if(when_ShiftPlugins_l169) begin
         if(when_ShiftPlugins_l175) begin
           execute_LightShifterPlugin_isActive <= 1'b1;
@@ -2953,6 +2970,11 @@ module VexRiscv (
           CsrPlugin_mie_MEIE <= CsrPlugin_csrMapping_writeDataSignal[11];
           CsrPlugin_mie_MTIE <= CsrPlugin_csrMapping_writeDataSignal[7];
           CsrPlugin_mie_MSIE <= CsrPlugin_csrMapping_writeDataSignal[3];
+        end
+      end
+      if(execute_CsrPlugin_csr_773) begin
+        if(execute_CsrPlugin_writeEnable) begin
+          CsrPlugin_mtvec_base <= CsrPlugin_csrMapping_writeDataSignal[31 : 2];
         end
       end
     end
@@ -3147,6 +3169,9 @@ module VexRiscv (
       execute_CsrPlugin_csr_772 <= (decode_INSTRUCTION[31 : 20] == 12'h304);
     end
     if(when_CsrPlugin_l1669_3) begin
+      execute_CsrPlugin_csr_773 <= (decode_INSTRUCTION[31 : 20] == 12'h305);
+    end
+    if(when_CsrPlugin_l1669_4) begin
       execute_CsrPlugin_csr_834 <= (decode_INSTRUCTION[31 : 20] == 12'h342);
     end
     if(execute_CsrPlugin_csr_836) begin
@@ -3160,135 +3185,141 @@ module VexRiscv (
 endmodule
 
 module StreamFifoLowLatency (
-  input               io_push_valid,
-  output              io_push_ready,
-  input               io_push_payload_error,
-  input      [31:0]   io_push_payload_inst,
-  output reg          io_pop_valid,
-  input               io_pop_ready,
-  output reg          io_pop_payload_error,
-  output reg [31:0]   io_pop_payload_inst,
-  input               io_flush,
-  output     [0:0]    io_occupancy,
-  input               clk,
-  input               reset
+  input  wire          io_push_valid,
+  output wire          io_push_ready,
+  input  wire          io_push_payload_error,
+  input  wire [31:0]   io_push_payload_inst,
+  output wire          io_pop_valid,
+  input  wire          io_pop_ready,
+  output wire          io_pop_payload_error,
+  output wire [31:0]   io_pop_payload_inst,
+  input  wire          io_flush,
+  output wire [0:0]    io_occupancy,
+  output wire [0:0]    io_availability,
+  input  wire          clk,
+  input  wire          reset
 );
 
-  reg                 when_Phase_l759;
-  reg                 pushPtr_willIncrement;
-  reg                 pushPtr_willClear;
-  wire                pushPtr_willOverflowIfInc;
-  wire                pushPtr_willOverflow;
-  reg                 popPtr_willIncrement;
-  reg                 popPtr_willClear;
-  wire                popPtr_willOverflowIfInc;
-  wire                popPtr_willOverflow;
-  wire                ptrMatch;
-  reg                 risingOccupancy;
-  wire                empty;
-  wire                full;
-  wire                pushing;
-  wire                popping;
-  wire                readed_error;
-  wire       [31:0]   readed_inst;
-  wire       [32:0]   _zz_readed_error;
-  wire                when_Stream_l1217;
-  wire                when_Stream_l1230;
-  wire       [32:0]   _zz_readed_error_1;
-  reg        [32:0]   _zz_readed_error_2;
+  wire                fifo_io_push_ready;
+  wire                fifo_io_pop_valid;
+  wire                fifo_io_pop_payload_error;
+  wire       [31:0]   fifo_io_pop_payload_inst;
+  wire       [0:0]    fifo_io_occupancy;
+  wire       [0:0]    fifo_io_availability;
+
+  StreamFifo fifo (
+    .io_push_valid         (io_push_valid                 ), //i
+    .io_push_ready         (fifo_io_push_ready            ), //o
+    .io_push_payload_error (io_push_payload_error         ), //i
+    .io_push_payload_inst  (io_push_payload_inst[31:0]    ), //i
+    .io_pop_valid          (fifo_io_pop_valid             ), //o
+    .io_pop_ready          (io_pop_ready                  ), //i
+    .io_pop_payload_error  (fifo_io_pop_payload_error     ), //o
+    .io_pop_payload_inst   (fifo_io_pop_payload_inst[31:0]), //o
+    .io_flush              (io_flush                      ), //i
+    .io_occupancy          (fifo_io_occupancy             ), //o
+    .io_availability       (fifo_io_availability          ), //o
+    .clk                   (clk                           ), //i
+    .reset                 (reset                         )  //i
+  );
+  assign io_push_ready = fifo_io_push_ready;
+  assign io_pop_valid = fifo_io_pop_valid;
+  assign io_pop_payload_error = fifo_io_pop_payload_error;
+  assign io_pop_payload_inst = fifo_io_pop_payload_inst;
+  assign io_occupancy = fifo_io_occupancy;
+  assign io_availability = fifo_io_availability;
+
+endmodule
+
+module StreamFifo (
+  input  wire          io_push_valid,
+  output reg           io_push_ready,
+  input  wire          io_push_payload_error,
+  input  wire [31:0]   io_push_payload_inst,
+  output reg           io_pop_valid,
+  input  wire          io_pop_ready,
+  output reg           io_pop_payload_error,
+  output reg  [31:0]   io_pop_payload_inst,
+  input  wire          io_flush,
+  output wire [0:0]    io_occupancy,
+  output wire [0:0]    io_availability,
+  input  wire          clk,
+  input  wire          reset
+);
+
+  reg                 oneStage_doFlush;
+  wire                oneStage_buffer_valid;
+  wire                oneStage_buffer_ready;
+  wire                oneStage_buffer_payload_error;
+  wire       [31:0]   oneStage_buffer_payload_inst;
+  reg                 io_push_rValid;
+  reg                 io_push_rData_error;
+  reg        [31:0]   io_push_rData_inst;
+  wire                when_Stream_l369;
+  wire                when_Stream_l1187;
 
   always @(*) begin
-    when_Phase_l759 = 1'b0;
-    if(pushing) begin
-      when_Phase_l759 = 1'b1;
+    oneStage_doFlush = io_flush;
+    if(when_Stream_l1187) begin
+      if(io_pop_ready) begin
+        oneStage_doFlush = 1'b1;
+      end
     end
   end
 
   always @(*) begin
-    pushPtr_willIncrement = 1'b0;
-    if(pushing) begin
-      pushPtr_willIncrement = 1'b1;
+    io_push_ready = oneStage_buffer_ready;
+    if(when_Stream_l369) begin
+      io_push_ready = 1'b1;
     end
   end
 
+  assign when_Stream_l369 = (! oneStage_buffer_valid);
+  assign oneStage_buffer_valid = io_push_rValid;
+  assign oneStage_buffer_payload_error = io_push_rData_error;
+  assign oneStage_buffer_payload_inst = io_push_rData_inst;
   always @(*) begin
-    pushPtr_willClear = 1'b0;
-    if(io_flush) begin
-      pushPtr_willClear = 1'b1;
-    end
-  end
-
-  assign pushPtr_willOverflowIfInc = 1'b1;
-  assign pushPtr_willOverflow = (pushPtr_willOverflowIfInc && pushPtr_willIncrement);
-  always @(*) begin
-    popPtr_willIncrement = 1'b0;
-    if(popping) begin
-      popPtr_willIncrement = 1'b1;
-    end
-  end
-
-  always @(*) begin
-    popPtr_willClear = 1'b0;
-    if(io_flush) begin
-      popPtr_willClear = 1'b1;
-    end
-  end
-
-  assign popPtr_willOverflowIfInc = 1'b1;
-  assign popPtr_willOverflow = (popPtr_willOverflowIfInc && popPtr_willIncrement);
-  assign ptrMatch = 1'b1;
-  assign empty = (ptrMatch && (! risingOccupancy));
-  assign full = (ptrMatch && risingOccupancy);
-  assign pushing = (io_push_valid && io_push_ready);
-  assign popping = (io_pop_valid && io_pop_ready);
-  assign io_push_ready = (! full);
-  assign _zz_readed_error = _zz_readed_error_1;
-  assign readed_error = _zz_readed_error[0];
-  assign readed_inst = _zz_readed_error[32 : 1];
-  assign when_Stream_l1217 = (! empty);
-  always @(*) begin
-    if(when_Stream_l1217) begin
-      io_pop_valid = 1'b1;
-    end else begin
+    io_pop_valid = oneStage_buffer_valid;
+    if(when_Stream_l1187) begin
       io_pop_valid = io_push_valid;
     end
   end
 
+  assign oneStage_buffer_ready = io_pop_ready;
   always @(*) begin
-    if(when_Stream_l1217) begin
-      io_pop_payload_error = readed_error;
-    end else begin
+    io_pop_payload_error = oneStage_buffer_payload_error;
+    if(when_Stream_l1187) begin
       io_pop_payload_error = io_push_payload_error;
     end
   end
 
   always @(*) begin
-    if(when_Stream_l1217) begin
-      io_pop_payload_inst = readed_inst;
-    end else begin
+    io_pop_payload_inst = oneStage_buffer_payload_inst;
+    if(when_Stream_l1187) begin
       io_pop_payload_inst = io_push_payload_inst;
     end
   end
 
-  assign when_Stream_l1230 = (pushing != popping);
-  assign io_occupancy = (risingOccupancy && ptrMatch);
-  assign _zz_readed_error_1 = _zz_readed_error_2;
+  assign io_occupancy = oneStage_buffer_valid;
+  assign io_availability = (! oneStage_buffer_valid);
+  assign when_Stream_l1187 = (! oneStage_buffer_valid);
   always @(posedge clk or posedge reset) begin
     if(reset) begin
-      risingOccupancy <= 1'b0;
+      io_push_rValid <= 1'b0;
     end else begin
-      if(when_Stream_l1230) begin
-        risingOccupancy <= pushing;
+      if(io_push_ready) begin
+        io_push_rValid <= io_push_valid;
       end
-      if(io_flush) begin
-        risingOccupancy <= 1'b0;
+      if(oneStage_doFlush) begin
+        io_push_rValid <= 1'b0;
       end
     end
   end
 
   always @(posedge clk) begin
-    if(when_Phase_l759) begin
-      _zz_readed_error_2 <= {io_push_payload_inst,io_push_payload_error};
+    if(io_push_ready) begin
+      io_push_rData_error <= io_push_payload_error;
+      io_push_rData_inst <= io_push_payload_inst;
     end
   end
 
