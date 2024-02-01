@@ -26,6 +26,8 @@ module top
     input nReset,
     input uart_output,
 
+    output [1:0] leds,
+
     output logic[3:0] debug,
 
     output uart_tx,
@@ -142,17 +144,20 @@ logic           ctrl_dBus_rsp_error;
 logic [31:0]    ctrl_dBus_rsp_data;
 
 logic           ctrl_timer_interrupt;
-logic           ctrl_interrupt;
+logic           ctrl_interrupt = 1'b1;
 logic           ctrl_software_interrupt;
 
 logic [31:0]    iob_ddr_read_data;
 
 
+assign leds[0] = !ctrl_timer_interrupt;
+assign leds[1] = ctrl_interrupt;
+
 VexRiscv control_cpu(
     .clk(ctrl_cpu_clock),
     .reset(!nReset || !clocks_locked),
 
-    .timerInterrupt(1'b0),
+    .timerInterrupt(ctrl_timer_interrupt),
     .externalInterrupt(1'b0),
     .softwareInterrupt(1'b0),
 
@@ -455,7 +460,9 @@ timer_int_ctrl#(.CLOCK_HZ(CTRL_CLOCK_HZ)) timer_interrupt(
     .req_ready_o(irq_req_ack),
 
     .rsp_data_o(irq_rsp_data),
-    .rsp_valid_o(irq_rsp_valid)
+    .rsp_valid_o(irq_rsp_valid),
+
+    .ctrl_timer_interrupt_o(ctrl_timer_interrupt)
 );
 
 gpio#(.NUM_IN_PORTS(1)) gpio(

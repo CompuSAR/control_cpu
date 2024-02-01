@@ -4,4 +4,4 @@ _start:
         lui     sp, 0x80004             # Set stack pointer to end of pre-cached memory (16KB + base)
         lui     gp, 0
         lui     tp, 0
-        jal     zero, bl1_start
+        j       bl1_start

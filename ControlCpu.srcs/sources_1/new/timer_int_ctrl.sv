@@ -15,15 +15,42 @@ module timer_int_ctrl#(
 
     // Response
     output logic[31:0]  rsp_data_o,
-    output logic        rsp_valid_o
+    output logic        rsp_valid_o,
+
+    // Control lines
+    output logic        ctrl_timer_interrupt_o
 );
 
-logic[63:0] cycles_counter = 64'h0;
-logic[31:0] cycles_counter_saved;
-logic       cycles_counter_save_flag;
+/*
+* Registers:
+*       Sequential interface:
+*       0000 Wait until time point is reached or interrupt (R)
+*       0004 Report clock's frequency (R)
+*       0008 Current cycle count low, latch high (R)
+*       000c Latched cycle count high (R)
+*       0010 Wait cycle low (RW)
+*       0014 Wait cycle high (RW)
+*
+*       Timer interrupt interface
+*       0200 Interrupt cycle low (RW)
+*       0204 Interrupt cycle high (latched) (RW)
+*       0210 Reset interrupt cycle (W)
+*/
+
 logic[63:0] wait_cycle, wait_cycle_next;
 logic[31:0] pending_address, pending_address_next;
 logic prev_valid = 1'b0, prev_valid_next;
+
+// Sequential interface
+logic[63:0] cycles_counter = 64'h0;
+logic[31:0] cycles_counter_saved;
+logic       cycles_counter_save_flag;
+
+// Timer interrupt interface
+localparam TIMER_INT_DISABLED32 = 32'hffffffff;
+localparam TIMER_INT_DISABLED64 = 64'hffffffffffffffff;
+logic[63:0] interrupt_cycle = TIMER_INT_DISABLED64, interrupt_cycle_next;
+logic[31:0] interrupt_cycle_high_latch = TIMER_INT_DISABLED32, interrupt_cycle_high_latch_next;
 
 always_ff@(posedge clock) begin
     cycles_counter <= cycles_counter+1;
@@ -34,7 +61,13 @@ always_ff@(posedge clock) begin
     if( cycles_counter_save_flag )
         cycles_counter_saved <= cycles_counter[63:32];
 
+    // XXX assigns every cycle. Can possibly lower power consumption by making
+    // assignment conditional
     wait_cycle <= wait_cycle_next;
+    interrupt_cycle <= interrupt_cycle_next;
+    interrupt_cycle_high_latch <= interrupt_cycle_high_latch_next;
+
+    ctrl_timer_interrupt_o <= (cycles_counter >= interrupt_cycle) ? 1'b1 : 1'b0;
 end
 
 always_comb begin
@@ -73,7 +106,7 @@ always_comb begin
         rsp_valid_o = 1'b1;
         case( pending_address )
             16'h0000: begin     // Halt
-                if(!wait_expired) begin
+                if(!wait_expired && !ctrl_timer_interrupt_o) begin
                     rsp_valid_o = 1'b0;
                 end else begin
                     rsp_valid_o = 1'b1;
@@ -93,6 +126,12 @@ always_comb begin
                 rsp_data_o = wait_cycle[31:0];
             16'h0014:           // Wait cycle high
                 rsp_data_o = wait_cycle[63:32];
+            16'h0200:
+                rsp_data_o = interrupt_cycle[31:0];
+            16'h0204:
+                rsp_data_o = interrupt_cycle[63:32];
+            default:
+                rsp_data_o = 32'h0;
         endcase
     end
 end
@@ -102,6 +141,9 @@ always_comb begin
 
     req_ready_o = 1'bX;
     wait_cycle_next = wait_cycle;
+    interrupt_cycle_next = interrupt_cycle;
+    interrupt_cycle_high_latch = interrupt_cycle_high_latch_next;
+
     if( req_valid_i ) begin
         req_ready_o = 1'b1;  // Accept request by default
 
@@ -112,6 +154,12 @@ always_comb begin
                     wait_cycle_next[31:0] = req_data_i;
                 16'h0014: // Wait cycle high
                     wait_cycle_next[63:32] = req_data_i;
+                16'h0200: // Interrupt cycle low
+                    interrupt_cycle_next = { interrupt_cycle_high_latch, req_data_i };
+                16'h0204: // Interrupt cycle high
+                    interrupt_cycle_high_latch_next = req_data_i;
+                16'h0210: // Reset timer interrupt
+                    interrupt_cycle_next = TIMER_INT_DISABLED64;
             endcase
         end
     end

@@ -13,6 +13,10 @@ enum class CSR {
     mie = 0x304,
     mtvec = 0x305,
     mscratch = 0x340,
+    mepc = 0x341,
+    mcause = 0x342,
+    mtval = 0x343,
+    mip = 0x344,
 
     mcycle = 0xb00,
     mcycleh = 0xb80,

@@ -7,7 +7,19 @@ extern unsigned char HEAP_START[];
 
 extern "C"
 void trap_handler() {
-    uart_send("USER TRAP!!!!\n");
+    uart_send("USER TRAP!!!!\ncause: ");
+    print_hex( csr_read_write(CSR::mcause, 0) );
+    uart_send(" pc: ");
+    print_hex( csr_read(CSR::mepc) );
+    uart_send(" mstatus: ");
+    print_hex( csr_read(CSR::mstatus) );
+    uart_send(" mie: ");
+    print_hex( csr_read(CSR::mie) );
+    uart_send(" mip: ");
+    print_hex( csr_read(CSR::mip) );
+    uart_send("\n");
+
+    reset_timer_cycles();
 
     halt();
 }
@@ -50,10 +62,12 @@ int _start() {
     print_hex( csr_read(CSR::mtvec) );
     uart_send("\n");
 
-    csr_write(CSR::mstatus, 0);
+    csr_write(CSR::mstatus, 1<<3);      // Set MIE
     uart_send("mstatus: ");
     print_hex( csr_read(CSR::mstatus) );
     uart_send("\n");
+
+    set_timer_ns(3'000'000'000);
 
     halt();
 }
