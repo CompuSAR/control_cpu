@@ -144,22 +144,23 @@ logic           ctrl_dBus_rsp_error;
 logic [31:0]    ctrl_dBus_rsp_data;
 
 logic           ctrl_timer_interrupt;
-logic           ctrl_interrupt = 1'b1;
+logic           ctrl_ext_interrupt;
 logic           ctrl_software_interrupt;
+logic [31:0]    irq_lines;
 
 logic [31:0]    iob_ddr_read_data;
 
 
 assign leds[0] = !ctrl_timer_interrupt;
-assign leds[1] = ctrl_interrupt;
+assign leds[1] = ctrl_ext_interrupt;
 
 VexRiscv control_cpu(
     .clk(ctrl_cpu_clock),
     .reset(!nReset || !clocks_locked),
 
     .timerInterrupt(ctrl_timer_interrupt),
-    .externalInterrupt(1'b0),
-    .softwareInterrupt(1'b0),
+    .externalInterrupt(ctrl_ext_interrupt),
+    .softwareInterrupt(ctrl_software_interrupt),
 
     .iBus_cmd_ready(inst_cache_port_cmd_ready_n[0]),
     .iBus_cmd_valid(inst_cache_port_cmd_valid_s[0]),
@@ -451,7 +452,7 @@ sddr_phy_xilinx ddr_phy(
     ,.ddr3_dqs_n_io(ddr3_dqs_n)
     );
 
-timer_int_ctrl#(.CLOCK_HZ(CTRL_CLOCK_HZ)) timer_interrupt(
+timer_int_ctrl#(.CLOCK_HZ(CTRL_CLOCK_HZ)) interrupt_controller(
     .clock(ctrl_cpu_clock),
     .req_addr_i(ctrl_dBus_cmd_payload_address[15:0]),
     .req_data_i(ctrl_dBus_cmd_payload_data),
@@ -462,7 +463,10 @@ timer_int_ctrl#(.CLOCK_HZ(CTRL_CLOCK_HZ)) timer_interrupt(
     .rsp_data_o(irq_rsp_data),
     .rsp_valid_o(irq_rsp_valid),
 
-    .ctrl_timer_interrupt_o(ctrl_timer_interrupt)
+    .irqs_i(irq_lines),
+
+    .ctrl_timer_interrupt_o(ctrl_timer_interrupt),
+    .ctrl_ext_interrupt_o(ctrl_ext_interrupt)
 );
 
 gpio#(.NUM_IN_PORTS(1)) gpio(
