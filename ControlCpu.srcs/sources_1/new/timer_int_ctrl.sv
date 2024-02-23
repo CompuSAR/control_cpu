@@ -165,7 +165,7 @@ always_comb begin
     req_ready_o = 1'bX;
     wait_cycle_next = wait_cycle;
     interrupt_cycle_next = interrupt_cycle;
-    interrupt_cycle_high_latch = interrupt_cycle_high_latch_next;
+    interrupt_cycle_high_latch_next = interrupt_cycle_high_latch;
     irq_masked_next = irq_masked;
 
     if( req_valid_i ) begin

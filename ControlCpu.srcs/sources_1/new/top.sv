@@ -60,6 +60,7 @@ module top
 //localparam CTRL_CLOCK_HZ = 101041667;
 //localparam CTRL_CLOCK_HZ = 86607143;
 localparam CTRL_CLOCK_HZ = 75781250;
+localparam UART_BAUD = 115200;
 
 `ifdef SYNTHESIS
 wire spi_clk;
@@ -147,6 +148,7 @@ logic           ctrl_timer_interrupt;
 logic           ctrl_ext_interrupt;
 logic           ctrl_software_interrupt;
 logic [31:0]    irq_lines;
+localparam UART_IRQ = 0;
 
 logic [31:0]    iob_ddr_read_data;
 
@@ -233,6 +235,8 @@ logic spi_enable, spi_req_ack, spi_rsp_valid;
 logic [31:0] spi_rsp_data;
 logic gpio_enable, gpio_req_ack, gpio_rsp_valid;
 logic [31:0] gpio_rsp_data;
+logic uart_enable, uart_req_ack, uart_rsp_valid;
+logic [31:0] uart_rsp_data;
 
 io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
     .clock(ctrl_cpu_clock),
@@ -240,7 +244,6 @@ io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
     .address(ctrl_dBus_cmd_payload_address),
     .address_valid(ctrl_dBus_cmd_valid),
     .write(ctrl_dBus_cmd_payload_wr),
-    .data_in(ctrl_dBus_cmd_payload_data),
     .data_out(ctrl_dBus_rsp_data),
 
     .req_ack(ctrl_dBus_cmd_ready),
@@ -271,8 +274,10 @@ io_block#(.CLOCK_HZ(CTRL_CLOCK_HZ)) iob(
     .passthrough_gpio_rsp_data(gpio_rsp_data),
     .passthrough_gpio_rsp_valid(gpio_rsp_valid),
 
-    .uart_tx(uart_tx),
-    .uart_rx(uart_rx)
+    .passthrough_uart_enable(uart_enable),
+    .passthrough_uart_req_ack(uart_req_ack),
+    .passthrough_uart_rsp_valid(uart_rsp_valid),
+    .passthrough_uart_rsp_data(uart_rsp_data)
 );
 
 cache#(
@@ -513,6 +518,24 @@ spi_ctrl#(.MEM_DATA_WIDTH(CACHELINE_BITS)) spi_flash(
 
     .dma_rsp_valid_i(cache_port_rsp_valid_n[CACHE_PORT_IDX_SPI_FLASH]),
     .dma_rsp_data_i(cache_port_rsp_read_data_n[CACHE_PORT_IDX_SPI_FLASH])
+);
+
+uart_ctrl#(.ClockDivider(CTRL_CLOCK_HZ / UART_BAUD)) uart_ctrl(
+    .clock( ctrl_cpu_clock ),
+
+    .req_valid_i(uart_enable),
+    .req_addr_i(ctrl_dBus_cmd_payload_address[15:0]),
+    .req_data_i(ctrl_dBus_cmd_payload_data),
+    .req_write_i(ctrl_dBus_cmd_payload_wr),
+    .req_ack_o(uart_req_ack),
+
+    .rsp_valid_o(uart_rsp_valid),
+    .rsp_data_o(uart_rsp_data),
+
+    .intr_send_ready_o(irq_lines[UART_IRQ]),
+
+    .uart_tx(uart_tx),
+    .uart_rx(uart_rx)
 );
 
 STARTUPE2 startup_cfg(

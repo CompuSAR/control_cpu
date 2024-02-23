@@ -29,7 +29,6 @@ module io_block#(
     input [31:0] address,
     input address_valid,
     input write,
-    input [31:0] data_in,
     output logic [31:0] data_out,
     output logic req_ack,
     output logic rsp_valid,
@@ -59,8 +58,11 @@ module io_block#(
     input passthrough_spi_rsp_valid,
     input [31:0] passthrough_spi_rsp_data,
 
-    output uart_tx,
-    input uart_rx
+    output logic passthrough_uart_enable,
+    input passthrough_uart_req_ack,
+    input passthrough_uart_rsp_valid,
+    input [31:0] passthrough_uart_rsp_data
+
     );
 
 logic [31:0] previous_address, previous_address_next;
@@ -81,21 +83,12 @@ end
 logic uart_send_data_ready;
 logic uart_recv_ready;
 
-uart_send#(.ClockDivider(CLOCK_HZ/115200)) // 115,200 BAUD at CPU clock
-uart_output(
-    .clock(clock),
-    .data_in(data_in[7:0]),
-    .data_in_ready(uart_send_data_ready),
-
-    .out_bit(uart_tx),
-    .receive_ready(uart_recv_ready)
-);
-
 task default_state_current();
     uart_send_data_ready = 1'b0;
     req_ack = 1'b1;
     previous_address_next = address;
 
+    passthrough_uart_enable = 1'b0;
     passthrough_ddr_enable = 1'b0;
     passthrough_ddr_ctrl_enable = 1'b0;
     passthrough_gpio_enable = 1'b0;
@@ -123,8 +116,8 @@ always_comb begin
         end else begin
             case( previous_address[23:16] )
                 8'h0: begin                     // UART
-                    rsp_valid = 1'b1;
-                    data_out = 32'b0;
+                    rsp_valid = passthrough_uart_rsp_valid;
+                    data_out = passthrough_uart_rsp_data;
                 end
                 8'h1: begin                     // DDR control
                     rsp_valid = passthrough_ddr_ctrl_rsp_valid;
@@ -162,12 +155,8 @@ always_comb begin
         end else if(address_valid) begin
             case( address[23:16] )
                 8'h0: begin                // UART
-                    if( write ) begin
-                        req_ack = uart_recv_ready;
-                        uart_send_data_ready = 1'b1;
-                    end else begin
-                        req_ack = 1;        // XXX No UART receive yet
-                    end
+                    passthrough_uart_enable = 1'b1;
+                    req_ack = passthrough_uart_req_ack;
                 end
                 8'h1: begin                // DDR control
                     passthrough_ddr_ctrl_enable = 1'b1;
