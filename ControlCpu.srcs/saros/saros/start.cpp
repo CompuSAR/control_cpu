@@ -5,6 +5,7 @@
 
 extern unsigned char HEAP_START[];
 
+/*
 extern "C"
 void trap_handler() {
     uart_send("USER TRAP!!!!\ncause: ");
@@ -23,9 +24,12 @@ void trap_handler() {
 
     halt();
 }
+*/
 
 extern "C"
 int _start() {
+    init_irq();
+
     uart_send("Second stage!\n");
     uart_send("Vendor Id: ");
     print_hex( csr_read(CSR::mvendorid) );
@@ -53,21 +57,6 @@ int _start() {
     uart_send(" ");
     print_hex( csr_read(CSR::mie) );
     uart_send("\n");
-
-    auto trap = reinterpret_cast<uintptr_t>(trap_handler);
-    uart_send("Trap handler: ");
-    print_hex(trap);
-    csr_write(CSR::mtvec, trap );
-    uart_send(" mtvec: ");
-    print_hex( csr_read(CSR::mtvec) );
-    uart_send("\n");
-
-    csr_write(CSR::mstatus, 1<<3);      // Set MIE
-    uart_send("mstatus: ");
-    print_hex( csr_read(CSR::mstatus) );
-    uart_send("\n");
-
-    set_timer_ns(3'000'000'000);
 
     halt();
 }

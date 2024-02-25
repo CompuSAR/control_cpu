@@ -166,11 +166,11 @@ void deinit() {
     write_enable();
 
     cmd.cmd = Commands::WriteEnhancedVolatileConfRegister;
-    cmd.bytes[0] = 0xff; // Quad I/O, single rate, Hold disabled, default driver strength
+    cmd.bytes[0] = 0xff; // Single I/O, single rate, Hold disabled, default driver strength
     SPI::start_transaction( &cmd, 2, 0, nullptr, 0 );
     SPI::wait_transaction();
 
-    set_config( SPI::Config::Quad );
+    set_config( SPI::Config::Single );
 }
 
 void erase_all() {

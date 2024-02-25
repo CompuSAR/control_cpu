@@ -38,6 +38,11 @@ enum class CSR {
     instreth = 0xc82,
 };
 
+static constexpr uint32_t MSTATUS__MIE = 1<<3;
+static constexpr uint32_t MIE__MEIE = 1<<11;
+static constexpr uint32_t MIE__MTIE = 1<<7;
+static constexpr uint32_t MIE__MSIE = 1<<3;
+
 static inline uint32_t csr_read(CSR csr) {
     uint32_t result;
 
@@ -54,6 +59,22 @@ static inline uint32_t csr_read_write(CSR csr, uint32_t value) {
     uint32_t result;
 
     asm volatile ("csrrw %0, %1, %2": "=r"(result): "i"(csr), "r" (value));
+
+    return result;
+}
+
+static inline uint32_t csr_read_set_bits(CSR csr, uint32_t value) {
+    uint32_t result;
+
+    asm volatile ("csrrs %0, %1, %2": "=r"(result): "i"(csr), "r" (value));
+
+    return result;
+}
+
+static inline uint32_t csr_read_clr_bits(CSR csr, uint32_t value) {
+    uint32_t result;
+
+    asm volatile ("csrrc %0, %1, %2": "=r"(result): "i"(csr), "r" (value));
 
     return result;
 }

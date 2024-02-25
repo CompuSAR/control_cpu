@@ -146,7 +146,7 @@ logic [31:0]    ctrl_dBus_rsp_data;
 
 logic           ctrl_timer_interrupt;
 logic           ctrl_ext_interrupt;
-logic           ctrl_software_interrupt;
+logic           ctrl_software_interrupt = 1'b0;
 logic [31:0]    irq_lines;
 localparam UART_IRQ = 0;
 
