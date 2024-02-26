@@ -7,16 +7,17 @@
 
 #define DEVICE_NUM 3
 
-#define REG_HALT                0x0000
-#define REG_CPU_CLOCK_FREQ      0x0004
-#define REG_CYCLE_COUNT         0x0008
-#define REG_WAIT_COUNT          0x0010
-#define REG_INT_CYCLE           0x0200
-#define REG_RESET_INT_CYCLE     0x0210
+#define REG_HALT                        0x0000
+#define REG_CPU_CLOCK_FREQ              0x0004
+#define REG_CYCLE_COUNT                 0x0008
+#define REG_WAIT_COUNT                  0x0010
+#define REG_INT_CYCLE                   0x0200
+#define REG_RESET_INT_CYCLE             0x0210
 
-#define REG_ACTIVE_IRQS         0x0400
-#define REG_IRQ_MASK_SET        0x0500
-#define REG_IRQ_MASK_CLEAR      0x0580
+#define REG_ACTIVE_UNMASKED_IRQS        0x0400
+#define REG_ACTIVE_IRQS                 0x0404
+#define REG_IRQ_MASK_SET                0x0500
+#define REG_IRQ_MASK_CLEAR              0x0580
 
 void sleep_ns(uint64_t nanoseconds) {
     sleep_cycles(nanoseconds*reg_read_32(DEVICE_NUM, REG_CPU_CLOCK_FREQ) / 1'000'000'000);
@@ -88,7 +89,7 @@ static void handle_timer_interrupt() {
 }
 
 static void handle_external_interrupt() {
-    uint32_t pending = reg_read_32( DEVICE_NUM, REG_ACTIVE_IRQS );
+    uint32_t pending = reg_read_32( DEVICE_NUM, REG_ACTIVE_UNMASKED_IRQS );
 
     if( pending & ExtIrq::UART )
         handle_uart_irq();
@@ -100,16 +101,22 @@ void irq_handler() {
 
     if( cause & 0x80000000 ) {
         // Interrupt
-        uint32_t pending = csr_read(CSR::mip);
 
-        if( pending & MIE__MSIE )
+        switch( cause & 0x7fffffff ) {
+        case 3:
             handle_software_interrupt();
-
-        if( pending & MIE__MTIE )
+            break;
+        case 7:
             handle_timer_interrupt();
-
-        if( pending & MIE__MEIE )
+            break;
+        case 11:
             handle_external_interrupt();
+            break;
+        default:
+            // Unknown interrupt cause
+            break;
+        }
+
     } else {
         // Exception
         // TODO implement

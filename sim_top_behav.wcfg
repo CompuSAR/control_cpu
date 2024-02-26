@@ -12,18 +12,17 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="18,121.806 ns"></ZoomStartTime>
-      <ZoomEndTime time="18,378.807 ns"></ZoomEndTime>
-      <Cursor1Time time="18,185.806 ns"></Cursor1Time>
+      <ZoomStartTime time="422.374 ns"></ZoomStartTime>
+      <ZoomEndTime time="1,115.526 ns"></ZoomEndTime>
+      <Cursor1Time time="1,000.000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="394"></NameColumnWidth>
-      <ValueColumnWidth column_width="117"></ValueColumnWidth>
+      <ValueColumnWidth column_width="105"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="22" />
+   <WVObjectSize size="26" />
    <wave_markers>
-      <marker label="" time="17610412" />
-      <marker label="" time="18164639" />
+      <marker label="" time="18032680" />
    </wave_markers>
    <wvobject type="array" fp_name="/sim_top/top_module/debug">
       <obj_property name="ElementShortName">debug[3:0]</obj_property>
@@ -119,8 +118,24 @@
       <obj_property name="ElementShortName">dBus_rsp_data[31:0]</obj_property>
       <obj_property name="ObjectShortName">dBus_rsp_data[31:0]</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/sim_top/top_module/uart_ctrl/req_valid_i">
-      <obj_property name="ElementShortName">req_valid_i</obj_property>
-      <obj_property name="ObjectShortName">req_valid_i</obj_property>
+   <wvobject type="array" fp_name="/sim_top/top_module/interrupt_controller/irq_masked">
+      <obj_property name="ElementShortName">irq_masked[31:0]</obj_property>
+      <obj_property name="ObjectShortName">irq_masked[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/interrupt_controller/irq_masked_next">
+      <obj_property name="ElementShortName">irq_masked_next[31:0]</obj_property>
+      <obj_property name="ObjectShortName">irq_masked_next[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/interrupt_controller/irqs_i">
+      <obj_property name="ElementShortName">irqs_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">irqs_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/interrupt_controller/irq_active_unmasked">
+      <obj_property name="ElementShortName">irq_active_unmasked[31:0]</obj_property>
+      <obj_property name="ObjectShortName">irq_active_unmasked[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/interrupt_controller/ctrl_ext_interrupt_o">
+      <obj_property name="ElementShortName">ctrl_ext_interrupt_o</obj_property>
+      <obj_property name="ObjectShortName">ctrl_ext_interrupt_o</obj_property>
    </wvobject>
 </wave_config>

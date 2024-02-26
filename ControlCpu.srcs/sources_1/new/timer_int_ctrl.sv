@@ -42,6 +42,7 @@ module timer_int_ctrl#(
 *
 *       IRQ control
 *       0400 Active IRQs
+*       0404 Active IRQs including masked
 *       0500 Set IRQs mask (write 1 to set)
 *       0580 Clear IRQs mask (write 1 to clear)
 */
@@ -62,8 +63,9 @@ logic[63:0] interrupt_cycle = TIMER_INT_DISABLED64, interrupt_cycle_next;
 logic[31:0] interrupt_cycle_high_latch = TIMER_INT_DISABLED32, interrupt_cycle_high_latch_next;
 
 // IRQs
-logic[31:0] irq_active = 0, irq_masked = 32'hffffffff, irq_masked_next;
-assign ctrl_ext_interrupt_o = (irq_active & (~irq_masked)) != 0;
+logic[31:0] irq_active = 0, irq_masked = 32'hffffffff, irq_masked_next, irq_active_unmasked;
+assign irq_active_unmasked = irq_active & (~irq_masked);
+assign ctrl_ext_interrupt_o = irq_active_unmasked != 0;
 
 always_ff@(posedge clock) begin
     irq_active <= irqs_i;
@@ -148,6 +150,8 @@ always_comb begin
             16'h0204:
                 rsp_data_o = interrupt_cycle[63:32];
             16'h0400:
+                rsp_data_o = irq_active_unmasked;
+            16'h0404:
                 rsp_data_o = irq_active;
             16'h0500:
                 rsp_data_o = irq_masked;
