@@ -24,6 +24,7 @@ enum ExtIrq : uint32_t {
 
 void irq_mask_external( ExtIrq::ExtIrq irq );
 void irq_unmask_external( ExtIrq::ExtIrq irq );
+uint32_t irq_external_get_mask();
 
 // Interrupt handlers
 extern "C"

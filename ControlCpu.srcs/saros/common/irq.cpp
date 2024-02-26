@@ -68,11 +68,15 @@ void wfi() {
 #ifdef SAROS
 
 void irq_mask_external( ExtIrq::ExtIrq irq ) {
-    reg_write_32( DEVICE_NUM, REG_IRQ_MASK_CLEAR, irq );
+    reg_write_32( DEVICE_NUM, REG_IRQ_MASK_SET, irq );
 }
 
 void irq_unmask_external( ExtIrq::ExtIrq irq ) {
-    reg_write_32( DEVICE_NUM, REG_IRQ_MASK_SET, irq );
+    reg_write_32( DEVICE_NUM, REG_IRQ_MASK_CLEAR, irq );
+}
+
+uint32_t irq_external_get_mask() {
+    return reg_read_32( DEVICE_NUM, REG_IRQ_MASK_CLEAR );
 }
 
 static void handle_software_interrupt() {
@@ -113,13 +117,16 @@ void irq_handler() {
 }
 
 void init_irq() {
+    // Set trap handler
     auto handler = reinterpret_cast<uintptr_t>(irq_handler_entry);
     csr_write(CSR::mtvec, handler );
 
-    reg_write_32( DEVICE_NUM, REG_IRQ_MASK_SET, 0xffffffff );
+    irq_mask_external( 0xffffffff );
 
-    csr_write(CSR::mie, MIE__MEIE );
+    // Enable External and Timer interrupts
+    csr_write(CSR::mie, MIE__MEIE | MIE__MTIE );
 
+    // Master interrupt enable
     csr_read_set_bits(CSR::mstatus, MSTATUS__MIE);
 }
 
