@@ -24,11 +24,11 @@ enum class DdrCommands {
 static constexpr int DdrDevice = 1;
 
 enum DdrRegister {
-    DdrControl = 0,
-    DdrOverrideCommand,
-    DdrOverrideAddress,
-    DdrReadOp,
-    DdrIncDelay,
+    DdrControl                  = 0x0000,
+    DdrOverrideCommand          = 0x0004,
+    DdrOverrideAddress          = 0x0008,
+    DdrReadOp                   = 0x000c,
+    DdrIncDelay                 = 0x0010,
 };
 
 static constexpr uint32_t DdrCtrl_ResetAll    = 0x0000;
