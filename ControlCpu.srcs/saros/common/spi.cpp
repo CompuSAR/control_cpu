@@ -10,12 +10,12 @@ namespace SPI {
 static constexpr uint32_t SpiDevice = 4;
 
 enum SpiRegister : uint32_t {
-    REG_TRIGGER         =       0,
-    REG_SEND_DMA_ADDR,
-    REG_NUM_SEND_CYCLES,
-    REG_RECV_DMA_ADDR,
-    REG_NUM_RECV_CYCLES,
-    REG_MODE,
+    REG_TRIGGER                 = 0x0000,
+    REG_SEND_DMA_ADDR           = 0x0004,
+    REG_NUM_SEND_CYCLES         = 0x0008,
+    REG_RECV_DMA_ADDR           = 0x000c,
+    REG_NUM_RECV_CYCLES         = 0x0010,
+    REG_MODE                    = 0x0014,
 };
 
 static Config current_config = Config(0xff);

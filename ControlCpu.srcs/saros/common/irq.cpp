@@ -7,16 +7,16 @@
 
 #define DEVICE_NUM 3
 
-#define REG_HALT 0x0000
-#define REG_CPU_CLOCK_FREQ 0x0001
-#define REG_CYCLE_COUNT 0x0002
-#define REG_WAIT_COUNT 0x0004
-#define REG_INT_CYCLE (0x0200/4)
-#define REG_RESET_INT_CYCLE (0x0210/4)
+#define REG_HALT                0x0000
+#define REG_CPU_CLOCK_FREQ      0x0004
+#define REG_CYCLE_COUNT         0x0008
+#define REG_WAIT_COUNT          0x0010
+#define REG_INT_CYCLE           0x0200
+#define REG_RESET_INT_CYCLE     0x0210
 
-#define REG_ACTIVE_IRQS (0x0400/4)
-#define REG_IRQ_MASK_SET (0x0500/4)
-#define REG_IRQ_MASK_CLEAR (0x0580/4)
+#define REG_ACTIVE_IRQS         0x0400
+#define REG_IRQ_MASK_SET        0x0500
+#define REG_IRQ_MASK_CLEAR      0x0580
 
 void sleep_ns(uint64_t nanoseconds) {
     sleep_cycles(nanoseconds*reg_read_32(DEVICE_NUM, REG_CPU_CLOCK_FREQ) / 1'000'000'000);

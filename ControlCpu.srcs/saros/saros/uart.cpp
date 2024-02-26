@@ -13,8 +13,8 @@ static volatile size_t buffer_prod = 0, buffer_cons = 0;
 
 static constexpr uint32_t UART_DEVICE = 0;
 
-static constexpr uint32_t UART_DATA_REG =       0x0000 / 4;
-static constexpr uint32_t UART_STATUS_REG =     0x0004 / 4;
+static constexpr uint32_t UART_DATA_REG =       0x0000;
+static constexpr uint32_t UART_STATUS_REG =     0x0004;
 static constexpr uint32_t UART_STATUS_REG__READY = 0x00000001;
 
 void handle_uart_irq() {
