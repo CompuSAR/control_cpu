@@ -154,7 +154,7 @@ logic [31:0]    iob_ddr_read_data;
 
 
 assign leds[0] = !ctrl_timer_interrupt;
-assign leds[1] = ctrl_ext_interrupt;
+assign leds[1] = !ctrl_ext_interrupt;
 
 VexRiscv control_cpu(
     .clk(ctrl_cpu_clock),

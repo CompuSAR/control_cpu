@@ -121,7 +121,7 @@ void init_irq() {
     auto handler = reinterpret_cast<uintptr_t>(irq_handler_entry);
     csr_write(CSR::mtvec, handler );
 
-    irq_mask_external( 0xffffffff );
+    irq_mask_external( ExtIrq::ALL );
 
     // Enable External and Timer interrupts
     csr_write(CSR::mie, MIE__MEIE | MIE__MTIE );

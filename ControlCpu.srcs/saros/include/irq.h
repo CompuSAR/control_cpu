@@ -19,6 +19,8 @@ void reset_timer_cycles();
 namespace ExtIrq {
 enum ExtIrq : uint32_t {
     UART = 0x00000001,
+
+    ALL = 0xffffffff,
 };
 }
 

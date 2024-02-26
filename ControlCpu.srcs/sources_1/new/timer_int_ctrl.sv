@@ -187,7 +187,7 @@ always_comb begin
                 16'h0500: // Set bits in IRQ mask
                     irq_masked_next = irq_masked | req_data_i;
                 16'h0580: // Clear bits in IRQ mask
-                    irq_masked_next = irq_masked & ~req_data_i;
+                    irq_masked_next = irq_masked & (~req_data_i);
             endcase
         end
     end
