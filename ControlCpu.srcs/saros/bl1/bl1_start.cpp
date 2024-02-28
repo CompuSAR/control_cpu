@@ -1,3 +1,4 @@
+#include "csr.h"
 #include "ddr.h"
 #include "elf_reader.h"
 #include "format.h"
@@ -5,6 +6,7 @@
 #include "spi.h"
 #include "spi_flash.h"
 #include "uart.h"
+#include "reg.h"
 
 extern "C" void bl1_start();
 
@@ -24,7 +26,20 @@ void hex_dump(const void *mem, size_t size) {
     }
 }
 
+static void trap_vector() {
+    uart_send("Trapped\n");
+
+    halt();
+}
+
 void bl1_start() {
+    // Disable all interrupts until we're ready for them.
+    csr_read_clr_bits( CSR::mstatus, MSTATUS__MIE );
+    csr_write( CSR::mie, 0 );
+    reg_write_32( 3, 0x500, 0xffffffff );
+
+    csr_write( CSR::mtvec, reinterpret_cast<uint32_t>(trap_vector) );
+
     for( uint32_t *bss = BSS_START; bss < &BSS_END; ++bss )
         *bss = 0;
 

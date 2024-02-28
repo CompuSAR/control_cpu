@@ -1,7 +1,7 @@
 .global irq_handler_entry
 irq_handler_entry:
     csrw mscratch, sp
-    lui         sp, 0x80004
+    lui         sp, 0x80008
 
     # Push registers
     addi        sp, sp, -72

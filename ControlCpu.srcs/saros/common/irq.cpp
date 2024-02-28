@@ -1,5 +1,7 @@
 #include "irq.h"
 
+#include "format.h"
+
 #include "csr.h"
 #include "memory.h"
 #include "reg.h"
@@ -82,15 +84,19 @@ uint32_t irq_external_get_mask() {
 
 static void handle_software_interrupt() {
     // TODO implement
+    uart_send_raw('S');
 }
 
 static void handle_timer_interrupt() {
     // TODO implement
+    uart_send_raw('T');
 }
 
 static void handle_external_interrupt() {
+    uart_send_raw('E');
     uint32_t pending = reg_read_32( DEVICE_NUM, REG_ACTIVE_UNMASKED_IRQS );
 
+    print_hex(pending);
     if( pending & ExtIrq::UART )
         handle_uart_irq();
 }
@@ -99,7 +105,10 @@ extern "C"
 void irq_handler() {
     uint32_t cause = csr_read(CSR::mcause);
 
+    uart_send_raw('h');
+    print_hex(cause);
     if( cause & 0x80000000 ) {
+        uart_send_raw('I');
         // Interrupt
 
         switch( cause & 0x7fffffff ) {
@@ -121,6 +130,8 @@ void irq_handler() {
         // Exception
         // TODO implement
     }
+
+    uart_send_raw('\n');
 }
 
 void init_irq() {

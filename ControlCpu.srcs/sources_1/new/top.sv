@@ -147,14 +147,16 @@ logic [31:0]    ctrl_dBus_rsp_data;
 logic           ctrl_timer_interrupt;
 logic           ctrl_ext_interrupt;
 logic           ctrl_software_interrupt = 1'b0;
-logic [31:0]    irq_lines;
-localparam UART_IRQ = 0;
-
 logic [31:0]    iob_ddr_read_data;
 
 
 assign leds[0] = !ctrl_timer_interrupt;
 assign leds[1] = !ctrl_ext_interrupt;
+
+logic [31:0]    irq_lines;
+localparam UART_IRQ = 0;
+
+assign irq_lines[31:1] = 0;
 
 VexRiscv control_cpu(
     .clk(ctrl_cpu_clock),

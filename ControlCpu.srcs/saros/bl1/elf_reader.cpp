@@ -66,6 +66,10 @@ EntryPoint load_os() {
 
     auto entry_point = reinterpret_cast<EntryPoint>(header.e_entry);
 
+    uart_send("Entry point ");
+    print_hex(header.e_entry);
+    uart_send('\n');
+
     check_value<Elf32_Half>(header.e_phentsize, sizeof(Elf32_Phdr));
     if( header.e_phnum * sizeof(Elf32_Phdr) > BufferSize ) {
         uart_send("ERROR: ELF program section descriptors need ");

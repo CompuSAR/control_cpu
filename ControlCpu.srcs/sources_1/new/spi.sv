@@ -106,6 +106,10 @@ logic                           cpu_dma_write_ack = 1'b0, spi_dma_write_ack;
 
 logic [31:0]                    cpu_send_counter = 0, cpu_recv_counter = 0;
 
+logic [MEM_DATA_WIDTH-1:0] spi_shift_buffer;
+logic [$clog2(MEM_DATA_WIDTH):0] spi_buffer_fill = 0;
+logic spi_load_buffer;
+
 wire cpu_send_idle = !cpu_dma_read_valid && !cpu_dma_read_ack;
 
 xpm_cdc_handshake#(
@@ -301,9 +305,6 @@ assign spi_cs_n_o = spi_state[0];
 logic [31:0] spi_send_cycles = 0, spi_recv_cycles = 0;
 logic [16:0] spi_dummy_cycles = 0;
 logic spi_quad_mode = 1'b0;
-logic [MEM_DATA_WIDTH-1:0] spi_shift_buffer;
-logic [$clog2(MEM_DATA_WIDTH):0] spi_buffer_fill = 0;
-logic spi_load_buffer;
 
 
 always_comb begin
