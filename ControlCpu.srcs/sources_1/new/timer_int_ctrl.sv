@@ -151,8 +151,10 @@ always_comb begin
                 rsp_data_o = interrupt_cycle[63:32];
             16'h0400:
                 rsp_data_o = irq_active_unmasked;
+                /*
             16'h0404:
                 rsp_data_o = irq_active;
+                */
             16'h0500:
                 rsp_data_o = irq_masked;
             16'h0580:

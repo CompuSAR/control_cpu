@@ -15,7 +15,7 @@ void print_hex(uint64_t number) {
     } while(number!=0);
 
     for( int j=i-1; j>=0; --j ) {
-        uart_send_raw(buffer[j]);
+        uart_send(buffer[j]);
     }
 }
 

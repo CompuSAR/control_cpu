@@ -22,7 +22,6 @@ void uart_send_raw(char c) {
 }
 
 void handle_uart_irq() {
-    uart_send_raw('U');
     while( buffer_prod!=buffer_cons && (reg_read_32( UART_DEVICE, UART_STATUS_REG ) & UART_STATUS_REG__READY) ) {
         uart_send_raw( buffer[buffer_cons] );
         rwb();
