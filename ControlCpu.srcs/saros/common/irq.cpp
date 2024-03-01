@@ -92,7 +92,6 @@ static void handle_timer_interrupt() {
 static void handle_external_interrupt() {
     uint32_t pending = reg_read_32( DEVICE_NUM, REG_ACTIVE_UNMASKED_IRQS );
 
-    print_hex(pending);
     if( pending & ExtIrq::UART )
         handle_uart_irq();
 }

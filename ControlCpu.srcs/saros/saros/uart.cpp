@@ -3,13 +3,12 @@
 #include "irq.h"
 #include "memory.h"
 #include "reg.h"
+#include "spsc.h"
 
 #include <cstddef>
 #include <cstdint>
 
-static constexpr size_t BufferSize = 1024;
-static uint8_t buffer[BufferSize];
-static volatile size_t buffer_prod = 0, buffer_cons = 0;
+static SPSC<char, 1024> charsQueue;
 
 static constexpr uint32_t UART_DEVICE = 0;
 
@@ -22,23 +21,18 @@ void uart_send_raw(char c) {
 }
 
 void handle_uart_irq() {
-    while( buffer_prod!=buffer_cons && (reg_read_32( UART_DEVICE, UART_STATUS_REG ) & UART_STATUS_REG__READY) ) {
-        uart_send_raw( buffer[buffer_cons] );
-        rwb();
-        buffer_cons = (buffer_cons+1) % BufferSize;
+    char c;
+    while( (reg_read_32( UART_DEVICE, UART_STATUS_REG ) & UART_STATUS_REG__READY) && charsQueue.consume(c) ) {
+        uart_send_raw( c );
     }
 
-    if( buffer_prod==buffer_cons )
+    if( charsQueue.isEmpty() )
         irq_mask_external( ExtIrq::UART );
 }
 
 void uart_send(char c) {
-    while( (buffer_prod+1)%BufferSize == buffer_cons )
+    while( ! charsQueue.produce(c) )
         wfi();
-
-    buffer[buffer_prod] = c;
-    wwb();
-    buffer_prod = (buffer_prod + 1) % BufferSize;
 
     irq_unmask_external( ExtIrq::UART );
 }
