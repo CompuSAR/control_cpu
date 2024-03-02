@@ -10,12 +10,22 @@ SECTIONS
 {
     .text : {
         . = ALIGN(4);
+        * (.text.startup)
+        . = ALIGN(4);
         * (.text*)
         . = ALIGN(4);
     } >exe
+    .init_array : {
+        . = ALIGN(4);
+        * (.init_array)
+    } >ram
+    .fini_array : {
+        . = ALIGN(4);
+        * (.fini_array)
+    } >ram
     .rodata : {
         . = ALIGN(4);
-         *(.rodata*)
+        *(.rodata*)
         . = ALIGN(4);
     } >readonly
 
