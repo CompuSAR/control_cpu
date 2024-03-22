@@ -7,7 +7,7 @@ import spinal.core._
 /**
  * Created by spinalvm on 15.06.17.
  */
-object GenCompuSarRiscV extends App{
+object GenCompuSar extends App{
   def cpu() = new VexRiscv(
     config = VexRiscvConfig(
       plugins = List(
@@ -23,7 +23,7 @@ object GenCompuSarRiscV extends App{
           catchAddressMisaligned = false,
           catchAccessFault = false
         ),
-        new CsrPlugin(CsrPluginConfig.smallest .copy(mtvecAccess=CsrAccess.READ_WRITE)),
+        new CsrPlugin(CsrPluginConfig.smallest .copy(mtvecAccess=CsrAccess.READ_WRITE, mscratchGen=true)),
         new DecoderSimplePlugin(
           catchIllegalInstruction = false
         ),
