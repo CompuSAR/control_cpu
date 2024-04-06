@@ -53,10 +53,14 @@ uint64_t get_cycles_count() {
     return cycles_count;
 }
 
+void wfi() {
+    reg_write_64(DEVICE_NUM, REG_WAIT_COUNT, 0xffff'ffff'ffff'ffff);
+    reg_read_32(DEVICE_NUM, REG_HALT);
+}
+
 void halt() {
     while( true ) {
-        reg_write_64(DEVICE_NUM, REG_WAIT_COUNT, 0xffff'ffff'ffff'ffff);
-        reg_read_32(DEVICE_NUM, REG_HALT);
+        wfi();
     }
 }
 

@@ -35,6 +35,9 @@ void handle_uart_tx_ready_irq() {
 }
 
 void uart_send(char c) {
+    while( uartBuffer.isFull() )
+        wfi();
+
     uartBuffer.produce(c);
 
     wwb();
