@@ -1,7 +1,8 @@
 #include "spi.h"
 
-#include "reg.h"
 #include "hw-params.h"
+#include "memory.h"
+#include "reg.h"
 
 #include <cstddef>
 
@@ -37,20 +38,22 @@ void postprocess_buffer( void *buffer, size_t recv_size ) {
     }
 }
 
-void start_transaction( const void *read_data, size_t read_size, uint16_t num_dummy_cycles, void *write_data, size_t write_size )
+void start_transaction( const void *send_buffer, size_t send_size, uint16_t num_dummy_cycles, void *recv_buffer, size_t recv_size )
 {
     // First write the values that the SPI clocked parts need
     reg_write_32( SpiDevice, REG_MODE, static_cast<uint32_t>(num_dummy_cycles) | (static_cast<uint32_t>(current_config)<<16) );
     if( current_config==Config::Single ) {
-        reg_write_32( SpiDevice, REG_NUM_SEND_CYCLES, read_size*8 );
-        reg_write_32( SpiDevice, REG_NUM_RECV_CYCLES, write_size*8 );
+        reg_write_32( SpiDevice, REG_NUM_SEND_CYCLES, send_size*8 );
+        reg_write_32( SpiDevice, REG_NUM_RECV_CYCLES, recv_size*8 );
     } else {
-        reg_write_32( SpiDevice, REG_NUM_SEND_CYCLES, read_size*2 );
-        reg_write_32( SpiDevice, REG_NUM_RECV_CYCLES, write_size*2 );
+        reg_write_32( SpiDevice, REG_NUM_SEND_CYCLES, send_size*2 );
+        reg_write_32( SpiDevice, REG_NUM_RECV_CYCLES, recv_size*2 );
     }
     // Then write the values it doesn't, so the first have time to propagate
-    reg_write_32( SpiDevice, REG_SEND_DMA_ADDR, reinterpret_cast<uint32_t>(read_data) );
-    reg_write_32( SpiDevice, REG_RECV_DMA_ADDR, reinterpret_cast<uint32_t>(write_data) );
+    reg_write_32( SpiDevice, REG_SEND_DMA_ADDR, reinterpret_cast<uint32_t>(send_buffer) );
+    reg_write_32( SpiDevice, REG_RECV_DMA_ADDR, reinterpret_cast<uint32_t>(recv_buffer) );
+
+    wwb();
 
     reg_write_32( SpiDevice, REG_TRIGGER, 0 );
 }

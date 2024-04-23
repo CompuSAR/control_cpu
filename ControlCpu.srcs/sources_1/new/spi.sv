@@ -302,9 +302,12 @@ logic [31:0] spi_send_cycles = 0, spi_recv_cycles = 0;
 logic [16:0] spi_dummy_cycles = 0;
 logic spi_quad_mode = 1'b0;
 logic [MEM_DATA_WIDTH-1:0] spi_shift_buffer;
-logic [$clog2(MEM_DATA_WIDTH):0] spi_buffer_fill = 0;
+localparam MEM_DATA_WIDTH_CLOG = $clog2(MEM_DATA_WIDTH);
+logic [MEM_DATA_WIDTH_CLOG:0] spi_buffer_fill = 0;
 logic spi_load_buffer;
 
+wire [MEM_DATA_WIDTH_CLOG:0] mem_data_width_cycles = spi_quad_mode ? MEM_DATA_WIDTH/4 : MEM_DATA_WIDTH;
+wire [MEM_DATA_WIDTH_CLOG:0] mem_data_width_cycles_minus_1 = spi_quad_mode ? (MEM_DATA_WIDTH/4)-1 : MEM_DATA_WIDTH-1;
 
 always_comb begin
     spi_state_next = spi_state;
@@ -351,7 +354,7 @@ always_comb begin
         RECV_ACTIVE: begin
             if( spi_recv_cycles==1 ) begin
                 spi_state_next = IDLE_PENDING;
-            end else if( spi_buffer_fill==(spi_quad_mode ? MEM_DATA_WIDTH-4 : MEM_DATA_WIDTH-1) ) begin
+            end else if( spi_buffer_fill==mem_data_width_cycles_minus_1 ) begin
                 spi_state_next = RECV_PENDING;
             end
         end
@@ -368,9 +371,9 @@ end
 
 task ack_buffer_from_cpu(input new_transaction);
     if( new_transaction )
-        spi_buffer_fill <= spi_num_send_cycles<=(MEM_DATA_WIDTH-1) ? (spi_num_send_cycles - 1) : (MEM_DATA_WIDTH - 1);
+        spi_buffer_fill <= (spi_num_send_cycles<=mem_data_width_cycles_minus_1) ? (spi_num_send_cycles - 1) : mem_data_width_cycles_minus_1;
     else
-        spi_buffer_fill <= spi_send_cycles<(MEM_DATA_WIDTH-1) ? spi_send_cycles : (MEM_DATA_WIDTH - 1);
+        spi_buffer_fill <= (spi_send_cycles<mem_data_width_cycles_minus_1) ? spi_send_cycles : mem_data_width_cycles_minus_1;
 
     spi_dma_read_ack <= 1'b1;
 endtask
@@ -403,7 +406,7 @@ always_ff@(posedge spi_ref_clock_p) begin
             end
             RECV_ACTIVE: begin
                 spi_recv_cycles <= spi_recv_cycles - 1;
-                spi_buffer_fill <= spi_buffer_fill + (spi_quad_mode ? 4 : 1);
+                spi_buffer_fill <= spi_buffer_fill + 1;
 
                 if( spi_state_next[3] ) begin // Need to flush
                     if( !spi_dma_write_ack )
@@ -425,7 +428,7 @@ always_ff@(posedge spi_ref_clock_p) begin
             end
             RECV_ACTIVE: begin
                 spi_recv_cycles <= spi_recv_cycles - 1;
-                spi_buffer_fill <= spi_buffer_fill + (spi_quad_mode ? 4 : 1);
+                spi_buffer_fill <= spi_buffer_fill + 1;
             end
             DUMMY: begin
                 spi_dummy_cycles <= spi_dummy_cycles - 1;

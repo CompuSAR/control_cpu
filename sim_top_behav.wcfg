@@ -12,15 +12,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="18,121.806 ns"></ZoomStartTime>
-      <ZoomEndTime time="18,378.807 ns"></ZoomEndTime>
-      <Cursor1Time time="18,185.806 ns"></Cursor1Time>
+      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
+      <ZoomEndTime time="136.701 ns"></ZoomEndTime>
+      <Cursor1Time time="0.000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="394"></NameColumnWidth>
-      <ValueColumnWidth column_width="117"></ValueColumnWidth>
+      <ValueColumnWidth column_width="113"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="22" />
+   <WVObjectSize size="33" />
    <wave_markers>
       <marker label="" time="17610412" />
       <marker label="" time="18164639" />
@@ -122,5 +122,50 @@
    <wvobject type="logic" fp_name="/sim_top/top_module/uart_ctrl/req_valid_i">
       <obj_property name="ElementShortName">req_valid_i</obj_property>
       <obj_property name="ObjectShortName">req_valid_i</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_ref_clock_i">
+      <obj_property name="ElementShortName">spi_ref_clock_i</obj_property>
+      <obj_property name="ObjectShortName">spi_ref_clock_i</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_cs_n_o">
+      <obj_property name="ElementShortName">spi_cs_n_o</obj_property>
+      <obj_property name="ObjectShortName">spi_cs_n_o</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_clk_o">
+      <obj_property name="ElementShortName">spi_clk_o</obj_property>
+      <obj_property name="ObjectShortName">spi_clk_o</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_buffer_fill">
+      <obj_property name="ElementShortName">spi_buffer_fill[7:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_buffer_fill[7:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_state">
+      <obj_property name="ElementShortName">spi_state[3:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_state[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_state_next">
+      <obj_property name="ElementShortName">spi_state_next[3:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_state_next[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_quad_mode">
+      <obj_property name="ElementShortName">spi_quad_mode</obj_property>
+      <obj_property name="ObjectShortName">spi_quad_mode</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_top/top_module/spi_flash/spi_dq_dir">
+      <obj_property name="ElementShortName">spi_dq_dir</obj_property>
+      <obj_property name="ObjectShortName">spi_dq_dir</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_dq_i">
+      <obj_property name="ElementShortName">spi_dq_i[3:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_dq_i[3:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_dq_io">
+      <obj_property name="ElementShortName">spi_dq_io[3:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_dq_io[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_top/top_module/spi_flash/spi_shift_buffer">
+      <obj_property name="ElementShortName">spi_shift_buffer[127:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_shift_buffer[127:0]</obj_property>
    </wvobject>
 </wave_config>
