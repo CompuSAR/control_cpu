@@ -329,7 +329,7 @@ always_comb begin
             end
         end
         RECV_ACTIVE: begin
-            if( spi_recv_cycles==1 ) begin
+            if( spi_recv_cycles==0 ) begin
                 spi_state_next = IDLE_PENDING;
             end else if( spi_buffer_fill==mem_data_width_cycles ) begin
                 spi_state_next = RECV_PENDING;
@@ -518,5 +518,10 @@ for( i=MEM_DATA_WIDTH-1; i<MEM_DATA_WIDTH; ++i ) begin
 end
 
 endgenerate
+
+assign debug[0] = spi_clk_o;
+assign debug[1] = spi_cs_n_o;
+assign debug[2] = spi_dq_i[0];
+assign debug[3] = spi_dq_i[1];
 
 endmodule
