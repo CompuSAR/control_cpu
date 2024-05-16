@@ -24,7 +24,7 @@ module top
 (
     input board_clock,
     input nReset,
-    input uart_output,
+    input enable_uart_output,
 
     output [1:0] leds,
 
@@ -485,7 +485,7 @@ gpio#(.NUM_IN_PORTS(1)) gpio(
     .rsp_data_o(gpio_rsp_data),
     .rsp_valid_o(gpio_rsp_valid),
 
-    .gp_in( '{ { 31'b0, uart_output } } ),
+    .gp_in( '{ { 31'b0, enable_uart_output } } ),
     .gp_out()
 );
 

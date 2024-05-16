@@ -86,8 +86,8 @@ struct SpiResult {
     uint8_t bytes[16*NumWords];
 } __attribute__(( aligned(16) ));
 
-static size_t last_op_size;
-static void *last_op_dest;
+static size_t last_op_size = 0;
+static void *last_op_dest = nullptr;
 static constexpr size_t NumDummyCycles = 3;
 
 FlashId read_id() {
@@ -119,7 +119,11 @@ void init() {
 
     FlashId id = read_id();
     uart_send("Flash Id (Single): ");
-    for( int i=0; i<(id.extended_id + 4); ++i ) {
+    unsigned len = id.id_length;
+    len += 4;
+    if( len>40 )
+        len = 40;
+    for( unsigned i=0; i<len; ++i ) {
         uart_send(" ");
         print_hex(reinterpret_cast<const uint8_t *>(&id)[i]);
     }
@@ -146,8 +150,12 @@ void init() {
     set_config( SPI::Config::Quad );
 
     id = read_id();
+    len = id.id_length;
+    len += 4;
+    if( len>40 )
+        len = 40;
     uart_send("Flash Id (Quad):   ");
-    for( int i=0; i<(id.extended_id + 4); ++i ) {
+    for( int i=0; i<len; ++i ) {
         uart_send(" ");
         print_hex(reinterpret_cast<const uint8_t *>(&id)[i]);
     }
@@ -212,6 +220,9 @@ void wait_done() {
 
     if( last_op_size!=0 )
         SPI::postprocess_buffer( last_op_dest, last_op_size );
+
+    last_op_dest = nullptr;
+    last_op_size = 0;
 }
 
 } // namespace SPI_FLASH

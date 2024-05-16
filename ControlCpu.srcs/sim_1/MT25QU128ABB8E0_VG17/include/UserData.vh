@@ -20,7 +20,7 @@
 
 `define FILENAME_mem_die1 "mem_Q128_die1.vmf" // Memory File Name 
 `define FILENAME_mem_die2 "mem_Q128_die2.vmf" // Memory File Name 
-`define FILENAME_mem "mem_Q128.vmf" // Memory File Name 
+`define FILENAME_mem "saros.mem" // Memory File Name
 //`define FILENAME_sfdp "sfdp.vmf" // SFDP File Name 
 `define FILENAME_sfdp "" // SFDP File Name 
 `define NVCR_DEFAULT_VALUE 'hFFFF

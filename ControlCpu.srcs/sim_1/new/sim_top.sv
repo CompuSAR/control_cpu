@@ -41,7 +41,7 @@ wire[3:0] debugs;
 
 top top_module(
     .board_clock(clock), .nReset(nReset),
-    .uart_output(1'b0),
+    .enable_uart_output(1'b0),
     .spi_cs_n(spi_flash_cs), .spi_dq(spi_flash_dq), .debug(debugs),
     .ddr3_dqs_p(ddr3_dqs_p), .ddr3_dqs_n(ddr3_dqs_n), .ddr3_dq(ddr3_dq),
     .uart_rx(1'b1)

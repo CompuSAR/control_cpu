@@ -31,3 +31,8 @@ saros.bin: saros.elf$(EXEEXT)
 saros.mcs: saros.bin
 	$(SCRIPTS_PATH)/make_hex.py "" "$<" > "$@".tmp
 	mv "$@".tmp "$@"
+
+saros.mem: saros.bin
+	echo "@200000" > "$@.tmp"
+	hexdump -ve '16/1 "%02X " "\n"' "$<" >> "$@.tmp"
+	mv "$@.tmp" "$@"

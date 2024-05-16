@@ -38,27 +38,6 @@ module spi_ctrl#(
 
 localparam MEM_DATA_WIDTH_BYTES = MEM_DATA_WIDTH/8;
 
-wire spi_ref_clock_p, spi_ref_clock_n, pll_feedback;
-PLLE2_BASE#(
-    .CLKFBOUT_MULT(16),
-    .CLKFBOUT_PHASE(0),
-    .CLKIN1_PERIOD(20), // 50 Mhz
-    .CLKOUT0_DIVIDE(16),
-    .CLKOUT0_PHASE(0),
-    .CLKOUT1_DIVIDE(16),
-    .CLKOUT1_PHASE(180)
-) clock_alignment(
-    .CLKIN1(spi_ref_clock_i),
-    .CLKFBIN(pll_feedback),
-    .RST(1'b0),
-    .PWRDWN(1'b0),
-
-    .CLKOUT0(spi_ref_clock_p),
-    .CLKOUT1(spi_ref_clock_n),
-
-    .CLKFBOUT(pll_feedback)
-);
-
 /*********************************************************************************
 * CPU clock logic
 *********************************************************************************/
@@ -80,19 +59,19 @@ xpm_cdc_array_single#(
     .src_clk(cpu_clock_i),
     .src_in(cpu_num_send_cycles),
 
-    .dest_clk(spi_ref_clock_p),
+    .dest_clk(spi_ref_clock_i),
     .dest_out(spi_num_send_cycles)
 ), cdc_num_recv_cycles(
     .src_clk(cpu_clock_i),
     .src_in(cpu_num_recv_cycles),
 
-    .dest_clk(spi_ref_clock_p),
+    .dest_clk(spi_ref_clock_i),
     .dest_out(spi_num_recv_cycles)
 ), cdc_transfer_mode(
     .src_clk(cpu_clock_i),
     .src_in(cpu_transfer_mode),
 
-    .dest_clk(spi_ref_clock_p),
+    .dest_clk(spi_ref_clock_i),
     .dest_out(spi_transfer_mode)
 );
 
@@ -107,32 +86,6 @@ logic                           cpu_dma_write_ack = 1'b0, spi_dma_write_ack;
 logic [31:0]                    cpu_send_counter = 0, cpu_recv_counter = 0;
 
 wire cpu_send_idle = !cpu_dma_read_valid && !cpu_dma_read_ack;
-
-xpm_cdc_handshake#(
-    .DEST_EXT_HSK(1),
-    .WIDTH(MEM_DATA_WIDTH),
-    .SIM_ASSERT_CHK(1)
-) cdc_dma_read_info(
-    .src_clk(cpu_clock_i),
-    .src_in(cpu_dma_read_data),
-    .src_send(cpu_dma_read_valid),
-    .src_rcv(cpu_dma_read_ack),
-
-    .dest_clk(spi_ref_clock_p),
-    .dest_out(spi_dma_read_data),
-    .dest_req(spi_dma_read_valid),
-    .dest_ack(spi_dma_read_ack)
-), cdc_dma_write_info(
-    .src_clk(spi_ref_clock_p),
-    .src_in(spi_shift_buffer),
-    .src_send(spi_dma_write_valid),
-    .src_rcv(spi_dma_write_ack),
-
-    .dest_clk(cpu_clock_i),
-    .dest_out(cpu_dma_write_data),
-    .dest_req(cpu_dma_write_valid),
-    .dest_ack(cpu_dma_write_ack)
-);
 
 task cpu_set_invalid_state();
 endtask
@@ -285,18 +238,18 @@ endgenerate
 * Bit 1: SPI clock enable
 * Bit 2: Send
 * Bit 3: Recv
+* Bit 4: Shifter load
 */
-enum logic[3:0] {
-    IDLE =              4'b0001,
-    SEND_ACTIVE =       4'b0110,
-    SEND_PENDING =      4'b0100,
-    DUMMY =             4'b0010,
-    RECV_ACTIVE =       4'b1010,
-    RECV_PENDING =      4'b1000,
-    IDLE_PENDING =      4'b1001
+enum logic[4:0] {
+    IDLE =              5'b00001,
+    SEND_STARTING =     5'b10000,
+    SEND_ACTIVE =       5'b00110,
+    SEND_PENDING =      5'b10100,
+    DUMMY =             5'b00010,
+    RECV_ACTIVE =       5'b01010,
+    RECV_PENDING =      5'b01000,
+    IDLE_PENDING =      5'b01001
 } spi_state = IDLE, spi_state_next;
-
-assign spi_cs_n_o = spi_state[0];
 
 logic [31:0] spi_send_cycles = 0, spi_recv_cycles = 0;
 logic [16:0] spi_dummy_cycles = 0;
@@ -304,21 +257,48 @@ logic spi_quad_mode = 1'b0;
 logic [MEM_DATA_WIDTH-1:0] spi_shift_buffer;
 localparam MEM_DATA_WIDTH_CLOG = $clog2(MEM_DATA_WIDTH);
 logic [MEM_DATA_WIDTH_CLOG:0] spi_buffer_fill = 0;
-logic spi_load_buffer;
+logic spi_load_buffer = 1'b0;
+logic spi_clock_enabled = 1'b0;
 
 wire [MEM_DATA_WIDTH_CLOG:0] mem_data_width_cycles = spi_quad_mode ? MEM_DATA_WIDTH/4 : MEM_DATA_WIDTH;
-wire [MEM_DATA_WIDTH_CLOG:0] mem_data_width_cycles_minus_1 = spi_quad_mode ? (MEM_DATA_WIDTH/4)-1 : MEM_DATA_WIDTH-1;
+
+xpm_cdc_handshake#(
+    .DEST_EXT_HSK(1),
+    .WIDTH(MEM_DATA_WIDTH),
+    .SIM_ASSERT_CHK(1)
+) cdc_dma_read_info(
+    .src_clk(cpu_clock_i),
+    .src_in(cpu_dma_read_data),
+    .src_send(cpu_dma_read_valid),
+    .src_rcv(cpu_dma_read_ack),
+
+    .dest_clk(spi_ref_clock_i),
+    .dest_out(spi_dma_read_data),
+    .dest_req(spi_dma_read_valid),
+    .dest_ack(spi_dma_read_ack)
+), cdc_dma_write_info(
+    .src_clk(spi_ref_clock_i),
+    .src_in(spi_shift_buffer),
+    .src_send(spi_dma_write_valid),
+    .src_rcv(spi_dma_write_ack),
+
+    .dest_clk(cpu_clock_i),
+    .dest_out(cpu_dma_write_data),
+    .dest_req(cpu_dma_write_valid),
+    .dest_ack(cpu_dma_write_ack)
+);
 
 always_comb begin
     spi_state_next = spi_state;
-    spi_load_buffer = 1'b0;
 
     case(spi_state)
         IDLE: begin
             if( spi_dma_read_valid && !spi_dma_read_ack ) begin
-                spi_state_next = SEND_ACTIVE;
-                spi_load_buffer = 1'b1;
+                spi_state_next = SEND_STARTING;
             end
+        end
+        SEND_STARTING: begin
+            spi_state_next = SEND_ACTIVE;
         end
         SEND_ACTIVE: begin
             if( spi_send_cycles==0 ) begin
@@ -332,14 +312,11 @@ always_comb begin
             end else begin
                 // Send part not done
                 if( spi_buffer_fill==0 ) begin
-                    spi_load_buffer = 1'b1;
                     spi_state_next = SEND_PENDING;
                 end
             end
         end
         SEND_PENDING: begin
-            spi_load_buffer = 1'b1;
-
             if( spi_dma_read_valid && !spi_dma_read_ack )
                 spi_state_next = SEND_ACTIVE;
         end
@@ -354,7 +331,7 @@ always_comb begin
         RECV_ACTIVE: begin
             if( spi_recv_cycles==1 ) begin
                 spi_state_next = IDLE_PENDING;
-            end else if( spi_buffer_fill==mem_data_width_cycles_minus_1 ) begin
+            end else if( spi_buffer_fill==mem_data_width_cycles ) begin
                 spi_state_next = RECV_PENDING;
             end
         end
@@ -371,107 +348,111 @@ end
 
 task ack_buffer_from_cpu(input new_transaction);
     if( new_transaction )
-        spi_buffer_fill <= (spi_num_send_cycles<=mem_data_width_cycles_minus_1) ? (spi_num_send_cycles - 1) : mem_data_width_cycles_minus_1;
+        spi_buffer_fill <= spi_num_send_cycles<mem_data_width_cycles ? spi_num_send_cycles : mem_data_width_cycles;
     else
-        spi_buffer_fill <= (spi_send_cycles<mem_data_width_cycles_minus_1) ? spi_send_cycles : mem_data_width_cycles_minus_1;
+        spi_buffer_fill <= spi_send_cycles<mem_data_width_cycles ? spi_send_cycles : mem_data_width_cycles;
 
     spi_dma_read_ack <= 1'b1;
 endtask
 
-always_ff@(posedge spi_ref_clock_p) begin
+always_ff@(posedge spi_ref_clock_i) begin
     spi_state <= spi_state_next;
 
     if( spi_dma_read_ack && !spi_dma_read_valid )
         spi_dma_read_ack <= 1'b0;
 
-    if( spi_state != spi_state_next ) begin
-        // State transition
-        case( spi_state )
-            IDLE: begin
-                spi_send_cycles <= spi_num_send_cycles - 1;
-                spi_recv_cycles <= spi_num_recv_cycles;
-                spi_dummy_cycles <= spi_transfer_mode[15:0];
-                spi_quad_mode <= spi_transfer_mode[16];
+    if( spi_dma_write_valid && spi_dma_write_ack )
+        spi_dma_write_valid <= 1'b0;
 
-                ack_buffer_from_cpu(1'b1);
-            end
-            SEND_ACTIVE: begin
-                if( spi_state_next==SEND_PENDING && spi_dma_read_valid && !spi_dma_read_ack ) begin
-                    ack_buffer_from_cpu(1'b0);
-                    spi_state <= SEND_ACTIVE;
-                end
-                if( spi_state_next==DUMMY )
-                    spi_dummy_cycles <= spi_dummy_cycles - 1;
-                spi_buffer_fill <= 0;
-            end
-            RECV_ACTIVE: begin
-                spi_recv_cycles <= spi_recv_cycles - 1;
-                spi_buffer_fill <= spi_buffer_fill + 1;
+    case( spi_state_next )
+        IDLE: begin
+            spi_buffer_fill <= 0;
+        end
+        SEND_STARTING: begin
+            spi_send_cycles <= spi_num_send_cycles;
+            spi_recv_cycles <= spi_num_recv_cycles;
+            spi_dummy_cycles <= spi_transfer_mode[15:0];
+            spi_quad_mode <= spi_transfer_mode[16];
 
-                if( spi_state_next[3] ) begin // Need to flush
-                    if( !spi_dma_write_ack )
-                        spi_dma_write_valid <= 1'b1;
-                end
+            ack_buffer_from_cpu(1'b1);
+        end
+        SEND_ACTIVE: begin
+            spi_send_cycles <= spi_send_cycles - 1;
+            spi_buffer_fill <= spi_buffer_fill - 1;
+
+            if( spi_state==SEND_PENDING ) begin
+                ack_buffer_from_cpu(1'b0);
             end
-            RECV_PENDING: begin
-                spi_buffer_fill <= 0;
-                spi_dma_write_valid <= 1'b0;
-            end
-            IDLE_PENDING: spi_dma_write_valid <= 1'b0;
-        endcase
-    end else begin
-        // Stable state
-        case( spi_state )
-            SEND_ACTIVE: begin
-                spi_send_cycles <= spi_send_cycles - 1;
-                spi_buffer_fill <= spi_buffer_fill - 1;
-            end
-            RECV_ACTIVE: begin
-                spi_recv_cycles <= spi_recv_cycles - 1;
-                spi_buffer_fill <= spi_buffer_fill + 1;
-            end
-            DUMMY: begin
-                spi_dummy_cycles <= spi_dummy_cycles - 1;
-            end
-            RECV_PENDING: begin
-                spi_buffer_fill <= 0;
-                spi_dma_write_valid <= !spi_dma_write_ack;
-            end
-            IDLE_PENDING: spi_dma_write_valid <= !spi_dma_write_ack;
-        endcase
-    end
+        end
+        DUMMY: begin
+            spi_dummy_cycles <= spi_dummy_cycles - 1;
+        end
+        RECV_ACTIVE: begin
+            spi_recv_cycles <= spi_recv_cycles - 1;
+            spi_buffer_fill <= spi_buffer_fill + 1;
+        end
+        RECV_PENDING: begin
+            spi_buffer_fill <= 0;
+
+            if( !spi_dma_write_ack )
+                spi_dma_write_valid <= 1'b1;
+        end
+        IDLE_PENDING: begin
+            if( !spi_dma_write_ack )
+                spi_dma_write_valid <= 1'b1;
+        end
+    endcase
 end
 
 BUFGCE spi_clock_buf(
     .O(spi_clk_o),
-    .I(spi_ref_clock_n),
-    .CE(spi_state[1])
+    .I(spi_ref_clock_i),
+    .CE(spi_clock_enabled)
 );
 
-logic[3:0] spi_dq_o, spi_dq_raw_i, spi_dq_i;
+logic[3:0] spi_dq_dir = 4'b1111;
+logic[3:0] spi_dq_o = 4'b1100, spi_dq_i;
 
-assign spi_dq_o = spi_state[2] ?
-    (spi_quad_mode ? {spi_shift_buffer[0], spi_shift_buffer[1], spi_shift_buffer[2], spi_shift_buffer[3]} : spi_shift_buffer[3:0]) :
-    4'b1111;
+always_ff@(negedge spi_ref_clock_i) begin
+    if( spi_state_next[2] ) begin
+        // Send mode
+        if( spi_quad_mode ) begin
+            spi_dq_o <= {spi_shift_buffer[0], spi_shift_buffer[1], spi_shift_buffer[2], spi_shift_buffer[3]};
+            spi_dq_dir <= 4'b0000;
+        end else begin
+            spi_dq_o <= {3'b11X, spi_shift_buffer[0]};
+            spi_dq_dir <= 4'b0010;
+        end
+    end else begin
+        // Non send mode
+        spi_dq_o <= 4'b11X1;
+        if( spi_quad_mode )
+            spi_dq_dir <= 4'b1111;
+        else
+            spi_dq_dir <= 4'b0011;
+    end
 
-wire spi_dq_dir = !spi_state[2];
-IOBUF dq0_buffer(.T(spi_cs_n_o ? 1'b1 : (spi_quad_mode ? spi_dq_dir : 1'b0)), .I(spi_dq_o[0]), .O(spi_dq_raw_i[0]), .IO(spi_dq_io[0]));
-IOBUF dq1_buffer(.T(spi_cs_n_o ? 1'b1 : (spi_quad_mode ? spi_dq_dir : 1'b1)), .I(spi_dq_o[1]), .O(spi_dq_raw_i[1]), .IO(spi_dq_io[1]));
-IOBUF dq2_buffer(.T(spi_cs_n_o ? 1'b1 : (spi_quad_mode ? spi_dq_dir : 1'b0)), .I(spi_quad_mode ? spi_dq_o[2] : 1'b1), .O(spi_dq_raw_i[2]), .IO(spi_dq_io[2]));
-IOBUF dq3_buffer(.T(spi_cs_n_o ? 1'b1 : (spi_quad_mode ? spi_dq_dir : 1'b0)), .I(spi_quad_mode ? spi_dq_o[3] : 1'b1), .O(spi_dq_raw_i[3]), .IO(spi_dq_io[3]));
+    spi_clock_enabled <= spi_state_next[1];
+    spi_load_buffer <= spi_state_next[4];
+end
 
-always_ff@(posedge spi_ref_clock_n)
-    spi_dq_i <= spi_dq_raw_i;
+assign spi_cs_n_o = spi_state[0];
 
+generate
+
+for( i=0; i<4; ++i )
+    IOBUF dq_buffer(.T(spi_dq_dir[i]), .I(spi_dq_o[i]), .O(spi_dq_i[i]), .IO(spi_dq_io[i]));
+
+endgenerate
 
 generate
 
 for( i=0; i<1; ++i ) begin
-    always_ff@(posedge spi_ref_clock_p) begin
+    always_ff@(posedge spi_ref_clock_i) begin
         if( spi_load_buffer ) begin
             spi_shift_buffer[i] <= spi_dma_read_data[i];
         end else begin
-            case(spi_state)
+            case(spi_state_next)
                 SEND_ACTIVE: spi_shift_buffer[i] <= (spi_quad_mode ? spi_shift_buffer[i+4] : spi_shift_buffer[i+1]);
                 RECV_ACTIVE: spi_shift_buffer[i] <= (spi_quad_mode ? spi_dq_i[0] : spi_dq_i[1]);
                 DUMMY: spi_shift_buffer[i] <= 1'bX;
@@ -481,11 +462,11 @@ for( i=0; i<1; ++i ) begin
 end
 
 for( i=1; i<4; ++i ) begin
-    always_ff@(posedge spi_ref_clock_p) begin
+    always_ff@(posedge spi_ref_clock_i) begin
         if( spi_load_buffer ) begin
             spi_shift_buffer[i] <= spi_dma_read_data[i];
         end else begin
-            case(spi_state)
+            case(spi_state_next)
                 SEND_ACTIVE: spi_shift_buffer[i] <= (spi_quad_mode ? spi_shift_buffer[i+4] : spi_shift_buffer[i+1]);
                 RECV_ACTIVE: spi_shift_buffer[i] <= (spi_quad_mode ? spi_dq_i[i] : spi_shift_buffer[i-1]);
                 DUMMY: spi_shift_buffer[i] <= 1'bX;
@@ -495,11 +476,11 @@ for( i=1; i<4; ++i ) begin
 end
 
 for( i=4; i<(MEM_DATA_WIDTH-4); ++i ) begin
-    always_ff@(posedge spi_ref_clock_p) begin
+    always_ff@(posedge spi_ref_clock_i) begin
         if( spi_load_buffer ) begin
             spi_shift_buffer[i] <= spi_dma_read_data[i];
         end else begin
-            case(spi_state)
+            case(spi_state_next)
                 SEND_ACTIVE: spi_shift_buffer[i] <= (spi_quad_mode ? spi_shift_buffer[i+4] : spi_shift_buffer[i+1]);
                 RECV_ACTIVE: spi_shift_buffer[i] <= (spi_quad_mode ? spi_shift_buffer[i-4] : spi_shift_buffer[i-1]);
                 DUMMY: spi_shift_buffer[i] <= 1'bX;
@@ -509,11 +490,11 @@ for( i=4; i<(MEM_DATA_WIDTH-4); ++i ) begin
 end
 
 for( i=MEM_DATA_WIDTH-4; i<(MEM_DATA_WIDTH-1); ++i ) begin
-    always_ff@(posedge spi_ref_clock_p) begin
+    always_ff@(posedge spi_ref_clock_i) begin
         if( spi_load_buffer ) begin
             spi_shift_buffer[i] <= spi_dma_read_data[i];
         end else begin
-            case(spi_state)
+            case(spi_state_next)
                 SEND_ACTIVE: spi_shift_buffer[i] <= (spi_quad_mode ? 1'bX : spi_shift_buffer[i+1]);
                 RECV_ACTIVE: spi_shift_buffer[i] <= (spi_quad_mode ? spi_shift_buffer[i-4] : spi_shift_buffer[i-1]);
                 DUMMY: spi_shift_buffer[i] <= 1'bX;
@@ -523,11 +504,11 @@ for( i=MEM_DATA_WIDTH-4; i<(MEM_DATA_WIDTH-1); ++i ) begin
 end
 
 for( i=MEM_DATA_WIDTH-1; i<MEM_DATA_WIDTH; ++i ) begin
-    always_ff@(posedge spi_ref_clock_p) begin
+    always_ff@(posedge spi_ref_clock_i) begin
         if( spi_load_buffer ) begin
             spi_shift_buffer[i] <= spi_dma_read_data[i];
         end else begin
-            case(spi_state)
+            case(spi_state_next)
                 SEND_ACTIVE: spi_shift_buffer[i] <= 1'bX;
                 RECV_ACTIVE: spi_shift_buffer[i] <= (spi_quad_mode ? spi_shift_buffer[i-4] : spi_shift_buffer[i-1]);
                 DUMMY: spi_shift_buffer[i] <= 1'bX;
@@ -537,10 +518,5 @@ for( i=MEM_DATA_WIDTH-1; i<MEM_DATA_WIDTH; ++i ) begin
 end
 
 endgenerate
-
-assign debug[0] = spi_clk_o;
-assign debug[1] = spi_cs_n_o;
-assign debug[2] = spi_dq_i[0];
-assign debug[3] = spi_dq_i[1];
 
 endmodule
