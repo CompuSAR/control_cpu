@@ -66,6 +66,8 @@ localparam UART_BAUD = 115200;
 wire spi_clk;
 `endif
 
+///// 32 bit section
+
 function automatic [3:0] convert_byte_write( logic we, logic[1:0] address, logic[1:0] size );
     if( we ) begin
         logic[3:0] mask;
@@ -555,5 +557,14 @@ generate
     for(i=0; i<CACHELINE_BYTES; ++i)
         assign cache_port_cmd_write_mask_s[CACHE_PORT_IDX_SPI_FLASH][i] = spi_flash_dma_write;
 endgenerate
+
+///// 8 bit section
+
+freq_div_bus#() freq_div_6502(
+    .clock_i( ctrl_cpu_clock ),
+    .ctl_div_nom_i( 16'd75 ),
+    .ctl_div_denom_i( 16'd1 ),
+    .reset_i( 1'b0 )
+    );
 
 endmodule
