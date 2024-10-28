@@ -21,7 +21,7 @@ Follow the following steps to build the project:
 
 ### Building the FPGA image
 * Open the project from the `ControlCpu.xpr` file in the root of the source tree.
-  * The project references a file called `sar6502_2.dcp` under the "Utility sources" section. This is a generated file that is not checked into the source control. To build the project for the first time you'll need to delete the file from the project. Once deleted it will get recreated the first time you build. Vivado manages this file automatically, and there is nothing you'll need to do.
+  * The project references a file called `top.dcp` under the "Utility sources" section. This is a generated file that is not checked into the source control. To build the project for the first time you'll need to delete the file from the project. Once deleted it will get recreated the first time you build. Vivado manages this file automatically, and there is nothing you'll need to do.
 * You can either generate an MCS and flash it to the board or use the hardware manager to load the bit file directly.
   * This only covers the hardware and bootloader.
 * Notice that Vivado doesn't track the bootloader for changes. If you rebuild only the bootloader, you'll need to manually resynthesize the whole project for it to update.
