@@ -52,7 +52,7 @@ localparam DMA_WIDTH = $bits(dma.req_data);
 localparam DMA_WIDTH_BYTES = DMA_WIDTH / 8;
 localparam DMA_WIDTH_ADDR = $clog2(DMA_WIDTH);
 
-localparam REG_FULL_READ_GRACE = 10;
+localparam REG_FULL_READ_GRACE = 8;
 
 initial dma.req_valid = 1'b0;
 
@@ -68,15 +68,26 @@ logic [DMA_WIDTH-1:0] dma_data[2] = '{ default: {DMA_WIDTH{1'b0}} };
 logic dma_data_valid[2] = '{ default: 1'b0 };
 logic dma_req_pending = 1'b0;
 
-logic [7:0] shift_register = 8'h00;
+logic [7:0] shift_register = 8'h00, grace_reg_out;
 logic [$clog2(REG_FULL_READ_GRACE)-1:0] grace_counter;
 logic should_bit_shift;
 wire next_bit_in;
 
-assign next_bit_in = no_disk_in_drive ? 1'b0 : dma_data[0][track_pos[DMA_WIDTH_ADDR-1:0]];
+assign next_bit_in = disk_in_drive ? dma_data[0][track_pos[DMA_WIDTH_ADDR-1:0]] : 1'b0;
 
 assign ctrl.req_ack = 1'b1;
 assign cpu_req_ack_o = 1'b1;
+
+logic [31:0] dbg_last_fetch_addr = 32'hbadabada;
+logic [31:0] dbg_apple_cycles = 0;
+
+always_ff@(posedge clk_i) begin
+    if( dma.req_valid && dma.req_ack )
+        dbg_last_fetch_addr <= dma.req_addr;
+
+    if( apple_cycle )
+        dbg_apple_cycles <= dbg_apple_cycles + 1;
+end
 
 always_ff@(posedge clk_i) begin
     ctrl.rsp_valid <= 1'b0;
@@ -119,6 +130,32 @@ always_ff@(posedge clk_i) begin
                     ctrl.rsp_data <= track_data_length;
                 16'h0008:
                     ctrl.rsp_data <= track_pos;
+                16'h8000:
+                    ctrl.rsp_data <= dma_data[0][31:0];
+                16'h8004:
+                    ctrl.rsp_data <= dma_data[0][63:32];
+                16'h8008:
+                    ctrl.rsp_data <= dma_data[0][95:64];
+                16'h800c:
+                    ctrl.rsp_data <= dma_data[0][127:96];
+                16'h8010:
+                    ctrl.rsp_data <= dma_data[1][31:0];
+                16'h8014:
+                    ctrl.rsp_data <= dma_data[1][63:32];
+                16'h8018:
+                    ctrl.rsp_data <= dma_data[1][95:64];
+                16'h801c:
+                    ctrl.rsp_data <= dma_data[1][127:96];
+                16'h8100:
+                    ctrl.rsp_data <= { dma_req_pending, dma_data_valid[1], dma_data_valid[0] };
+                16'h8104:
+                    ctrl.rsp_data <= track_data_start;
+                16'h8108:
+                    ctrl.rsp_data <= track_pos;
+                16'h810c:
+                    ctrl.rsp_data <= dbg_last_fetch_addr;
+                16'h8110:
+                    ctrl.rsp_data <= dbg_apple_cycles;
                 default:
                     ctrl.rsp_data <= 32'hX;
             endcase
@@ -179,6 +216,7 @@ always_ff@(posedge clk_i) begin
             if( shift_register[6] ) begin
                 // We're going to be full post shift
                 grace_counter <= REG_FULL_READ_GRACE - 1;
+                grace_reg_out <= { shift_register[6:0], next_bit_in };
             end
         end
     end
@@ -190,9 +228,12 @@ always_ff@(posedge clk_i) begin
         if( cpu_req_write_i ) begin
         end else begin
             // Read request
-            if( motor_running )
+            if( motor_running && grace_counter==0 ) begin
                 cpu_rsp_read_data_o <= shift_register;
-            else
+            end else if( motor_running ) begin
+                cpu_rsp_read_data_o <= grace_reg_out;
+                grace_counter <= 0;
+            end else
                 cpu_rsp_read_data_o <= 8'h00;
 
             cpu_rsp_valid_o <= 1'b1;
@@ -230,7 +271,7 @@ freq_div_bus bits_tracker(
     .slow_cmd_ready_o(),
 
     .fast_cmd_valid_o(should_bit_shift),
-    .fast_cmd_ready_i(grace_counter == 0)
+    .fast_cmd_ready_i(1'b1)
 );
 
 endmodule

@@ -127,6 +127,9 @@ logic [15:0] cpu_req_addr = 16'h00ec;       // $C0EC equivalent, read data latch
 logic [7:0] cpu_req_write_data = 8'h00;
 wire cpu_req_ack, cpu_rsp_valid;
 wire [7:0] cpu_rsp_read_data;
+wire apple_cycle;
+
+assign apple_cycle = cpu_bus_valid && cpu_bus_ack;
 
 apple2_diskette_controller dut(
     .clk_i(ctrl_clk),
@@ -143,8 +146,7 @@ apple2_diskette_controller dut(
     .cpu_rsp_valid_o(cpu_rsp_valid),
     .cpu_rsp_read_data_o(cpu_rsp_read_data),
 
-    .cpu_bus_valid_i(cpu_bus_valid),
-    .cpu_bus_ack_i(cpu_bus_ack),
+    .apple_cycle,
 
     .dma(dma)
 );

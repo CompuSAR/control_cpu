@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
-      <ZoomEndTime time="60.090 ns"></ZoomEndTime>
-      <Cursor1Time time="0.000 ns"></Cursor1Time>
+      <ZoomStartTime time="29,442.878464 us"></ZoomStartTime>
+      <ZoomEndTime time="29,464.838465 us"></ZoomEndTime>
+      <Cursor1Time time="29,461.178464 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="220"></NameColumnWidth>
-      <ValueColumnWidth column_width="133"></ValueColumnWidth>
+      <ValueColumnWidth column_width="129"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="49" />
+   <WVObjectSize size="46" />
    <wvobject type="array" fp_name="/a2_disk_sim_top/dut/ctrl/DATA_WIDTH">
       <obj_property name="ElementShortName">DATA_WIDTH[31:0]</obj_property>
       <obj_property name="ObjectShortName">DATA_WIDTH[31:0]</obj_property>
@@ -92,18 +92,6 @@
       <obj_property name="ElementShortName">cpu_rsp_read_data_o[7:0]</obj_property>
       <obj_property name="ObjectShortName">cpu_rsp_read_data_o[7:0]</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/a2_disk_sim_top/dut/cpu_bus_valid_i">
-      <obj_property name="ElementShortName">cpu_bus_valid_i</obj_property>
-      <obj_property name="ObjectShortName">cpu_bus_valid_i</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/a2_disk_sim_top/dut/cpu_bus_ack_i">
-      <obj_property name="ElementShortName">cpu_bus_ack_i</obj_property>
-      <obj_property name="ObjectShortName">cpu_bus_ack_i</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/a2_disk_sim_top/dut/apple_cycle">
-      <obj_property name="ElementShortName">apple_cycle</obj_property>
-      <obj_property name="ObjectShortName">apple_cycle</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/a2_disk_sim_top/dut/spin_counter">
       <obj_property name="ElementShortName">spin_counter[31:0]</obj_property>
       <obj_property name="ObjectShortName">spin_counter[31:0]</obj_property>
@@ -144,10 +132,6 @@
       <obj_property name="ElementShortName">motor_running</obj_property>
       <obj_property name="ObjectShortName">motor_running</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/a2_disk_sim_top/dut/no_disk_in_drive">
-      <obj_property name="ElementShortName">no_disk_in_drive</obj_property>
-      <obj_property name="ObjectShortName">no_disk_in_drive</obj_property>
-   </wvobject>
    <wvobject type="logic" fp_name="/a2_disk_sim_top/dut/freq_div_reset">
       <obj_property name="ElementShortName">freq_div_reset</obj_property>
       <obj_property name="ObjectShortName">freq_div_reset</obj_property>
@@ -171,6 +155,10 @@
    <wvobject type="array" fp_name="/a2_disk_sim_top/dut/grace_counter">
       <obj_property name="ElementShortName">grace_counter[3:0]</obj_property>
       <obj_property name="ObjectShortName">grace_counter[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/a2_disk_sim_top/dut/apple_cycle">
+      <obj_property name="ElementShortName">apple_cycle</obj_property>
+      <obj_property name="ObjectShortName">apple_cycle</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/a2_disk_sim_top/dut/should_bit_shift">
       <obj_property name="ElementShortName">should_bit_shift</obj_property>

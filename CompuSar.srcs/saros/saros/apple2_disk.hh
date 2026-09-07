@@ -54,6 +54,7 @@ public:
     void reset();
     bool load(Filesystem::File &image);
 
+    void debugDump() const;
 private:
     void ioHandleThread() noexcept;
     void calcNewTrack( uint8_t phase, bool on );

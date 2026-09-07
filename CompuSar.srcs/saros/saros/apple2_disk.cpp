@@ -178,6 +178,38 @@ bool Diskette::load(Filesystem::File &image) {
     return true;
 }
 
+void Diskette::debugDump() const {
+    uart_send("Current state of dma data: 0: ");
+    print_hex(reg_read_32(DeviceNum, 0x8000));
+    uart_send(" ");
+    print_hex(reg_read_32(DeviceNum, 0x8004));
+    uart_send(" ");
+    print_hex(reg_read_32(DeviceNum, 0x8008));
+    uart_send(" ");
+    print_hex(reg_read_32(DeviceNum, 0x800c));
+    uart_send("   1: ");
+    print_hex(reg_read_32(DeviceNum, 0x8010));
+    uart_send(" ");
+    print_hex(reg_read_32(DeviceNum, 0x8014));
+    uart_send(" ");
+    print_hex(reg_read_32(DeviceNum, 0x8018));
+    uart_send(" ");
+    print_hex(reg_read_32(DeviceNum, 0x801c));
+    uart_send("\n");
+
+    uart_send("Status: ");
+    print_hex(reg_read_32(DeviceNum, 0x8100));
+    uart_send("\nTrack start: ");
+    print_hex(reg_read_32(DeviceNum, 0x8104));
+    uart_send("\nTrack pos: ");
+    print_hex(reg_read_32(DeviceNum, 0x8108));
+    uart_send("\nLast fecth: ");
+    print_hex(reg_read_32(DeviceNum, 0x810c));
+    uart_send("\nApple cycles: ");
+    print_hex(reg_read_32(DeviceNum, 0x8110));
+    uart_send("\n");
+}
+
 void Diskette::ioHandleThread() noexcept {
     uart_send("Apple DiskII emulation thread started\n");
 
@@ -481,7 +513,6 @@ void Diskette::trackWriteSector62(uint8_t track, uint32_t &position, std::span<u
     };
     static_assert( sizeof(TranslationTable) == 64 );
 
-    uint8_t checksum = 0;
     std::array<uint8_t, (SectorSize + 2)/3> auxBuffer;
 
     for(auto &byte : auxBuffer)
@@ -490,13 +521,18 @@ void Diskette::trackWriteSector62(uint8_t track, uint32_t &position, std::span<u
     assertWithMessage(data.size() == SectorSize, "trackWriteSector62 called with invalid sector size");
 
     unsigned auxPos = 0, auxShift = 0;
+
+    uint8_t prevByte = 0;
     // Write the "6"
     for(uint8_t byte : data) {
-        uint8_t convertedByte = TranslationTable[byte>>2];
+        uint8_t writeByte = prevByte ^ (byte>>2);
+        assertWithMessage( (writeByte & 0xc0)==0, "6+2 checksum byte must have only 6 bits" );
+
+        prevByte = byte >> 2;
+
+        uint8_t convertedByte = TranslationTable[writeByte];
         trackWriteByte(track, position, convertedByte);
         auxBuffer[auxPos] |= (byte&0x3) << auxShift;
-
-        checksum ^= byte>>2;
 
 #ifdef DEBUG
         uart_send("D: byte ");
@@ -504,7 +540,7 @@ void Diskette::trackWriteSector62(uint8_t track, uint32_t &position, std::span<u
         uart_send(" converted ");
         print_hex(convertedByte);
         uart_send(" checksum ");
-        print_hex(checksum);
+        print_hex(writeByte);
         uart_send(" auxBuffer[");
         print_dec(auxPos);
         uart_send("]=");
@@ -519,15 +555,16 @@ void Diskette::trackWriteSector62(uint8_t track, uint32_t &position, std::span<u
 
     // Write the "2"
     for(uint8_t byte : auxBuffer) {
-        uint8_t convertedByte = TranslationTable[byte>>2];
+        uint8_t writeByte = prevByte ^ byte;
+        assertWithMessage( (writeByte & 0xc0)==0, "6+2 checksum byte must have only 6 bits" );
+        prevByte = byte;
+
+        uint8_t convertedByte = TranslationTable[writeByte];
         trackWriteByte(track, position, convertedByte);
-        checksum ^= convertedByte;
     }
 
-    assertWithMessage(
-            (checksum & 0xc0) == 0,
-            "In 6 and 2 encoding the checksum should have the two most significant bits clear" );
-    trackWriteByte(track, position, TranslationTable[checksum]);
+    assertWithMessage( (prevByte & 0xc0)==0, "6+2 checksum byte must have only 6 bits" );
+    trackWriteByte(track, position, TranslationTable[prevByte]);
 }
 
 // Sync the hardware to our soft state. Must be called with lock held
@@ -554,7 +591,7 @@ void Diskette::updateDiskHw(bool force) {
         lhwsTrack = currentTrackX4;
     }
 
-    reg_write_32(DeviceNum, MotorSpinRatio, 1<<16 | 3);
+    reg_write_32(DeviceNum, MotorSpinRatio, 3<<16 | 1);
     reg_write_32(DeviceNum, MotorControl, driveMotorValue);
 }
 
