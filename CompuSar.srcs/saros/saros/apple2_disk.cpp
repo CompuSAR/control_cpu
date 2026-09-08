@@ -512,6 +512,23 @@ void Diskette::trackWriteSector62(uint8_t track, uint32_t &position, std::span<u
         0xf7, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff,
     };
     static_assert( sizeof(TranslationTable) == 64 );
+#define NAIVE_AUX 0
+
+#if !NAIVE_AUX
+    // The "2" bits are reversed (LSB high). Rather than perform expensive bit manipulations,
+    // when we store them, we use a table that transposes the encoded values.
+    static constexpr uint8_t TranslationTableAux[] = {
+        0x96, 0x9a, 0x97, 0x9b, 0xa7, 0xac, 0xab, 0xad,
+        0x9d, 0x9f, 0x9e, 0xa6, 0xae, 0xb2, 0xaf, 0xb3,
+        0xd6, 0xd9, 0xd7, 0xda, 0xdf, 0xe6, 0xe5, 0xe7,
+        0xdb, 0xdd, 0xdc, 0xde, 0xe9, 0xeb, 0xea, 0xec,
+        0xb4, 0xb6, 0xb5, 0xb7, 0xbd, 0xbf, 0xbe, 0xcb,
+        0xb9, 0xbb, 0xba, 0xbc, 0xcd, 0xcf, 0xce, 0xd3,
+        0xed, 0xef, 0xee, 0xf2, 0xf7, 0xfa, 0xf9, 0xfb,
+        0xf3, 0xf5, 0xf4, 0xf6, 0xfc, 0xfe, 0xfd, 0xff,
+    };
+    static_assert( sizeof(TranslationTableAux) == 64 );
+#endif
 
     std::array<uint8_t, (SectorSize + 2)/3> auxBuffer;
 
@@ -522,48 +539,81 @@ void Diskette::trackWriteSector62(uint8_t track, uint32_t &position, std::span<u
 
     unsigned auxPos = 0, auxShift = 0;
 
-    uint8_t prevByte = 0;
-    // Write the "6"
     for(uint8_t byte : data) {
-        uint8_t writeByte = prevByte ^ (byte>>2);
-        assertWithMessage( (writeByte & 0xc0)==0, "6+2 checksum byte must have only 6 bits" );
+#if NAIVE_AUX
+        uint8_t bitSwitched;
 
-        prevByte = byte >> 2;
+        switch(byte&0x03) {
+        case 0x00:
+        case 0x03:
+            bitSwitched = byte&0x03;
+            break;
+        case 0x01:
+            bitSwitched = 0x02;
+            break;
+        case 0x02:
+            bitSwitched = 0x01;
+            break;
+        }
 
-        uint8_t convertedByte = TranslationTable[writeByte];
-        trackWriteByte(track, position, convertedByte);
-        auxBuffer[auxPos] |= (byte&0x3) << auxShift;
-
-#ifdef DEBUG
-        uart_send("D: byte ");
-        print_hex(byte);
-        uart_send(" converted ");
-        print_hex(convertedByte);
-        uart_send(" checksum ");
-        print_hex(writeByte);
-        uart_send(" auxBuffer[");
-        print_dec(auxPos);
-        uart_send("]=");
-        print_hex(auxBuffer[auxPos]);
-        uart_send("\n");
+        auxBuffer[auxPos++] |= bitSwitched << auxShift;
+#else
+        auxBuffer[auxPos++] |= (byte&0x03) << auxShift;
 #endif
-        if( ++auxPos == auxBuffer.size() ) {
+
+        if( auxPos == auxBuffer.size() ) {
             auxPos = 0;
             auxShift += 2;
         }
     }
 
+    uint8_t prevByte = 0;
     // Write the "2"
     for(uint8_t byte : auxBuffer) {
-        uint8_t writeByte = prevByte ^ byte;
-        assertWithMessage( (writeByte & 0xc0)==0, "6+2 checksum byte must have only 6 bits" );
-        prevByte = byte;
-
-        uint8_t convertedByte = TranslationTable[writeByte];
+        assertWithMessage((byte&0xc0) == 0, "Aux buffer byte must have two zero MSb");
+#if NAIVE_AUX
+        uint8_t convertedByte = TranslationTable[byte ^ prevByte];
+#else
+        uint8_t convertedByte = TranslationTableAux[byte ^ prevByte];
+#endif
         trackWriteByte(track, position, convertedByte);
+
+        prevByte = byte;
     }
 
-    assertWithMessage( (prevByte & 0xc0)==0, "6+2 checksum byte must have only 6 bits" );
+#if !NAIVE_AUX
+    // The transposed table covered the actual bytes written. Before we move to the 6 bits, we need to transpose the
+    // checksum, or the end checksum will be wrong.
+    {
+        uint8_t newChecksum = 0;
+
+        if( (prevByte&0x01) )
+            newChecksum |= 0x02;
+        if( (prevByte&0x02) )
+            newChecksum |= 0x01;
+        if( (prevByte&0x04) )
+            newChecksum |= 0x08;
+        if( (prevByte&0x08) )
+            newChecksum |= 0x04;
+        if( (prevByte&0x10) )
+            newChecksum |= 0x20;
+        if( (prevByte&0x20) )
+            newChecksum |= 0x10;
+
+        prevByte = newChecksum;
+    }
+#endif
+
+    // Write the "6"
+    for(uint8_t byte : data) {
+        byte >>= 2;
+        uint8_t convertedByte = TranslationTable[byte ^ prevByte];
+        trackWriteByte(track, position, convertedByte);
+
+        prevByte = byte;
+    }
+
+    // Write the checksum
     trackWriteByte(track, position, TranslationTable[prevByte]);
 }
 
