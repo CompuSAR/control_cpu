@@ -79,17 +79,38 @@ bool Diskette::load(Filesystem::File &image) {
     static constexpr size_t Gap2Size = 5;       // Between sector header and data
     static constexpr size_t Gap3Size = 16;      // Before regular sector header. Officially between 14 and 24.
     // The above number needs to be tuned to the drive's speed to prevent the overflow/underflow assert from triggering.
+    static constexpr size_t SectorsPerTrack = 16;
 
     static constexpr size_t SectorSize = 256;
 
     SD::BlockPtr blockData;
     size_t blockSize = 0;
-    size_t blockSizeConsumed = 0;
 
     std::unique_lock locker(loadLock);
     ejectImpl();
 
     for( uint8_t track = 0; track <= MaxTrack; ++track ) {
+        std::array<SD::BlockPtr, SectorsPerTrack/2> trackBlocks;
+        std::array<std::span<uint8_t>, SectorsPerTrack> trackData;
+
+        for( unsigned i=0; i<trackBlocks.size(); ++i ) {
+            size_t blockSize = image.readBlock(trackBlocks[i]);
+
+            if( blockSize!=SD::BlockSize ) {
+                uart_send("E: Failed to read source DSK\n");
+
+                return false;
+            }
+
+            trackData[i*2] = std::span<uint8_t, SectorSize>( &trackBlocks[i]->data[0], SectorSize );
+            trackData[i*2+1] = std::span<uint8_t, SectorSize>( &trackBlocks[i]->data[SectorSize], SectorSize );
+        }
+
+        static constexpr unsigned DosInterleaving[] = {
+            0x0, 0x7, 0xe, 0x6, 0xd, 0x5, 0xc, 0x4, 0xb, 0x3, 0xa, 0x2, 0x9, 0x1, 0x8, 0xf
+        };
+        static_assert(sizeof(DosInterleaving)/sizeof(DosInterleaving[0]) == SectorsPerTrack);
+
         uint32_t position = 0;
 
         uint32_t dataStartPos = 0;
@@ -102,20 +123,6 @@ bool Diskette::load(Filesystem::File &image) {
             print_dec(sector);
             uart_send("\n");
 #endif
-            if( (blockSize - blockSizeConsumed) < SectorSize ) {
-                // Load the next cooked sector(s) into memory
-                if( (blockSize - blockSizeConsumed)==0 ) {
-                    blockSize = image.readBlock(blockData);
-                    blockSizeConsumed = 0;
-                }
-
-                if( (blockSize - blockSizeConsumed) < SectorSize ) {
-                    uart_send("DSK file is too small for an entire Apple II disk image\n");
-
-                    return false;
-                }
-            }
-
             // Write the sector header
             for( unsigned i=0; i<(sector==0 ? Gap1Size : Gap3Size); ++i )
                 trackWriteSelfSync(track, position);
@@ -146,13 +153,11 @@ bool Diskette::load(Filesystem::File &image) {
             trackWriteByte(track, position, 0xAA);
             trackWriteByte(track, position, 0xAD);
 
-            trackWriteSector62(track, position, std::span(blockData->data.begin()+blockSizeConsumed, SectorSize) );
+            trackWriteSector62(track, position, trackData[ DosInterleaving[sector] ] );
 
             trackWriteByte(track, position, 0xDE);
             trackWriteByte(track, position, 0xAA);
             trackWriteByte(track, position, 0xEB);
-
-            blockSizeConsumed += SectorSize;
 
 #ifdef DEBUG
             uart_send("D: End of sector track position: ");
@@ -488,12 +493,8 @@ void Diskette::trackWriteData44(uint8_t track, uint32_t &position, uint8_t data,
     if( checksum!=nullptr )
         *checksum ^= data;
 
-    uint8_t mask = 0x80;
-    while( mask != 0 ) {
-        trackWriteBit(track, position, true);
-        trackWriteBit(track, position, (data&mask) != 0);
-        mask >>= 1;
-    }
+    trackWriteByte( track, position, (data>>1) | 0xaa );
+    trackWriteByte( track, position, data | 0xaa );
 }
 
 /**

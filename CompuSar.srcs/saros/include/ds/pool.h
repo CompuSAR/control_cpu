@@ -154,6 +154,9 @@ public:
     }
 
     void free( T *element ) {
+        if( element==nullptr )
+            return;
+
         PoolElement *poolElement = convert(element);
         assertWithMessage(
                 poolElement >= &_pool.pool[0] && poolElement <= last(),

@@ -74,7 +74,8 @@ void Scheduler::stopThread() {
     currentThread->_state = Thread::State::Dead;
     currentThread->~Thread();
 
-    asm volatile("csrr sp, mscratch; mv tp, zero");
+    asm volatile (".option arch, +zicsr");
+    asm volatile ("csrr sp, mscratch; mv tp, zero");
     rescheduleImpl();
 }
 
